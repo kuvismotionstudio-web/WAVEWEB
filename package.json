@@ -26,6 +26,7 @@
   "build": {
     "appId": "com.waveweb.browser",
     "productName": "WAVEWEB",
+    "icon": "assets/waveweb.png",
     "directories": {
       "output": "dist"
     },
@@ -36,6 +37,7 @@
       "!node_modules/@huggingface/transformers/.cache/**"
     ],
     "win": {
+      "icon": "assets/waveweb.png",
       "target": [
         {
           "target": "nsis",
