@@ -215,9 +215,10 @@ function createWindow() {
 
   mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
 
-  // Spoof user-agent for webviews to avoid site blocks (e.g. GOFILE)
+  // Spoof user-agent to look like regular Chrome (avoid site blocks)
   const defaultUA = mainWindow.webContents.getUserAgent();
-  const cleanUA = defaultUA.replace(/Electron\/[\d.]+\s/, '').replace(/WAVEWEB\/[\d.]+\s/, '');
+  const chromiumVersion = defaultUA.match(/Chrome\/([\d.]+)/)?.[1] || '136.0.0.0';
+  const cleanUA = `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${chromiumVersion} Safari/537.36`;
   session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
     details.requestHeaders['User-Agent'] = cleanUA;
     callback({ requestHeaders: details.requestHeaders });
