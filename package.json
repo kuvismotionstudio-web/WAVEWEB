@@ -1,6 +1,6 @@
 {
   "name": "waveweb",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "WAVEWEB - Modern Chromium Browser with AI",
   "main": "src/main.js",
   "scripts": {
