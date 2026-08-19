@@ -854,7 +854,6 @@ function attachWebview(tab, url) {
 
   tab.webview = wv;
   tab.url = url;
-  attachZoomToWebview(wv);
 
   // Password manager — listener added once per webview
   wv.addEventListener('console-message', (e) => {
@@ -866,12 +865,16 @@ function attachWebview(tab, url) {
     }
   });
 
-  // Mouse back/forward buttons (via ipc-message from webview-preload)
+  // Mouse back/forward buttons & zoom (via ipc-message from webview-preload)
   wv.addEventListener('ipc-message', e => {
     if (e.channel === 'mouse-nav') {
       const btn = e.args[0];
       if (btn === 3 && tab.webview?.canGoBack()) tab.webview.goBack();
       if (btn === 4 && tab.webview?.canGoForward()) tab.webview.goForward();
+    }
+    if (e.channel === 'zoom') {
+      const delta = e.args[0];
+      if (tab.id === activeTabId) setZoom(delta);
     }
   });
 
@@ -2436,17 +2439,6 @@ document.addEventListener('wheel', (e) => {
   const delta = e.deltaY > 0 ? -0.1 : 0.1;
   setZoom(delta);
 }, { passive: false });
-
-function attachZoomToWebview(wv) {
-  wv.addEventListener('dom-ready', () => {
-    wv.addEventListener('wheel', (e) => {
-      if (!e.ctrlKey) return;
-      e.preventDefault();
-      const delta = e.deltaY > 0 ? -0.1 : 0.1;
-      setZoom(delta);
-    }, { passive: false });
-  });
-}
 
 // ===== FULLSCREEN =====
 let _fullscreen = false;
