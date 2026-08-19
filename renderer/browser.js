@@ -422,12 +422,12 @@ document.querySelectorAll('.accent-opt').forEach(btn => {
     document.documentElement.style.setProperty('--accent', '#' + color);
     localStorage.setItem('ww_accent_color', color);
     // Also update accent2 to a complementary shade
-    const complement = color === '6c63ff' ? '00d4ff' :
+    const complement = color === '6c63ff' ? 'ff4444' :
                        color === '0078d4' ? '4dc9f6' :
-                       color === '00d4a0' ? '6c63ff' :
-                       color === 'ff5050' ? 'ff8844' :
+                       color === '00d4a0' ? 'ff1a35' :
+                       color === 'ff1a35' ? 'ff8844' :
                        color === 'ff8844' ? 'ffd060' :
-                       color === 'ffd060' ? 'ff8844' : '00d4ff';
+                       color === 'ffd060' ? 'ff8844' : 'ff4444';
     document.documentElement.style.setProperty('--accent2', '#' + complement);
   });
 });
@@ -472,6 +472,33 @@ const DEFAULT_SITES = [
   { url: 'https://netflix.com', title: 'Netflix', icon: 'N', cl: 'ql-nf' },
 ];
 
+function getPinnedSites() {
+  const raw = localStorage.getItem('ww_pinned_sites');
+  if (raw) {
+    try { return JSON.parse(raw); } catch(_) {}
+  }
+  return [...DEFAULT_SITES];
+}
+
+function savePinnedSites(sites) {
+  localStorage.setItem('ww_pinned_sites', JSON.stringify(sites));
+}
+
+function addPinnedSite(url, title) {
+  const sites = getPinnedSites();
+  const initial = (title || url)[0].toUpperCase();
+  sites.push({ url, title: title || url, icon: initial, cl: '' });
+  savePinnedSites(sites);
+  renderTopSites();
+}
+
+function removePinnedSite(index) {
+  const sites = getPinnedSites();
+  sites.splice(index, 1);
+  savePinnedSites(sites);
+  renderTopSites();
+}
+
 function trackTopSite(url, title, favicon) {
   try {
     const host = new URL(url).hostname;
@@ -480,27 +507,86 @@ function trackTopSite(url, title, favicon) {
     sites[host].count = (sites[host].count || 0) + 1;
     sites[host].title = title || sites[host].title;
     sites[host].favicon = favicon || sites[host].favicon;
-    // Keep only last 100
     const entries = Object.entries(sites).sort((a, b) => b[1].count - a[1].count).slice(0, 100);
     localStorage.setItem('ww_topsites', JSON.stringify(Object.fromEntries(entries)));
   } catch(e) {}
+}
+
+function showAddSiteModal() {
+  let existing = $('add-site-modal');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'add-site-modal';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);';
+  overlay.innerHTML = `
+    <div style="background:var(--bg-1);border:1px solid var(--border);border-radius:var(--r-md);padding:24px;width:380px;box-shadow:0 20px 60px rgba(0,0,0,0.5);">
+      <h3 style="margin:0 0 16px;font-size:16px;color:var(--text-1);">Add site</h3>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div>
+          <label style="font-size:12px;color:var(--text-3);display:block;margin-bottom:4px;">URL</label>
+          <input id="add-site-url" type="text" placeholder="https://example.com" style="width:100%;padding:8px 12px;background:var(--bg-3);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text-1);font-size:13px;outline:none;box-sizing:border-box;" />
+        </div>
+        <div>
+          <label style="font-size:12px;color:var(--text-3);display:block;margin-bottom:4px;">Name</label>
+          <input id="add-site-title" type="text" placeholder="My Site" style="width:100%;padding:8px 12px;background:var(--bg-3);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text-1);font-size:13px;outline:none;box-sizing:border-box;" />
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end;">
+        <button id="add-site-cancel" style="padding:8px 16px;background:var(--bg-3);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text-2);font-size:13px;cursor:pointer;">Cancel</button>
+        <button id="add-site-confirm" style="padding:8px 16px;background:var(--accent);border:none;border-radius:var(--r-sm);color:#fff;font-size:13px;font-weight:600;cursor:pointer;">Add</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  overlay.querySelector('#add-site-cancel').addEventListener('click', () => overlay.remove());
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  overlay.querySelector('#add-site-confirm').addEventListener('click', () => {
+    let url = overlay.querySelector('#add-site-url').value.trim();
+    let title = overlay.querySelector('#add-site-title').value.trim();
+    if (!url) return;
+    if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+    addPinnedSite(url, title || new URL(url).hostname);
+    overlay.remove();
+  });
+  overlay.querySelector('#add-site-url').focus();
 }
 
 function renderTopSites() {
   const container = $('newtab-top-sites');
   if (!container) return;
   try {
-    const raw = localStorage.getItem('ww_topsites');
-    const tracked = raw ? Object.values(JSON.parse(raw)).sort((a, b) => b.count - a.count).slice(0, 8) : [];
-    const sites = tracked.length >= 4 ? tracked : DEFAULT_SITES;
-    container.innerHTML = sites.map(s => {
-      const icon = s.favicon ? `<img src="${esc(s.favicon)}" width=20 height=20 onerror="this.style.display='none'" />` : `<div class="ql-icon">${(s.title || '?')[0].toUpperCase()}</div>`;
-      return `<div class="top-site" data-url="${esc(s.url)}">${icon}<span class="top-site-title">${esc(s.title)}</span></div>`;
-    }).join('');
-    container.querySelectorAll('.top-site').forEach(el => {
-      el.addEventListener('click', () => navigate(el.dataset.url));
+    const sites = getPinnedSites();
+    container.innerHTML = sites.map((s, i) => {
+      const icon = s.favicon ? `<img src="${esc(s.favicon)}" width=20 height=20 onerror="this.style.display='none'" />` : `<div class="ql-icon">${(s.icon || s.title || '?')[0].toUpperCase()}</div>`;
+      return `<div class="top-site" data-url="${esc(s.url)}" data-index="${i}">
+        ${icon}
+        <span class="top-site-title">${esc(s.title)}</span>
+        <button class="top-site-remove" data-index="${i}" title="Remove">✕</button>
+      </div>`;
+    }).join('') + `<div class="top-site top-site-add" id="top-site-add-btn" title="Add site">
+      <div class="ql-icon">+</div>
+      <span class="top-site-title">Add</span>
+    </div>`;
+
+    container.querySelectorAll('.top-site:not(.top-site-add)').forEach(el => {
+      el.addEventListener('click', (e) => {
+        if (e.target.classList.contains('top-site-remove')) return;
+        navigate(el.dataset.url);
+      });
       el.addEventListener('auxclick', e => { if (e.button === 1) { e.preventDefault(); createTab(el.dataset.url); } });
     });
+
+    container.querySelectorAll('.top-site-remove').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        removePinnedSite(parseInt(btn.dataset.index));
+      });
+    });
+
+    const addBtn = $('top-site-add-btn');
+    if (addBtn) addBtn.addEventListener('click', showAddSiteModal);
   } catch(e) {}
 }
 
@@ -768,6 +854,17 @@ function attachWebview(tab, url) {
 
   tab.webview = wv;
   tab.url = url;
+  attachZoomToWebview(wv);
+
+  // Password manager — listener added once per webview
+  wv.addEventListener('console-message', (e) => {
+    if (e.message.startsWith('__WW_LOGIN__')) {
+      try {
+        const data = JSON.parse(e.message.slice(12));
+        if (tab.url) showSavePasswordPrompt(wv, tab.url, data.username, data.password);
+      } catch (_) {}
+    }
+  });
 
   // Mouse back/forward buttons (via ipc-message from webview-preload)
   wv.addEventListener('ipc-message', e => {
@@ -784,7 +881,23 @@ function attachWebview(tab, url) {
     applyDarkMode(wv);
   });
   wv.addEventListener('did-fail-load', (e) => {
-    if (e.errorCode !== -3) onStopLoading(tab.id);
+    if (e.errorCode === -3) return; // Aborted, ignore
+    onStopLoading(tab.id);
+    const errorPageHtml = `<!DOCTYPE html><html><head><style>
+      body{margin:0;display:flex;align-items:center;justify-content:center;height:100vh;background:#0f0f13;color:#eee;font-family:system-ui,sans-serif;text-align:center}
+      .err{max-width:440px;padding:32px}
+      .err h2{font-size:20px;margin:0 0 8px;color:#ff4444}
+      .err p{font-size:13px;color:#888;margin:0 0 16px;line-height:1.5}
+      .err code{font-size:11px;color:#666;background:#1a1a22;padding:4px 10px;border-radius:6px;display:inline-block}
+      .err button{background:#ff1a35;color:#fff;border:none;padding:10px 24px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;margin-top:8px}
+      .err button:hover{background:#ff3355}
+    </style></head><body><div class="err">
+      <h2>⚠️ Page failed to load</h2>
+      <p>${esc(e.errorDescription || 'An error occurred while loading this page.')}</p>
+      <code>Error ${e.errorCode}: ${esc(e.validatedURL || tab.url || '')}</code><br>
+      <button onclick="location.reload()">Try Again</button>
+    </div></body></html>`;
+    wv.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(errorPageHtml));
   });
   wv.addEventListener('page-title-updated', e => {
     setTabTitle(tab.id, e.title);
@@ -1019,7 +1132,7 @@ function onNavigated(id, url, saveToHistory = true) {
     $('btn-translate')?.classList.remove('active');
   }
 
-  if (saveToHistory && settings.saveHistory && url && !url.startsWith('about:')) {
+  if (saveToHistory && settings.saveHistory && !tab.incognito && url && !url.startsWith('about:')) {
     window.electronAPI.historyAdd({
       url,
       title: tab.title || url,
@@ -2120,29 +2233,8 @@ function watchLoginForm(webview, url) {
           setTimeout(() => { console.log('__WW_LOGIN__' + JSON.stringify(data)); }, 200);
         }, { once: true });
       });
-      // Also watch for navigation after form (some sites login via API)
-      let pwdField = document.querySelector('input[type="password"]');
-      if (pwdField) {
-        const origPushState = history.pushState;
-        history.pushState = function() {
-          const user = document.querySelector('input[type="email"], input[name="email"], input[name="login"], input[name="username"], input[type="text"][autocomplete="username"]');
-          if (user && user.value) {
-            console.log('__WW_LOGIN__' + JSON.stringify({ username: user.value, password: pwdField.value }));
-          }
-          return origPushState.apply(this, arguments);
-        };
-      }
     })();
   `);
-  webview.addEventListener('console-message', (e) => {
-    if (e.message.startsWith('__WW_LOGIN__')) {
-      try {
-        const data = JSON.parse(e.message.slice(12));
-        const tab = tabs.find(t => t.id === activeTabId);
-        if (tab?.url) showSavePasswordPrompt(tab.webview, tab.url, data.username, data.password);
-      } catch (_) {}
-    }
-  });
 }
 
 // ===== SETTINGS ACTIONS =====
@@ -2345,6 +2437,17 @@ document.addEventListener('wheel', (e) => {
   setZoom(delta);
 }, { passive: false });
 
+function attachZoomToWebview(wv) {
+  wv.addEventListener('dom-ready', () => {
+    wv.addEventListener('wheel', (e) => {
+      if (!e.ctrlKey) return;
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? -0.1 : 0.1;
+      setZoom(delta);
+    }, { passive: false });
+  });
+}
+
 // ===== FULLSCREEN =====
 let _fullscreen = false;
 function setFullscreen(fs) {
@@ -2436,6 +2539,101 @@ function showToast(msg, duration = 2500) {
   t.innerHTML = `<div style="display:flex;align-items:center;gap:8px;">${esc(msg)}</div>`;
   container.appendChild(t);
   setTimeout(() => t.remove(), duration);
+}
+
+function showUpdateToast(html, duration) {
+  const container = $('downloads-toast-container');
+  const t = document.createElement('div');
+  t.className = 'dl-toast';
+  t.style.padding = '10px 16px';
+  t.style.fontSize = '13px';
+  t.innerHTML = html;
+  container.appendChild(t);
+  if (duration) setTimeout(() => { if (t.parentNode) t.remove(); }, duration);
+  return t;
+}
+
+// ===== AUTO-UPDATER =====
+function initUpdater() {
+  window.electronAPI.updateCheck();
+
+  window.electronAPI.on('update-checking', () => {
+    console.log('[updater] checking...');
+  });
+
+  window.electronAPI.on('update-available', (data) => {
+    const ver = data?.version || 'new';
+    const t = showUpdateToast(`
+      <div style="display:flex;flex-direction:column;gap:8px;width:100%;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:16px;">🔄</span>
+          <span style="font-weight:600;">Update available: v${esc(ver)}</span>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button id="update-download-btn" style="
+            background:var(--accent);color:#fff;border:none;border-radius:var(--r-sm);
+            padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;
+          ">Download</button>
+          <button id="update-dismiss-btn" style="
+            background:var(--bg-3);color:var(--text-2);border:1px solid var(--border);
+            border-radius:var(--r-sm);padding:6px 12px;font-size:12px;cursor:pointer;
+          ">Later</button>
+        </div>
+      </div>
+    `);
+    t.querySelector('#update-download-btn').addEventListener('click', () => {
+      window.electronAPI.updateDownload();
+      t.remove();
+      const dl = showUpdateToast(`
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:16px;">⏳</span>
+          <span>Downloading update v${esc(ver)}...</span>
+        </div>
+      `);
+      dl.id = 'update-progress-toast';
+    });
+    t.querySelector('#update-dismiss-btn').addEventListener('click', () => t.remove());
+  });
+
+  window.electronAPI.on('update-download-progress', (data) => {
+    const el = $('update-progress-toast');
+    if (el) {
+      const pct = data?.percent ? Math.round(data.percent) : 0;
+      el.querySelector('span:last-child').textContent = `Downloading update... ${pct}%`;
+    }
+  });
+
+  window.electronAPI.on('update-downloaded', (data) => {
+    const el = $('update-progress-toast');
+    if (el) el.remove();
+    const ver = data?.version || 'new';
+    const t = showUpdateToast(`
+      <div style="display:flex;flex-direction:column;gap:8px;width:100%;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:16px;">✅</span>
+          <span style="font-weight:600;">Update v${esc(ver)} ready!</span>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button id="update-restart-btn" style="
+            background:var(--accent);color:#fff;border:none;border-radius:var(--r-sm);
+            padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;
+          ">Restart now</button>
+          <button id="update-later-btn" style="
+            background:var(--bg-3);color:var(--text-2);border:1px solid var(--border);
+            border-radius:var(--r-sm);padding:6px 12px;font-size:12px;cursor:pointer;
+          ">Later</button>
+        </div>
+      </div>
+    `);
+    t.querySelector('#update-restart-btn').addEventListener('click', () => {
+      window.electronAPI.updateInstall();
+    });
+    t.querySelector('#update-later-btn').addEventListener('click', () => t.remove());
+  });
+
+  window.electronAPI.on('update-error', (msg) => {
+    console.warn('[updater] error:', msg);
+  });
 }
 
 // ===== ESCAPE HELPER =====
@@ -2671,7 +2869,7 @@ function pinTab(tabId) {
   }
 }
 
-const GROUP_COLORS = ['', '#6c63ff', '#00d4a0', '#ff5050', '#ff8844', '#ffd060', '#0078d4', '#ff66b2'];
+const GROUP_COLORS = ['', '#ff1a35', '#00d4a0', '#ff4444', '#ff8844', '#ffd060', '#0078d4', '#ff66b2'];
 
 function setGroupColor(tabId, color) {
   const tab = tabs.find(t => t.id === tabId);
@@ -3499,9 +3697,6 @@ function createIncognitoTab(url = null) {
 
 $('btn-incognito').addEventListener('click', () => createIncognitoTab());
 
-// Override history saving for incognito tabs
-const _origOnNavigated = onNavigated;
-
 // ===== MOUSE GESTURES =====
 const gestureIndicator = (() => {
   const el = document.createElement('div');
@@ -3672,7 +3867,7 @@ function showObStep(step) {
 
   if (step === 2) {
     // Sync accent picker
-    const saved = localStorage.getItem('ww_accent_color') || '6c63ff';
+    const saved = localStorage.getItem('ww_accent_color') || 'ff1a35';
     document.querySelectorAll('#ob-accent-picker .accent-opt').forEach(b => {
       b.classList.toggle('active', b.dataset.color === saved);
     });
@@ -3725,36 +3920,45 @@ function closeOnboarding() {
 
 // ===== INIT =====
 (async function init() {
-  await initSettings();
+  try {
+    await initSettings();
 
-  // AI init: nothing to do — model loads on first message
-  $('ai-api-setup').classList.remove('hidden');
+    // AI init: nothing to do — model loads on first message
+    $('ai-api-setup')?.classList.remove('hidden');
 
-  // Register notes panel
-  PANELS['notes'] = $('panel-notes');
+    // Register notes panel
+    PANELS['notes'] = $('panel-notes');
 
-  createTab();
-  loadBookmarksBar();
-  updateStats();
-  updateStatusBar();
+    createTab();
+    loadBookmarksBar();
+    updateStats();
+    updateStatusBar();
 
-  setInterval(updateStats, 30000);
+    setInterval(updateStats, 30000);
 
-  // Onboarding
-  if (!localStorage.getItem('ww_onboarded')) {
-    setTimeout(startOnboarding, 400);
-  }
+    // Auto-updater
+    initUpdater();
 
-  // Check for last session
+    // Onboarding
+    if (!localStorage.getItem('ww_onboarded')) {
+      setTimeout(startOnboarding, 400);
+    }
+
+    // Check for last session
   checkLastSession();
 
-  console.log('%c🌊 WAVEWEB', 'color:#6c63ff;font-weight:900;font-size:18px;');
-  console.log('%cBrowser ready', 'color:#00d4ff;font-size:12px;');
+  console.log('%c🌊 WAVEWEB', 'color:#ff1a35;font-weight:900;font-size:18px;');
+  console.log('%cBrowser ready', 'color:#ff4444;font-size:12px;');
 
   // Dismiss splash screen
   const splash = $('splash');
   if (splash) {
     splash.classList.add('fade-out');
     setTimeout(() => splash.remove(), 600);
+  }
+  } catch (err) {
+    console.error('[WAVEWEB] Init error:', err);
+    const splash = $('splash');
+    if (splash) { splash.classList.add('fade-out'); setTimeout(() => splash.remove(), 600); }
   }
 })();

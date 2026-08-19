@@ -21,18 +21,6 @@ autoUpdater.on('update-available', (info) => {
     releaseDate: info.releaseDate,
     releaseNotes: info.releaseNotes || '',
   });
-  dialog.showMessageBox(mainWindow, {
-    type: 'info',
-    title: 'Update Available',
-    message: `A new version (${info.version}) is available. Do you want to download it now?`,
-    buttons: ['Download', 'Later'],
-    defaultId: 0,
-    cancelId: 1,
-  }).then(({ response }) => {
-    if (response === 0) {
-      autoUpdater.downloadUpdate();
-    }
-  });
 });
 
 autoUpdater.on('update-not-available', () => {
@@ -52,18 +40,6 @@ autoUpdater.on('update-downloaded', (info) => {
   if (mainWindow) mainWindow.webContents.send('update-downloaded', {
     version: info.version,
     releaseDate: info.releaseDate,
-  });
-  dialog.showMessageBox(mainWindow, {
-    type: 'info',
-    title: 'Update Ready',
-    message: `Version ${info.version} has been downloaded. The app will restart to apply the update.`,
-    buttons: ['Restart Now', 'Later'],
-    defaultId: 0,
-    cancelId: 1,
-  }).then(({ response }) => {
-    if (response === 0) {
-      autoUpdater.quitAndInstall(false, true);
-    }
   });
 });
 
@@ -239,11 +215,29 @@ function createWindow() {
 
   mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
 
+  // Spoof user-agent for webviews to avoid site blocks (e.g. GOFILE)
+  const defaultUA = mainWindow.webContents.getUserAgent();
+  const cleanUA = defaultUA.replace(/Electron\/[\d.]+\s/, '').replace(/WAVEWEB\/[\d.]+\s/, '');
+  session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
+    details.requestHeaders['User-Agent'] = cleanUA;
+    callback({ requestHeaders: details.requestHeaders });
+  });
+
   mainWindow.on('enter-full-screen', () => {
     mainWindow.webContents.send('fullscreen-changed', true);
   });
   mainWindow.on('leave-full-screen', () => {
     mainWindow.webContents.send('fullscreen-changed', false);
+  });
+
+  // ===== PERMISSION HANDLER =====
+  session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
+    const allowed = ['media', 'microphone', 'camera', 'notifications', 'clipboard-read', 'clipboard-sanitized-write', 'fullscreen', 'geolocation', 'idle-detection'];
+    if (allowed.includes(permission)) {
+      callback(true);
+    } else {
+      callback(false);
+    }
   });
 
   // ===== AD BLOCKER =====
