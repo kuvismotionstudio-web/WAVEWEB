@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WAVEWEB</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ===== TITLE BAR ===== -->
+  <div id="titlebar">
+    <div id="titlebar-drag">
+      <div id="logo">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <path d="M2 12 Q6 4 12 12 Q18 20 22 12" stroke="url(#wg)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+          <defs><linearGradient id="wg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#ff1a35"/><stop offset="100%" style="stop-color:#ff4444"/></linearGradient></defs>
+        </svg>
+        <span>WAVEWEB</span>
+      </div>
+    </div>
+    <div id="window-controls">
+      <button id="btn-minimize" onclick="window.electronAPI.minimize()" title="Minimize">
+        <svg width="11" height="11" viewBox="0 0 11 11"><rect y="5" width="11" height="1.2" rx="0.6" fill="currentColor"/></svg>
+      </button>
+      <button id="btn-maximize" onclick="window.electronAPI.maximize()" title="Maximize">
+        <svg width="11" height="11" viewBox="0 0 11 11"><rect x="0.6" y="0.6" width="9.8" height="9.8" rx="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>
+      </button>
+      <button id="btn-close" onclick="window.electronAPI.close()" title="Close">
+        <svg width="11" height="11" viewBox="0 0 11 11"><line x1="1" y1="1" x2="10" y2="10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="10" y1="1" x2="1" y2="10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== TABS BAR ===== -->
+  <div id="tabsbar">
+    <div id="tab-group-bar" class="tab-group-bar"></div>
+    <div id="tabs-scroll">
+      <div id="tabs-container">
+        <!-- tabs injected here, new-tab-btn is injected after last tab by JS -->
+      </div>
+      <button id="new-tab-btn" title="New Tab (Ctrl+T)">
+        <svg width="12" height="12" viewBox="0 0 12 12"><line x1="6" y1="1" x2="6" y2="11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><line x1="1" y1="6" x2="11" y2="6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div id="tabsbar-right"></div>
+  </div>
+
+  <!-- ===== NAVBAR ===== -->
+  <div id="navbar">
+    <div id="nav-left">
+      <button class="nav-btn" id="btn-back" title="Back (Alt+Left)" disabled>
+        <svg width="16" height="16" viewBox="0 0 16 16"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+      </button>
+      <button class="nav-btn" id="btn-forward" title="Forward (Alt+Right)" disabled>
+        <svg width="16" height="16" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+      </button>
+      <button class="nav-btn" id="btn-reload" title="Reload (Ctrl+R)">
+        <svg width="16" height="16" viewBox="0 0 16 16"><path d="M13.5 8A5.5 5.5 0 1 1 10 3.08" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/><polyline points="10,1 10,4 13,4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+      </button>
+      <button class="nav-btn" id="btn-home" title="Home">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M3 12L12 3l9 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 21V12h6v9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+
+    <div id="url-bar-wrapper">
+      <div id="security-icon"></div>
+      <input id="url-bar" type="text" placeholder="Search or enter URL..." spellcheck="false" autocomplete="off" />
+      <div id="url-bar-actions">
+        <button id="btn-bookmark-page" title="Bookmark this page" class="url-action-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 3h14v18l-7-4-7 4V3z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button id="btn-read-later" title="Read later" class="url-action-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v7l4 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/></svg>
+        </button>
+        <button id="btn-translate" title="Translate page" class="url-action-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 5h8M3 12h5M3 19h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M14 4l5 16M19 4l5 16M17 8h6M16 14h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" transform="translate(1,2) scale(0.7)"/></svg>
+        </button>
+      </div>
+      <div id="translate-popup" class="hidden">
+        <div class="tp-header">Translate page</div>
+        <div class="tp-langs" id="translate-langs"></div>
+        <button id="btn-translate-original" class="tp-reset">Show original</button>
+      </div>
+    </div>
+
+    <div id="nav-right">
+      <button class="nav-btn" id="btn-downloads" title="Downloads (Ctrl+J)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 3v13M7 11l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 19h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <span id="dl-badge" class="badge hidden">0</span>
+      </button>
+      <button class="nav-btn" id="btn-history" title="History (Ctrl+H)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M12 7v5l3 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="nav-btn" id="btn-bookmarks-panel" title="Bookmarks (Ctrl+B)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 3h14v18l-7-4-7 4V3z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="nav-btn" id="btn-ai-sidebar" title="Wave AI (Ctrl+I)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="10" stroke="url(#aiN)" stroke-width="1.8"/>
+          <path d="M8 9h8M8 12h8M8 15h5" stroke="url(#aiN)" stroke-width="1.8" stroke-linecap="round"/>
+          <defs><linearGradient id="aiN" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#ff1a35"/><stop offset="100%" style="stop-color:#ff4444"/></linearGradient></defs>
+        </svg>
+      </button>
+      <button class="nav-btn" id="btn-reader" title="Reader Mode (Ctrl+Shift+R)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M7 8h10M7 12h10M7 16h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+      <button class="nav-btn" id="btn-screenshot" title="Screenshot (Ctrl+Shift+S)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M8 5l1.5-2h5L16 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="nav-btn" id="btn-pip" title="Picture in Picture">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="2" y="4" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.8"/><rect x="12" y="11" width="8" height="5" rx="1" stroke="currentColor" stroke-width="1.5" fill="var(--bg-1)"/></svg>
+      </button>
+      <button class="nav-btn" id="btn-incognito" title="New Incognito Tab (Ctrl+Shift+N)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="18" y1="4" x2="20" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="4" y1="4" x2="6" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <button class="nav-btn" id="btn-notes" title="Notes (Ctrl+M)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="4" y="3" width="16" height="18" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 8h8M8 12h8M8 16h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+      <button class="nav-btn" id="btn-passwords" title="WavePass (Ctrl+Shift+P)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="16" r="1.5" fill="currentColor"/><path d="M8 11V8a4 4 0 1 1 8 0v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="nav-btn" id="btn-clipboard" title="Clipboard Manager">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="6" y="3" width="12" height="18" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M9 3V1h6v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M9 9h6M9 12h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+      <button class="nav-btn" id="btn-perf" title="Performance Monitor">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="14" width="3" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="8" y="10" width="3" height="11" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="13" y="6" width="3" height="15" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="18" y="3" width="3" height="18" rx="1" stroke="currentColor" stroke-width="1.5"/></svg>
+      </button>
+      <button class="nav-btn" id="btn-scripts" title="User Scripts">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M8 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M15 3l6 6-9 9H6v-6l9-9z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="nav-btn" id="btn-settings" title="Settings">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M12 1v3M12 20v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M1 12h3M20 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== URL SUGGESTIONS ===== -->
+  <div id="url-suggestions" class="hidden"></div>
+
+  <!-- ===== BOOKMARKS BAR ===== -->
+  <div id="bookmarks-bar" class="hidden">
+    <div id="bookmarks-bar-scroll">
+      <div id="bookmarks-bar-list"></div>
+    </div>
+    <button id="bb-more-btn" class="hidden" title="More bookmarks">▶</button>
+  </div>
+
+  <!-- ===== FIND BAR ===== -->
+  <div id="find-bar" class="hidden">
+    <input id="find-input" type="text" placeholder="Find in page..." />
+    <span id="find-count"></span>
+    <button id="find-prev">↑</button>
+    <button id="find-next">↓</button>
+    <button id="find-close">✕</button>
+  </div>
+
+  <!-- ===== MAIN AREA ===== -->
+  <div id="browser-body">
+
+    <!-- Webview + NewTab container -->
+    <div id="content-area">
+      <div id="webview-container"></div>
+
+      <!-- SAFETY SCREEN -->
+      <div id="safety-screen" class="hidden">
+        <div id="safety-content">
+          <div id="safety-icon">⚠️</div>
+          <h2 id="safety-title">Site Blocked by WAVEWEB</h2>
+          <p id="safety-reason"></p>
+          <p id="safety-url"></p>
+          <div id="safety-actions">
+            <button id="safety-go-back" class="settings-btn" style="background:var(--accent);color:#fff">Go Back</button>
+            <button id="safety-proceed" class="settings-btn" style="background:transparent;border:1px solid var(--border);color:var(--text-2)">I Understand, Proceed</button>
+          </div>
+          <p id="safety-footer">WAVEWEB Safety Filter helps protect you from harmful content.</p>
+        </div>
+      </div>
+
+      <!-- NEW TAB PAGE -->
+      <div id="newtab-page" class="active">
+        <div id="newtab-bg"></div>
+        <div id="newtab-content">
+          <div id="newtab-clock"></div>
+          <div id="newtab-logo">
+            <svg width="56" height="56" viewBox="0 0 24 24" fill="none">
+              <path d="M2 12 Q6 4 12 12 Q18 20 22 12" stroke="url(#bw)" stroke-width="2" stroke-linecap="round" fill="none"/>
+              <defs><linearGradient id="bw" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#ff1a35"/><stop offset="100%" style="stop-color:#ff4444"/></linearGradient></defs>
+            </svg>
+            <h1>WAVEWEB</h1>
+            <p class="newtab-sub">Your AI-powered browser</p>
+          </div>
+          <div id="newtab-search-wrap">
+            <div id="newtab-search">
+              <div id="newtab-search-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M16.5 16.5l4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              </div>
+              <input id="newtab-input" type="text" placeholder="Search or enter URL..." />
+              <button id="newtab-go">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+          </div>
+          <div id="quick-links"></div>
+          <div id="newtab-top-sites"></div>
+          <div id="newtab-stats">
+            <span id="stat-blocked">🛡 <b id="stat-blocked-count">0</b> ads blocked</span>
+            <span id="stat-tabs">📑 <b id="stat-tabs-count">1</b> tabs open</span>
+          </div>
+          <div id="newtab-quote"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== RIGHT PANELS ===== -->
+
+    <!-- DOWNLOADS PANEL -->
+    <div id="panel-downloads" class="side-panel hidden">
+      <div class="panel-header">
+        <span class="panel-title">Downloads</span>
+        <div class="panel-header-actions">
+          <button id="dl-clear-btn" class="panel-action-btn" title="Clear history">Clear</button>
+          <button class="panel-close-btn" data-panel="downloads">✕</button>
+        </div>
+      </div>
+      <div id="active-downloads"></div>
+      <div id="downloads-list" class="panel-list"></div>
+    </div>
+
+    <!-- WAVEPASS PANEL -->
+    <div id="panel-passwords" class="side-panel hidden">
+      <div class="panel-header">
+        <span class="panel-title">🔑 WavePass</span>
+        <div class="panel-header-actions">
+          <button id="wp-lock-btn" class="panel-action-btn hidden">Lock</button>
+          <button class="panel-close-btn" data-panel="passwords">✕</button>
+        </div>
+      </div>
+      <div id="wp-vault" class="hidden">
+        <div class="panel-search-wrap">
+          <svg viewBox="0 0 24 24" width="16" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-3);pointer-events:none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8" fill="none"/><path d="M16.5 16.5l4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <input type="text" id="wp-search" class="panel-search" placeholder="Search passwords..." />
+        </div>
+        <div style="padding: 4px 12px; display: flex; gap: 6px;">
+          <button id="btn-gen-password" class="settings-btn" style="font-size:11px;flex:1">🎲 Generate Password</button>
+        </div>
+        <div id="wp-gen-result" class="hidden" style="padding: 8px 14px; background: rgba(108,99,255,0.04); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px;">
+          <code id="wp-gen-pwd" style="flex:1;font-size:13px;color:var(--text-1);word-break:break-all"></code>
+          <button id="wp-gen-copy" class="settings-btn" style="font-size:11px">📋</button>
+          <button id="wp-gen-close" class="settings-btn" style="font-size:11px">✕</button>
+        </div>
+        <div id="wp-list" class="panel-list"></div>
+      </div>
+      <div id="wp-locked" class="wp-locked-view">
+        <div class="wp-lock-icon">🔐</div>
+        <div class="wp-lock-title">Vault Locked</div>
+        <div class="wp-lock-sub">Enter your master PIN to unlock</div>
+        <input type="password" id="wp-unlock-input" class="wp-pin-input" placeholder="Enter PIN" maxlength="6" autocomplete="off" />
+        <div class="wp-pin-error" id="wp-unlock-error"></div>
+        <button id="wp-unlock-btn" class="wp-pin-btn">Unlock</button>
+        <button id="wp-setup-btn" class="wp-pin-btn wp-pin-btn-secondary hidden">Set up WavePass</button>
+      </div>
+    </div>
+
+    <!-- HISTORY PANEL -->
+    <div id="panel-history" class="side-panel hidden">
+      <div class="panel-header">
+        <span class="panel-title">History</span>
+        <div class="panel-header-actions">
+          <button id="history-clear-btn" class="panel-action-btn">Clear</button>
+          <button class="panel-close-btn" data-panel="history">✕</button>
+        </div>
+      </div>
+      <div class="panel-search-wrap">
+        <input id="history-search" class="panel-search" type="text" placeholder="Search history..." />
+      </div>
+      <div id="history-list" class="panel-list"></div>
+    </div>
+
+    <!-- BOOKMARKS PANEL -->
+    <div id="panel-bookmarks" class="side-panel hidden">
+      <div class="panel-header">
+        <span class="panel-title">Bookmarks</span>
+        <button class="panel-close-btn" data-panel="bookmarks">✕</button>
+      </div>
+      <div class="panel-search-wrap">
+        <input id="bookmarks-search" class="panel-search" type="text" placeholder="Search bookmarks..." />
+        <div style="display:flex;gap:4px;padding:4px 0">
+          <button id="bm-export-btn" class="panel-item-btn" title="Export bookmarks (HTML)" style="font-size:10px;padding:3px 8px">↗ Export</button>
+          <button id="bm-import-btn" class="panel-item-btn" title="Import bookmarks (HTML)" style="font-size:10px;padding:3px 8px">↙ Import</button>
+        </div>
+      </div>
+      <div id="reading-list" class="panel-list" style="border-bottom:1px solid var(--border);max-height:200px;overflow-y:auto"></div>
+      <div id="bookmarks-list" class="panel-list"></div>
+    </div>
+
+    <!-- ADBLOCK PANEL -->
+    <div id="panel-adblock" class="side-panel hidden">
+      <div class="panel-header">
+        <span class="panel-title">🛡 Ad Blocker</span>
+        <button class="panel-close-btn" data-panel="adblock">✕</button>
+      </div>
+      <div id="adblock-content" class="panel-list">
+        <div class="adblock-stats-header">
+          <div class="ab-stat-card">
+            <span class="ab-stat-num" id="ab-total-blocked">0</span>
+            <span class="ab-stat-label">Total Blocked</span>
+          </div>
+          <div class="ab-stat-card">
+            <span class="ab-stat-num" id="ab-domains-blocked">0</span>
+            <span class="ab-stat-label">Domains</span>
+          </div>
+          <div class="ab-stat-card">
+            <span class="ab-stat-num" id="ab-filters-count">0</span>
+            <span class="ab-stat-label">Filters</span>
+          </div>
+        </div>
+
+        <div class="adblock-section">
+          <div class="adblock-section-title">Toggle</div>
+          <div class="settings-row">
+            <div class="settings-label">
+              <span>Ad Blocker Enabled</span>
+              <small>Block ads and trackers</small>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="ab-enabled" checked />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="settings-row">
+            <button id="ab-reset-stats" class="panel-action-btn">Reset Stats</button>
+          </div>
+        </div>
+
+        <div class="adblock-section">
+          <div class="adblock-section-title">Per-Site Whitelist</div>
+          <div class="adblock-hint">Sites where ad blocking is disabled</div>
+          <div id="ab-whitelist" class="ab-list"></div>
+          <div class="adblock-add-row">
+            <input id="ab-whitelist-input" class="settings-input" type="text" placeholder="example.com" />
+            <button id="ab-whitelist-add" class="settings-btn" style="font-size:11px;padding:5px 10px">Add</button>
+          </div>
+        </div>
+
+        <div class="adblock-section">
+          <div class="adblock-section-title">Custom Filters</div>
+          <div class="adblock-hint">Add filter rules (e.g. ||ads.example.com^ or /pattern/)</div>
+          <div id="ab-custom-filters" class="ab-list"></div>
+          <div class="adblock-add-row">
+            <input id="ab-filter-input" class="settings-input" type="text" placeholder="||example.com^" />
+            <button id="ab-filter-add" class="settings-btn" style="font-size:11px;padding:5px 10px">Add</button>
+          </div>
+        </div>
+
+        <div class="adblock-section">
+          <div class="adblock-section-title">Top Blocked Domains</div>
+          <div id="ab-top-domains" class="ab-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXTENSIONS PANEL -->
+    <div id="panel-extensions" class="side-panel hidden">
+      <div class="panel-header">
+        <span class="panel-title">🧩 Extensions</span>
+        <div class="panel-header-actions">
+          <button id="ext-reload-btn" class="panel-action-btn" title="Reload all extensions">↻</button>
+          <button class="panel-close-btn" data-panel="extensions">✕</button>
+        </div>
+      </div>
+      <div class="panel-search-wrap">
+        <div class="ext-hint">Extensions are loaded from <code>userData/extensions/</code></div>
+      </div>
+      <div id="extensions-list" class="panel-list"></div>
+    </div>
+
+    <!-- SETTINGS PANEL -->
+    <div id="panel-settings" class="side-panel hidden">
+      <div class="panel-header">
+        <span class="panel-title">Settings</span>
+        <button class="panel-close-btn" data-panel="settings">✕</button>
+      </div>
+
+      <!-- Settings search -->
+      <div class="panel-search-wrap">
+        <input id="settings-search" class="panel-search" type="text" placeholder="Search settings..." />
+      </div>
+
+      <!-- Settings categories -->
+      <div id="settings-categories">
+        <button class="set-cat active" data-cat="general">General</button>
+        <button class="set-cat" data-cat="privacy">Privacy</button>
+        <button class="set-cat" data-cat="ai">AI</button>
+        <button class="set-cat" data-cat="appearance">Appearance</button>
+        <button class="set-cat" data-cat="about">About</button>
+      </div>
+
+      <div id="settings-content" class="panel-list">
+
+        <!-- GENERAL -->
+        <div class="settings-section" data-category="general">
+          <div class="settings-section-title">General</div>
+          <div class="settings-row">
+            <div class="settings-label">
+              <span>Search Engine</span>
+              <small>Default search provider</small>
+            </div>
+            <select id="setting-search-engine" class="settings-select">
+              <option value="google">Google</option>
+              <option value="bing">Bing</option>
+              <option value="duckduckgo">DuckDuckGo</option>
+              <option value="brave">Brave Search</option>
+              <option value="ecosia">Ecosia</option>
+            </select>
+          </div>
+          <div class="settings-row">
+            <div class="settings-label">
+              <span>Homepage</span>
+              <small>Page shown when clicking Home</small>
+            </div>
+            <input id="setting-homepage" class="settings-input" type="text" placeholder="https://..." />
+          </div>
+          <div class="settings-row">
+            <div class="settings-label">
+              <span>Download Location</span>
+              <small id="download-path-label">Default downloads folder</small>
+            </div>
+            <button id="btn-change-download-path" class="settings-btn" style="font-size:11px">Change</button>
+          </div>
+          <div class="settings-row">
+            <div class="settings-label">
+              <span>Bookmarks Bar</span>
+              <small>Show bookmarks bar below the address bar</small>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="setting-show-bookmarks-bar" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="settings-row">
+            <div class="settings-label">
+              <span>Save History</span>
+              <small>Remember visited pages</small>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="setting-history" checked />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- PRIVACY -->
+        <div class="settings-section" data-category="privacy">
+          <div class="settings-section-title">Privacy & Security</div>
+          <div class="settings-row">
+            <div class="settings-label">
+              <span>Ad Blocker</span>
+              <small>Block ads and trackers</small>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="setting-adblock" checked />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="settings-row">
+            <div class="settings-label">
+              <span>Safety Screen</span>
+              <small>Warn about harmful, adult, gambling and phishing sites</small>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="setting-safety-screen" checked />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="settings-row">
+            <div class="settings-label">
+              <span>Clear Data on Exit</span>
+              <small>Auto-clear history on browser close</small>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="setting-clear-on-exit" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-section-subtitle">Clear Browsing Data</div>
+              <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:8px">
+                <label class="cb-label">
+                  <input type="checkbox" id="cd-history" checked /><span class="cb-box"></span> History
+                </label>
+                <label class="cb-label">
+                  <input type="checkbox" id="cd-cache" checked /><span class="cb-box"></span> Cache
+                </label>
+                <label class="cb-label">
+                  <input type="checkbox" id="cd-cookies" checked /><span class="cb-box"></span> Cookies & Site Data
+                </label>
+                <label class="cb-label">
+                  <input type="checkbox" id="cd-downloads" /><span class="cb-box"></span> Downloads History
+                </label>
+              </div>
+              <button id="clear-all-data-btn" class="danger-btn" style="font-size:11px;padding:6px 14px">Clear Selected</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI -->
+        <div class="settings-section" data-category="ai">
+          <div class="settings-section-title">Wave AI</div>
+          <div class="settings-row">
+            <div class="settings-label">
+              <span>🧠 AI Engine</span>
+              <small>Uses Transformers.js — runs locally in your browser, no API key needed.</small>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-label">
+              <span>Model</span>
+              <small>Downloaded once, cached in browser (~250MB)</small>
+            </div>
+            <select id="setting-ai-model" class="settings-select">
+              <option value="Phi-3-mini-4k">Phi-3 mini (3.8B, best quality)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- APPEARANCE -->
+        <div class="settings-section" data-category="appearance">
+          <div class="settings-section-title">Appearance</div>
+          <div class="settings-row">
+            <div class="settings-label">
+              <span>Zoom Level</span>
+              <small>Default page zoom</small>
+            </div>
+            <select id="setting-zoom" class="settings-select">
+              <option value="0.75">75%</option>
+              <option value="0.9">90%</option>
+              <option value="1" selected>100%</option>
+              <option value="1.1">110%</option>
+              <option value="1.25">125%</option>
+              <option value="1.5">150%</option>
+            </select>
+          </div>
+          <div class="settings-row">
+            <div class="settings-label">
+              <span>Accent Color</span>
+              <small>Primary accent color</small>
+            </div>
+            <div id="accent-picker">
+              <button class="accent-opt active" data-color="6c63ff" style="background:#ff1a35" title="Purple"></button>
+              <button class="accent-opt" data-color="0078d4" style="background:#0078d4" title="Blue"></button>
+              <button class="accent-opt" data-color="00d4a0" style="background:#00d4a0" title="Teal"></button>
+              <button class="accent-opt" data-color="ff5050" style="background:#ff5050" title="Red"></button>
+              <button class="accent-opt" data-color="ff8844" style="background:#ff8844" title="Orange"></button>
+              <button class="accent-opt" data-color="ffd060" style="background:#ffd060" title="Yellow"></button>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-label">
+              <span>Background Effect</span>
+              <small>New tab page background</small>
+            </div>
+            <select id="setting-bg-effect" class="settings-select">
+              <option value="gradient">Gradient</option>
+              <option value="solid">Solid</option>
+              <option value="none">None</option>
+            </select>
+          </div>
+          <div class="settings-row">
+            <div class="settings-label">
+              <span>Dark Mode for Websites</span>
+              <small>Force dark theme on all pages</small>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="setting-dark-mode" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- ABOUT -->
+        <div class="settings-section" data-category="about">
+          <div class="settings-section-title">About WAVEWEB</div>
+          <div id="system-info-content" class="system-info"></div>
+          <div class="settings-row" style="border:none;margin-top:16px;justify-content:center;opacity:0.6;font-size:12px;">
+            Powered by <strong style="margin-left:4px;background:linear-gradient(135deg,#ff1a35,#ff4444);-webkit-background-clip:text;-webkit-text-fill-color:transparent">ASTROWORLD</strong>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- AI SIDEBAR -->
+    <div id="ai-sidebar" class="side-panel hidden">
+      <div class="panel-header">
+        <div id="ai-sidebar-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" stroke="url(#aiH)" stroke-width="1.8"/>
+            <path d="M8 9h8M8 12h8M8 15h5" stroke="url(#aiH)" stroke-width="1.8" stroke-linecap="round"/>
+            <defs><linearGradient id="aiH" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#ff1a35"/><stop offset="100%" style="stop-color:#ff4444"/></linearGradient></defs>
+          </svg>
+          <span>Wave AI</span>
+        </div>
+        <button class="panel-close-btn" data-panel="ai-sidebar">✕</button>
+      </div>
+
+      <div id="ai-api-setup" class="hidden">
+        <div class="ai-setup-content">
+          <div class="ai-setup-option">
+            <div class="ai-setup-option-title">🧠 Local AI</div>
+            <p>Uses Transformers.js — model działa wprost w przeglądarce. Zero instalacji, zero kluczy API.</p>
+            <button id="ai-load-model" class="settings-btn full-width">Start AI</button>
+            <small>Phi-3 mini 3.8B (~2.3GB) — pobiera się raz, działa offline.</small>
+          </div>
+        </div>
+      </div>
+
+      <div id="ai-chat-area">
+        <div id="ai-messages">
+          <div class="ai-msg ai-msg-bot">
+            <div class="ai-avatar">W</div>
+            <div class="ai-bubble">Hey! I'm <strong>Wave AI</strong>. Ask me anything — I can summarize pages, search, translate, and more.</div>
+          </div>
+        </div>
+        <div class="ai-model-badge"><span>🧠 Phi-3 · Local</span></div>
+        <div id="ai-quick-actions">
+          <button class="ai-quick-btn" id="ai-summarize">📄 <span>Summarize</span></button>
+          <button class="ai-quick-btn" id="ai-translate">🌐 <span>Translate</span></button>
+          <button class="ai-quick-btn" id="ai-explain">💡 <span>Explain</span></button>
+          <button class="ai-quick-btn" id="ai-clear-chat">🗑 <span>Clear</span></button>
+        </div>
+        <div id="ai-input-row">
+          <input id="ai-input" type="text" placeholder="Ask Wave AI anything..." />
+          <button id="ai-send">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTES PANEL -->
+    <div id="panel-notes" class="side-panel hidden">
+      <div class="panel-header">
+        <span class="panel-title">Notes</span>
+        <div class="panel-header-actions">
+          <button id="notes-new-btn" class="panel-action-btn">+ New</button>
+          <button class="panel-close-btn" data-panel="notes">✕</button>
+        </div>
+      </div>
+      <div id="notes-list-view">
+        <div id="notes-list" class="panel-list"></div>
+      </div>
+      <div id="notes-editor-view" class="hidden">
+        <div id="notes-editor-toolbar">
+          <button id="notes-back-btn" class="panel-action-btn">← Back</button>
+          <input id="notes-title-input" type="text" placeholder="Note title..." class="notes-title-field" />
+          <button id="notes-delete-btn" class="panel-action-btn" style="color:var(--red)">Delete</button>
+        </div>
+        <textarea id="notes-textarea" placeholder="Write your note here...&#10;&#10;Tip: Notes are saved automatically."></textarea>
+      </div>
+    </div>
+
+    <!-- SESSIONS PANEL -->
+    <div id="panel-sessions" class="side-panel hidden">
+      <div class="panel-header">
+        <span class="panel-title">Session Manager</span>
+        <div class="panel-header-actions">
+          <button id="session-save-btn" class="panel-action-btn">+ Save Current</button>
+          <button class="panel-close-btn" data-panel="sessions">✕</button>
+        </div>
+      </div>
+      <div id="session-auto" class="session-auto-bar">
+        <span>🔄 Auto-save enabled</span>
+        <button id="session-restore-last" class="panel-action-btn">Restore Last</button>
+      </div>
+      <div id="sessions-list" class="panel-list"></div>
+    </div>
+
+    <!-- CLIPBOARD MANAGER PANEL -->
+    <div id="panel-clipboard" class="side-panel hidden">
+      <div class="panel-header">
+        <span class="panel-title">📋 Clipboard</span>
+        <div class="panel-header-actions">
+          <button id="clipboard-clear-btn" class="panel-action-btn">Clear</button>
+          <button class="panel-close-btn" data-panel="clipboard">✕</button>
+        </div>
+      </div>
+      <div class="panel-search-wrap">
+        <input id="clipboard-search" class="panel-search" type="text" placeholder="Search clipboard history..." />
+      </div>
+      <div id="clipboard-list" class="panel-list"></div>
+    </div>
+
+    <!-- PERFORMANCE MONITOR PANEL -->
+    <div id="panel-perf" class="side-panel hidden">
+      <div class="panel-header">
+        <span class="panel-title">📊 Performance</span>
+        <button class="panel-close-btn" data-panel="perf">✕</button>
+      </div>
+      <div id="perf-content" class="panel-list" style="padding:12px">
+        <div class="perf-stats-grid">
+          <div class="perf-card">
+            <div class="perf-card-label">System RAM</div>
+            <div class="perf-card-value" id="perf-sys-ram">—</div>
+            <div class="perf-card-bar"><div class="perf-bar-fill" id="perf-sys-ram-bar"></div></div>
+          </div>
+          <div class="perf-card">
+            <div class="perf-card-label">Electron Heap</div>
+            <div class="perf-card-value" id="perf-elec-heap">—</div>
+            <div class="perf-card-bar"><div class="perf-bar-fill" id="perf-elec-heap-bar"></div></div>
+          </div>
+          <div class="perf-card">
+            <div class="perf-card-label">CPU Load (1m)</div>
+            <div class="perf-card-value" id="perf-cpu-load">—</div>
+          </div>
+          <div class="perf-card">
+            <div class="perf-card-label">CPU Cores</div>
+            <div class="perf-card-value" id="perf-cpu-cores">—</div>
+          </div>
+        </div>
+        <div class="perf-section-title">Electron Process</div>
+        <div class="perf-detail-row"><span>RSS Memory</span><span id="perf-rss">—</span></div>
+        <div class="perf-detail-row"><span>Heap Used</span><span id="perf-heap-used">—</span></div>
+        <div class="perf-detail-row"><span>Heap Total</span><span id="perf-heap-total">—</span></div>
+        <div class="perf-detail-row"><span>External</span><span id="perf-external">—</span></div>
+        <div class="perf-section-title">System</div>
+        <div class="perf-detail-row"><span>Total RAM</span><span id="perf-total-mem">—</span></div>
+        <div class="perf-detail-row"><span>Free RAM</span><span id="perf-free-mem">—</span></div>
+        <div class="perf-detail-row"><span>CPU Model</span><span id="perf-cpu-model" style="font-size:11px;text-align:right;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">—</span></div>
+        <div class="perf-detail-row"><span>Uptime</span><span id="perf-uptime">—</span></div>
+        <div class="perf-detail-row"><span>Platform</span><span id="perf-platform">—</span></div>
+        <div style="margin-top:10px;text-align:center">
+          <button id="perf-refresh" class="panel-action-btn">↻ Refresh</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- USER SCRIPTS PANEL -->
+    <div id="panel-scripts" class="side-panel hidden">
+      <div class="panel-header">
+        <span class="panel-title">📜 User Scripts</span>
+        <div class="panel-header-actions">
+          <button id="scripts-add-btn" class="panel-action-btn">+ New</button>
+          <button class="panel-close-btn" data-panel="scripts">✕</button>
+        </div>
+      </div>
+      <div id="scripts-list" class="panel-list"></div>
+      <div id="scripts-editor" class="hidden" style="display:flex;flex-direction:column;flex:1;overflow:hidden">
+        <div class="panel-search-wrap" style="display:flex;gap:6px;flex-wrap:wrap">
+          <input id="script-name" class="panel-search" type="text" placeholder="Script name..." style="flex:1;min-width:120px" />
+          <select id="script-type" class="panel-search" style="width:70px;min-width:70px;flex:none">
+            <option value="js">JavaScript</option>
+            <option value="css">CSS</option>
+          </select>
+        </div>
+        <div class="panel-search-wrap">
+          <input id="script-pattern" class="panel-search" type="text" placeholder="URL pattern (* = wildcard, e.g. *://example.com/*)" />
+        </div>
+        <div style="flex:1;overflow:hidden;padding:0 0 6px">
+          <textarea id="script-code" placeholder="// Paste your script or CSS here..." style="width:100%;height:100%;background:var(--bg-3);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px;color:var(--text-1);font-family:'Courier New',monospace;font-size:12px;resize:none;outline:none"></textarea>
+        </div>
+        <div style="padding:6px 12px;display:flex;gap:6px;border-top:1px solid var(--border)">
+          <button id="script-save-btn" class="settings-btn" style="flex:1;background:var(--accent);color:#fff;border:none">Save</button>
+          <button id="script-cancel-btn" class="settings-btn" style="flex:1;border:1px solid var(--border);background:transparent;color:var(--text-2)">Cancel</button>
+          <button id="script-delete-btn" class="settings-btn danger-btn" style="border:1px solid var(--border);background:transparent;color:var(--red)">Delete</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- READER MODE OVERLAY -->
+    <div id="reader-overlay" class="hidden">
+      <div id="reader-toolbar">
+        <button id="reader-close">← Exit Reader</button>
+        <div id="reader-controls">
+          <button id="reader-font-dec">A-</button>
+          <button id="reader-font-inc">A+</button>
+          <select id="reader-font-family">
+            <option value="Georgia,serif">Serif</option>
+            <option value="system-ui,sans-serif">Sans</option>
+            <option value="'Courier New',monospace">Mono</option>
+          </select>
+          <button id="reader-theme-toggle">🌙</button>
+          <button id="reader-tts" title="Read aloud">🔊</button>
+        </div>
+      </div>
+      <div id="reader-content"></div>
+    </div>
+
+    <!-- KEYBOARD SHORTCUTS POPUP -->
+    <div id="shortcuts-popup" class="hidden">
+      <div id="shortcuts-backdrop"></div>
+      <div id="shortcuts-modal">
+        <div id="shortcuts-header">
+          <span>Keyboard Shortcuts</span>
+          <button id="shortcuts-close">✕</button>
+        </div>
+        <div id="shortcuts-grid">
+          <div class="sc-group"><div class="sc-group-title">Navigation</div>
+            <div class="sc-row"><kbd>Ctrl+T</kbd><span>New tab</span></div>
+            <div class="sc-row"><kbd>Ctrl+Shift+T</kbd><span>Reopen closed tab</span></div>
+            <div class="sc-row"><kbd>Ctrl+W</kbd><span>Close tab</span></div>
+            <div class="sc-row"><kbd>Ctrl+R / F5</kbd><span>Reload</span></div>
+            <div class="sc-row"><kbd>Ctrl+L</kbd><span>Focus URL bar</span></div>
+            <div class="sc-row"><kbd>Alt+←/→</kbd><span>Back / Forward</span></div>
+            <div class="sc-row"><kbd>Ctrl+1–9</kbd><span>Switch to tab N</span></div>
+          </div>
+          <div class="sc-group"><div class="sc-group-title">Panels</div>
+            <div class="sc-row"><kbd>Ctrl+H</kbd><span>History</span></div>
+            <div class="sc-row"><kbd>Ctrl+B</kbd><span>Bookmarks</span></div>
+            <div class="sc-row"><kbd>Ctrl+J</kbd><span>Downloads</span></div>
+            <div class="sc-row"><kbd>Ctrl+I</kbd><span>Wave AI</span></div>
+            <div class="sc-row"><kbd>Ctrl+M</kbd><span>Notes / Mute All</span></div>
+            <div class="sc-row"><kbd>Ctrl+Shift+T</kbd><span>Reopen tab</span></div>
+            <div class="sc-row"><kbd>Ctrl+Shift+P</kbd><span>WavePass</span></div>
+          </div>
+          <div class="sc-group"><div class="sc-group-title">Page</div>
+            <div class="sc-row"><kbd>Ctrl+F</kbd><span>Find in page</span></div>
+            <div class="sc-row"><kbd>Ctrl++/-</kbd><span>Zoom in/out</span></div>
+            <div class="sc-row"><kbd>Ctrl+0</kbd><span>Reset zoom</span></div>
+            <div class="sc-row"><kbd>Ctrl+P</kbd><span>Print</span></div>
+            <div class="sc-row"><kbd>Ctrl+Shift+R</kbd><span>Reader mode</span></div>
+            <div class="sc-row"><kbd>Ctrl+Shift+S</kbd><span>Screenshot</span></div>
+            <div class="sc-row"><kbd>Ctrl+Shift+N</kbd><span>Incognito tab</span></div>
+            <div class="sc-row"><kbd>Ctrl+Shift+E</kbd><span>Sessions</span></div>
+            <div class="sc-row"><kbd>Ctrl+Shift+X</kbd><span>Extensions</span></div>
+          </div>
+          <div class="sc-group"><div class="sc-group-title">Other</div>
+            <div class="sc-row"><kbd>?</kbd><span>This help</span></div>
+            <div class="sc-row"><kbd>Ctrl+D</kbd><span>Bookmark page</span></div>
+            <div class="sc-row"><kbd>Ctrl+U</kbd><span>View source</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SAVE PASSWORD PROMPT -->
+    <div id="wp-save-prompt" class="hidden">
+      <div id="wp-save-prompt-content">
+        <div id="wp-save-prompt-icon">🔑</div>
+        <div id="wp-save-prompt-info">
+          <div id="wp-save-prompt-title">Save password?</div>
+          <div id="wp-save-prompt-url"></div>
+        </div>
+        <div id="wp-save-prompt-actions">
+          <button id="wp-save-prompt-save">Save</button>
+          <button id="wp-save-prompt-ignore">Never</button>
+          <button id="wp-save-prompt-close">✕</button>
+        </div>
+      </div>
+    </div>
+  </div><!-- end browser-body -->
+
+  <!-- STATUS BAR -->
+  <div id="status-bar">
+    <span id="status-text"></span>
+    <div id="status-right">
+      <span id="status-zoom">100%</span>
+      <span id="status-incognito" class="hidden">🕵 Incognito</span>
+    </div>
+  </div>
+  <div id="downloads-toast-container"></div>
+
+  <!-- ===== ONBOARDING OVERLAY ===== -->
+  <div id="onboarding-overlay" class="hidden">
+    <div id="onboarding-modal">
+      <div id="onboarding-progress">
+        <div class="ob-step active" data-step="0"></div>
+        <div class="ob-step" data-step="1"></div>
+        <div class="ob-step" data-step="2"></div>
+        <div class="ob-step" data-step="3"></div>
+      </div>
+      <div id="onboarding-body">
+        <!-- Step 0: Welcome -->
+        <div class="onboarding-step" data-step="0">
+          <div class="ob-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+              <path d="M2 12 Q6 4 12 12 Q18 20 22 12" stroke="url(#obG)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+              <defs><linearGradient id="obG" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#ff1a35"/><stop offset="100%" style="stop-color:#ff4444"/></linearGradient></defs>
+            </svg>
+          </div>
+          <h2>Welcome to WAVEWEB</h2>
+          <p class="ob-sub">Your AI-powered browser — fast, modern, and private.</p>
+          <div class="ob-features">
+            <div class="ob-feature"><span class="ob-f-icon">🤖</span><span>Local AI — no setup, no API key</span></div>
+            <div class="ob-feature"><span class="ob-f-icon">🛡</span><span>Built-in ad & tracker blocking</span></div>
+            <div class="ob-feature"><span class="ob-f-icon">📑</span><span>Tab management with gestures</span></div>
+            <div class="ob-feature"><span class="ob-f-icon">🎨</span><span>Customizable dark theme</span></div>
+          </div>
+        </div>
+        <!-- Step 1: AI Setup -->
+        <div class="onboarding-step hidden" data-step="1">
+          <div class="ob-icon">🤖</div>
+          <h2>Wave AI</h2>
+          <p class="ob-sub">AI assistant działa wprost w przeglądarce — zero instalacji, zero kluczy API. Model (~2.3GB) pobiera się raz.</p>
+          <div class="ob-input-group">
+            <button id="ob-start-ai" class="settings-btn" style="flex:1;background:var(--accent);color:#fff;border:none">⚡ Load AI Now</button>
+            <button id="ob-skip-ai" class="settings-btn" style="background:transparent;border:1px solid var(--border);color:var(--text-2)">Skip</button>
+          </div>
+          <p style="font-size:11px;color:var(--text-3);margin-top:6px">Powered by Transformers.js — działa lokalnie, offline po pierwszym pobraniu.</p>
+        </div>
+        <!-- Step 2: Theme -->
+        <div class="onboarding-step hidden" data-step="2">
+          <div class="ob-icon">🎨</div>
+          <h2>Choose Your Accent</h2>
+          <p class="ob-sub">Pick a color that matches your style.</p>
+          <div id="ob-accent-picker">
+            <button class="accent-opt" data-color="6c63ff" style="background:#ff1a35" title="Purple"></button>
+            <button class="accent-opt" data-color="0078d4" style="background:#0078d4" title="Blue"></button>
+            <button class="accent-opt" data-color="00d4a0" style="background:#00d4a0" title="Teal"></button>
+            <button class="accent-opt active" data-color="ff1a35" style="background:#ff1a35" title="Red"></button>
+            <button class="accent-opt" data-color="ff8844" style="background:#ff8844" title="Orange"></button>
+            <button class="accent-opt" data-color="ffd060" style="background:#ffd060" title="Yellow"></button>
+          </div>
+        </div>
+        <!-- Step 3: Ready -->
+        <div class="onboarding-step hidden" data-step="3">
+          <div class="ob-icon">🚀</div>
+          <h2>You're All Set!</h2>
+          <p class="ob-sub">WAVEWEB is ready to go. Start browsing, or check out the keyboard shortcuts with <kbd style="background:var(--bg-4);padding:2px 8px;border-radius:4px">?</kbd></p>
+          <div class="ob-summary">
+            <div><span>Ctrl+T</span> New tab</div>
+            <div><span>Ctrl+W</span> Close tab</div>
+            <div><span>Ctrl+L</span> Focus URL bar</div>
+            <div><span>Ctrl+I</span> Open AI sidebar</div>
+          </div>
+        </div>
+      </div>
+      <div id="onboarding-footer">
+        <button id="ob-prev" class="settings-btn" style="background:transparent;border:1px solid var(--border);color:var(--text-2);visibility:hidden">Back</button>
+        <div id="ob-dots">
+          <span class="ob-dot active" data-step="0"></span>
+          <span class="ob-dot" data-step="1"></span>
+          <span class="ob-dot" data-step="2"></span>
+          <span class="ob-dot" data-step="3"></span>
+        </div>
+        <button id="ob-next" class="settings-btn">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TAB SEARCH ===== -->
+  <div id="tab-search-overlay" class="hidden">
+    <div id="tab-search-modal">
+      <input id="tab-search-input" type="text" placeholder="Search open tabs..." autocomplete="off" spellcheck="false" />
+      <div id="tab-search-results"></div>
+    </div>
+  </div>
+
+  <!-- ===== LOADING BAR ===== -->
+  <div id="loading-bar"></div>
+
+  <!-- ===== URL TOOLTIP ===== -->
+  <div id="url-tooltip"></div>
+
+  <!-- ===== ZOOM INDICATOR ===== -->
+  <div id="zoom-indicator" class="hidden"></div>
+
+  <!-- ===== SPLASH SCREEN ===== -->
+  <div id="splash">
+    <div class="splash-inner">
+      <div class="splash-wave">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+          <path d="M2 12 Q6 4 12 12 Q18 20 22 12" stroke="url(#sg)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+          <defs><linearGradient id="sg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#ff1a35"/><stop offset="100%" style="stop-color:#ff4444"/></linearGradient></defs>
+        </svg>
+      </div>
+      <div class="splash-logo">WAVEWEB</div>
+      <div class="splash-bar"><div class="splash-bar-fill"></div></div>
+    </div>
+  </div>
+
+  <script src="browser.js"></script>
+</body>
+</html>

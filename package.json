@@ -1,0 +1,65 @@
+{
+  "name": "waveweb",
+  "version": "1.0.0",
+  "description": "WAVEWEB - Modern Chromium Browser with AI",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux",
+    "publish": "electron-builder --publish always"
+  },
+  "keywords": [],
+  "author": "WAVEWEB",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^36.9.5",
+    "electron-builder": "^26.15.3"
+  },
+  "dependencies": {
+    "@huggingface/transformers": "^3.0.2",
+    "electron-updater": "^6.8.9"
+  },
+  "build": {
+    "appId": "com.waveweb.browser",
+    "productName": "WAVEWEB",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**/*",
+      "renderer/**/*",
+      "package.json",
+      "!node_modules/@huggingface/transformers/.cache/**"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "mac": {
+      "target": ["dmg"],
+      "category": "public.app-category.browsers"
+    },
+    "linux": {
+      "target": ["AppImage"],
+      "category": "Network"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "kuvismotionstudio-web",
+      "repo": "WAVEWEB",
+      "releaseType": "release"
+    }
+  }
+}
