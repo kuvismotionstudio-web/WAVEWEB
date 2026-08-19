@@ -1016,8 +1016,14 @@ function closeTab(id) {
     localStorage.setItem('ww_closed_tabs', JSON.stringify(closedTabs));
   }
 
+  const tabEl = document.querySelector(`[data-tab-id="${id}"]`);
+  if (tabEl) {
+    tabEl.classList.add('closing');
+    tabEl.addEventListener('animationend', () => {
+      tabEl.remove();
+    }, { once: true });
+  }
   if (tab.webview) tab.webview.remove();
-  document.querySelector(`[data-tab-id="${id}"]`)?.remove();
   tabs.splice(idx, 1);
 
   if (tabs.length === 0) { createTab(); return; }
@@ -1091,14 +1097,52 @@ function setUrlBar(url) {
   setSecurityIcon(url);
 }
 
+const PHISHING_KEYWORDS = ['login', 'signin', 'verify', 'account', 'secure', 'update', 'confirm', 'password', 'banking', 'paypal'];
+const PHISHING_TLDS = ['.tk', '.ml', '.ga', '.cf', '.gq', '.buzz', '.xyz', '.top', '.club', '.online', '.site', '.click', '.link', '.download', '.racing'];
+
+function detectPhishing(url) {
+  try {
+    const { hostname, pathname } = new URL(url);
+    const host = hostname.toLowerCase().replace(/^www\./, '');
+
+    // Check for IP address instead of domain
+    if (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/.test(host)) return true;
+
+    // Check for suspicious TLDs
+    if (PHISHING_TLDS.some(tld => host.endsWith(tld))) return true;
+
+    // Check for excessive subdomains (e.g. paypal.login.evil.com)
+    const parts = host.split('.');
+    if (parts.length > 3) return true;
+
+    // Check for homograph attacks (cyrillic in domain)
+    if (/[а-яА-ЯёЁ]/.test(host)) return true;
+
+    // Check for brand name + phishing keywords in path
+    const pathLower = pathname.toLowerCase();
+    const knownBrands = ['paypal', 'apple', 'google', 'microsoft', 'amazon', 'netflix', 'facebook', 'instagram', 'bank', 'wellsfargo', 'chase', 'citibank', 'coinbase'];
+    if (knownBrands.some(b => host.includes(b)) && PHISHING_KEYWORDS.some(k => pathLower.includes(k))) return true;
+
+    return false;
+  } catch (_) { return false; }
+}
+
 function setSecurityIcon(url) {
-  if (!url) { securityIcon.innerHTML = ''; return; }
-  if (url.startsWith('https://')) {
+  const wrap = $('url-bar-wrapper');
+  if (!url) { securityIcon.innerHTML = ''; wrap?.classList.remove('phishing'); return; }
+
+  if (detectPhishing(url)) {
+    securityIcon.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 3L2 21h20L12 3z" stroke="#ff4444" stroke-width="2" stroke-linejoin="round"/><line x1="12" y1="10" x2="12" y2="14" stroke="#ff4444" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17" r="0.8" fill="#ff4444"/></svg>`;
+    securityIcon.title = '⚠ Potential phishing site detected';
+    wrap?.classList.add('phishing');
+  } else if (url.startsWith('https://')) {
     securityIcon.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="10" rx="2" stroke="#00d4a0" stroke-width="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="#00d4a0" stroke-width="2" stroke-linecap="round"/></svg>`;
     securityIcon.title = 'Secure connection (HTTPS)';
+    wrap?.classList.remove('phishing');
   } else {
     securityIcon.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="10" rx="2" stroke="#ff8844" stroke-width="2"/><path d="M8 11V7a4 4 0 0 1 8 0" stroke="#ff8844" stroke-width="2" stroke-linecap="round"/></svg>`;
     securityIcon.title = 'Not secure';
+    wrap?.classList.remove('phishing');
   }
 }
 

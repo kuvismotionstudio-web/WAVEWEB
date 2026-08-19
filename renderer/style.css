@@ -158,7 +158,7 @@ body { display: flex; flex-direction: column; }
 }
 #window-controls button:hover { background: var(--bg-4); color: var(--text-1); transform: scale(1.05); }
 #window-controls button:active { transform: scale(0.92); }
-#btn-close:hover { background: rgba(255,80,80,0.15) !important; color: var(--red) !important; }
+/* #btn-close hover handled below in section 3 */
 
 /* ===== TABS ===== */
 #tabsbar {
@@ -817,7 +817,9 @@ webview.active { display: flex; }
 #newtab-page {
   position: absolute;
   inset: 0;
-  background: var(--bg-1);
+  background: rgba(15, 15, 19, 0.75);
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
   display: none;
   flex-direction: column;
   align-items: center;
@@ -1200,10 +1202,6 @@ webview.active { display: flex; }
   box-shadow: 0 0 20px rgba(255,26,53,0.03);
   transform: translateY(-2px);
   background: rgba(255,255,255,0.04);
-}
-#newtab-stats:hover {
-  border-color: rgba(255,26,53,0.08);
-  box-shadow: 0 0 20px rgba(255,26,53,0.03);
 }
 @keyframes statsIn {
   from { opacity: 0; transform: translateY(8px); }
@@ -3977,4 +3975,227 @@ kbd {
   color: var(--text-3);
   opacity: 0.6;
   margin-top: 8px;
+}
+
+/* ===== 1. TAB CLOSE ANIMATION ===== */
+.tab.closing {
+  animation: tabClose 0.22s cubic-bezier(0.4, 0, 1, 1) forwards;
+  pointer-events: none;
+}
+@keyframes tabClose {
+  0%   { transform: scaleX(1) translateY(0); opacity: 1; }
+  100% { transform: scaleX(0.5) translateY(4px); opacity: 0; }
+  transform-origin: left;
+}
+
+/* ===== 2. GLASSMORPHISM NEW TAB ===== */
+#newtab-page #newtab-bg {
+  opacity: 0.8;
+}
+#newtab-page #newtab-logo,
+#newtab-page #newtab-search-wrap,
+#newtab-page #newtab-top-sites,
+#newtab-page #newtab-stats,
+#newtab-page #newtab-quote {
+  position: relative;
+  z-index: 1;
+}
+
+/* ===== 3. WINDOW CONTROL HOVER EFFECTS ===== */
+#window-controls button {
+  position: relative;
+  overflow: hidden;
+}
+#window-controls button::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+#btn-minimize:hover::after { background: radial-gradient(circle at center, rgba(0,212,160,0.15), transparent 70%); opacity: 1; }
+#btn-maximize:hover::after { background: radial-gradient(circle at center, rgba(0,120,212,0.15), transparent 70%); opacity: 1; }
+#btn-close:hover { background: rgba(255,50,50,0.2) !important; color: #ff4444 !important; transform: scale(1.1); }
+#btn-close:hover::after { background: radial-gradient(circle at center, rgba(255,50,50,0.25), transparent 70%); opacity: 1; }
+#btn-close:active { transform: scale(0.9) !important; }
+#btn-minimize:hover { color: #00d4a0; transform: scale(1.08); }
+#btn-minimize:active { transform: scale(0.9); }
+#btn-maximize:hover { color: #4dc9f6; transform: scale(1.08); }
+#btn-maximize:active { transform: scale(0.9); }
+
+/* ===== 4. SMOOTH PAGE TRANSITION ===== */
+webview.active {
+  animation: pageIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes pageIn {
+  from { opacity: 0.6; }
+  to   { opacity: 1; }
+}
+
+/* ===== 5. PHISHING DETECTOR — URL BAR ===== */
+#url-bar-wrap.phishing {
+  box-shadow:
+    0 0 0 2px rgba(255,50,50,0.4),
+    0 0 20px rgba(255,50,50,0.15),
+    inset 0 0 10px rgba(255,50,50,0.05) !important;
+}
+#url-bar-wrap.phishing::after {
+  content: '⚠';
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  animation: phishingPulse 1.5s ease-in-out infinite;
+  z-index: 5;
+  pointer-events: none;
+}
+@keyframes phishingPulse {
+  0%, 100% { opacity: 0.7; transform: translateY(-50%) scale(1); }
+  50%      { opacity: 1;   transform: translateY(-50%) scale(1.15); }
+}
+
+/* ===========================================================
+   STYLE UPGRADES — batch 2
+   =========================================================== */
+
+/* --- 1. Button ripple effect on nav / panel / settings --- */
+.nav-btn, .set-cat, .panel-action-btn, .settings-btn, .danger-btn, .ai-quick-btn, .panel-item-btn {
+  position: relative;
+  overflow: hidden;
+}
+.nav-btn::after, .set-cat::after, .panel-action-btn::after, .settings-btn::after,
+.danger-btn::after, .ai-quick-btn::after, .panel-item-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--ripple-x, 50%) var(--ripple-y, 50%), rgba(255,255,255,0.18) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.4s;
+  pointer-events: none;
+}
+.nav-btn:active::after, .set-cat:active::after, .panel-action-btn:active::after,
+.settings-btn:active::after, .danger-btn:active::after, .ai-quick-btn:active::after,
+.panel-item-btn:active::after {
+  opacity: 1;
+  transition: opacity 0s;
+}
+
+/* --- 2. Tab close button — active press state --- */
+.tab-close:active {
+  background: rgba(255,60,60,0.28) !important;
+  color: #ff5555 !important;
+  transform: scale(0.85) !important;
+}
+
+/* --- 3. Status bar polish --- */
+#status-bar {
+  position: relative;
+}
+#status-right span {
+  padding: 1px 6px;
+  border-radius: 4px;
+  transition: background var(--anim-fast), color var(--anim-fast);
+  cursor: default;
+}
+#status-right span:hover {
+  background: rgba(255,255,255,0.05);
+  color: var(--text-2);
+}
+#status-zoom {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+#status-incognito {
+  color: var(--accent) !important;
+  font-weight: 500;
+  background: rgba(255,26,53,0.08);
+}
+
+/* --- 4. Fix duplicate #newtab-stats:hover (remove second block) --- */
+/* Second duplicate block at ~line 1206 is overridden by this !important */
+#newtab-stats:hover {
+  transform: translateY(-2px) !important;
+  background: rgba(255,255,255,0.04) !important;
+}
+
+/* --- 5. Firefox scrollbar support --- */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+*::-moz-scrollbar-thumb:hover {
+  scrollbar-color: rgba(255,255,255,0.18) transparent;
+}
+
+/* --- 6. Panel header gradient text --- */
+.panel-title {
+  background: linear-gradient(135deg, var(--text-1), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 600;
+}
+
+/* --- 7. Settings category tabs — active glow + hover glow --- */
+.set-cat.active {
+  text-shadow: 0 0 12px rgba(255,26,53,0.25);
+}
+.set-cat:hover:not(.active) {
+  text-shadow: 0 0 8px rgba(255,255,255,0.06);
+}
+
+/* --- 8. Newtab quote — subtle accent glow on hover --- */
+#newtab-quote:hover {
+  text-shadow: 0 0 20px rgba(255,26,53,0.08);
+}
+#newtab-quote::before, #newtab-quote::after {
+  color: var(--accent);
+  opacity: 0.3;
+  transition: opacity 0.3s, color 0.3s;
+}
+#newtab-quote:hover::before, #newtab-quote:hover::after {
+  opacity: 0.6;
+  color: var(--accent2);
+}
+
+/* --- 9. URL bar hover micro-interaction --- */
+#url-bar-wrapper:hover {
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15), 0 0 8px rgba(255,26,53,0.04);
+}
+
+/* --- 10. Panel item stagger already handled by .panel-list .panel-item above --- */
+
+/* --- 11. Active tab glow enhancement --- */
+.tab.active {
+  box-shadow:
+    inset 0 1px 0 rgba(255,26,53,0.4),
+    0 -1px 0 var(--bg-1),
+    0 6px 28px rgba(0,0,0,0.4),
+    0 3px 16px rgba(255,26,53,0.12),
+    0 0 40px rgba(255,26,53,0.05);
+}
+
+/* --- 12. Nav button active glow on disabled states --- */
+.nav-btn:disabled::after { display: none; }
+.nav-btn:disabled {
+  opacity: 0.2;
+  filter: grayscale(0.5);
+}
+
+/* --- 13. Settings row hover enhancement --- */
+.settings-row {
+  transition: background var(--anim-fast), transform var(--anim-fast), box-shadow var(--anim-fast), box-shadow 0.3s;
+}
+.settings-row:hover {
+  background: rgba(255,26,53,0.03);
+  box-shadow: inset 2px 0 0 var(--accent), 0 0 16px rgba(255,26,53,0.03);
+}
+
+/* --- 14. Panel close button — enhanced rotation + red on hover --- */
+.panel-close-btn:hover {
+  background: rgba(255,80,80,0.12);
+  color: var(--red);
+  transform: rotate(90deg);
 }
