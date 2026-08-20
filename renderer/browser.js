@@ -2088,9 +2088,11 @@ $('wp-gen-close')?.addEventListener('click', () => {
 
 function renderPasswordsList() {
   const list = $('wp-list');
-  const items = _wpFiltered.length ? _wpFiltered : _wpData;
+  const q = ($('wp-search')?.value || '').toLowerCase();
+  const items = q ? _wpFiltered : _wpData;
   if (!items.length) {
-    list.innerHTML = `<div class="panel-empty"><div class="panel-empty-icon">🔑</div><span>No saved passwords yet.<br>Log in to a site and WavePass will offer to save.</span></div>`;
+    const msg = q ? `No passwords matching "${q}"` : 'No saved passwords yet.<br>Log in to a site and WavePass will offer to save.';
+    list.innerHTML = `<div class="panel-empty"><div class="panel-empty-icon">🔑</div><span>${msg}</span></div>`;
     return;
   }
   list.innerHTML = items.map(p => {
@@ -2139,10 +2141,11 @@ function getHost(url) {
 
 function filterPasswordsList() {
   const q = ($('wp-search')?.value || '').toLowerCase();
-  _wpFiltered = q ? _wpData.filter(p => {
+  if (!q) { _wpFiltered = []; return; }
+  _wpFiltered = _wpData.filter(p => {
     const host = getHost(p.url);
     return host.includes(q) || p.username.toLowerCase().includes(q) || p.url.toLowerCase().includes(q);
-  }) : [];
+  });
 }
 
 // Save password prompt
@@ -2153,6 +2156,7 @@ async function showSavePasswordPrompt(webview, url, username, password) {
   if (!unlocked) return;
   const exists = await window.electronAPI.passwordsHasEntry(url, username);
   if (exists) return; // already saved
+  if (localStorage.getItem('wp_never_' + getHost(url))) return; // user chose "Never" for this site
 
   const el = $('wp-save-prompt');
   $('wp-save-prompt-url').textContent = getHost(url) || url;
@@ -2182,21 +2186,55 @@ async function autofillPasswords(webview, url) {
   if (!unlocked) return;
   const creds = await window.electronAPI.passwordsGetForUrl(url);
   if (!creds.length) return;
-  // Try all saved credentials: inject into form fields
-  for (const c of creds) {
+
+  function inject(cred) {
     webview.executeJavaScript(`
       (function(){
         const u = document.querySelector('input[type="email"], input[name="email"], input[name="login"], input[name="username"], input[type="text"][autocomplete="username"]');
         const p = document.querySelector('input[type="password"]');
         if (u && p) {
-          u.value = ${JSON.stringify(c.username)};
-          p.value = ${JSON.stringify(c.password)};
+          u.value = ${JSON.stringify(cred.username)};
+          p.value = ${JSON.stringify(cred.password)};
           u.dispatchEvent(new Event('input', {bubbles:true}));
           p.dispatchEvent(new Event('input', {bubbles:true}));
+          u.dispatchEvent(new Event('change', {bubbles:true}));
+          p.dispatchEvent(new Event('change', {bubbles:true}));
         }
       })();
     `);
-    break; // autofill first match only
+  }
+
+  if (creds.length === 1) {
+    inject(creds[0]);
+  } else {
+    // Multiple credentials — show picker toast
+    const t = showUpdateToast(`
+      <div style="display:flex;flex-direction:column;gap:8px;width:100%;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="width:28px;height:28px;border-radius:8px;background:var(--bg-4);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;">🔑</div>
+          <span style="font-weight:500;color:var(--text-1);font-size:13px;">${creds.length} accounts found</span>
+        </div>
+        ${creds.map((c, i) => `
+          <button class="wp-pick-btn" data-idx="${i}" style="
+            display:flex;align-items:center;gap:8px;width:100%;padding:8px 10px;border:1px solid var(--border);
+            border-radius:var(--r-sm);background:var(--bg-3);color:var(--text-1);cursor:pointer;text-align:left;
+            transition:background 0.15s,border-color 0.15s;
+          ">
+            <div style="width:24px;height:24px;border-radius:6px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:600;">${esc(c.username[0] || '?')}</div>
+            <div style="display:flex;flex-direction:column;">
+              <span style="font-size:12px;font-weight:500;">${esc(c.username)}</span>
+            </div>
+          </button>
+        `).join('')}
+      </div>
+    `, 10000);
+    t.querySelectorAll('.wp-pick-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = parseInt(btn.dataset.idx);
+        inject(creds[idx]);
+        t.remove();
+      });
+    });
   }
 }
 
@@ -3399,16 +3437,6 @@ $('session-save-btn')?.addEventListener('click', () => {
   if (name !== null) saveCurrentSession(name);
 });
 
-$('session-restore-last')?.addEventListener('click', async () => {
-  const last = await window.electronAPI.sessionGetLast();
-  if (last?.tabs?.length) {
-    last.tabs.forEach(t => createTab(t.url));
-    showToast(`📑 Restored ${last.tabs.length} tabs`);
-    $('session-auto').style.display = 'none';
-  } else {
-    showToast('No last session found');
-  }
-});
 
 // Periodic auto-save
 setInterval(saveLastSession, 60000);
@@ -3562,7 +3590,6 @@ attachWebview = function(tab, url) {
 let readerActive = false;
 let readerFontSize = 16;
 let readerLightMode = false;
-let ttsSpeaking = false;
 
 async function toggleReaderMode() {
   const tab = tabs.find(t => t.id === activeTabId);
@@ -3634,20 +3661,55 @@ $('reader-theme-toggle').addEventListener('click', () => {
   $('reader-theme-toggle').textContent = readerLightMode ? '🌑' : '🌙';
 });
 
-// Text-to-Speech
+// Text-to-Speech with pause/resume and chunking
+let ttsSpeaking = false;
+let ttsPaused = false;
+let ttsUtterance = null;
+
 $('reader-tts').addEventListener('click', () => {
-  if (ttsSpeaking) { stopTTS(); return; }
+  if (ttsSpeaking && !ttsPaused) {
+    speechSynthesis.pause();
+    ttsPaused = true;
+    $('reader-tts').textContent = '▶️';
+    return;
+  }
+  if (ttsPaused) {
+    speechSynthesis.resume();
+    ttsPaused = false;
+    $('reader-tts').textContent = '⏸';
+    return;
+  }
   const text = $('reader-content').innerText;
   if (!text) return;
-  const utt = new SpeechSynthesisUtterance(text);
-  utt.onend = () => { ttsSpeaking = false; $('reader-tts').textContent = '🔊'; };
-  speechSynthesis.speak(utt);
+
+  // Split into chunks of ~200 chars for reliability
+  const chunks = text.match(/.{1,200}(\s|$)/g) || [text];
+  let idx = 0;
+
+  function speakNext() {
+    if (idx >= chunks.length) {
+      ttsSpeaking = false;
+      ttsPaused = false;
+      $('reader-tts').textContent = '🔊';
+      return;
+    }
+    const utt = new SpeechSynthesisUtterance(chunks[idx]);
+    utt.onend = () => { idx++; speakNext(); };
+    utt.onerror = () => { ttsSpeaking = false; ttsPaused = false; $('reader-tts').textContent = '🔊'; };
+    ttsUtterance = utt;
+    speechSynthesis.speak(utt);
+  }
+
   ttsSpeaking = true;
-  $('reader-tts').textContent = '⏹';
+  ttsPaused = false;
+  $('reader-tts').textContent = '⏸';
+  speakNext();
 });
 function stopTTS() {
   speechSynthesis.cancel();
   ttsSpeaking = false;
+  ttsPaused = false;
+  ttsUtterance = null;
   $('reader-tts').textContent = '🔊';
 }
 
@@ -3714,13 +3776,34 @@ async function takeScreenshot() {
     document.body.appendChild(flash);
     setTimeout(() => flash.remove(), 500);
 
-    // Download it
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `waveweb-screenshot-${Date.now()}.png`;
-    a.click();
-    URL.revokeObjectURL(url);
-    showToast('📸 Screenshot saved!');
+    // Copy to clipboard
+    try {
+      const bitmap = await createImageBitmap(blob);
+      const c = document.createElement('canvas');
+      c.width = bitmap.width; c.height = bitmap.height;
+      c.getContext('2d').drawImage(bitmap, 0, 0);
+      c.toBlob(async (pngBlob) => {
+        try {
+          await navigator.clipboard.write([new ClipboardItem({ 'image/png': pngBlob })]);
+          showToast('📸 Screenshot copied to clipboard!');
+        } catch (_) {
+          // Fallback: save to file
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `waveweb-screenshot-${Date.now()}.png`;
+          a.click();
+          showToast('📸 Screenshot saved!');
+        }
+        URL.revokeObjectURL(url);
+      }, 'image/png');
+    } catch (_) {
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `waveweb-screenshot-${Date.now()}.png`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('📸 Screenshot saved!');
+    }
   } catch (e) {
     showToast('Screenshot failed: ' + e.message);
   }
@@ -4018,6 +4101,28 @@ function closeOnboarding() {
 
     // Check for last session
   checkLastSession();
+  const last = await window.electronAPI.sessionGetLast();
+  if (last?.tabs?.length > 0) {
+    setTimeout(() => {
+      const t = showUpdateToast(`
+        <div style="display:flex;align-items:center;gap:10px;width:100%;">
+          <div style="width:32px;height:32px;border-radius:8px;background:var(--bg-4);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;">📑</div>
+          <div style="display:flex;flex-direction:column;flex:1;">
+            <span style="font-weight:500;color:var(--text-1);font-size:13px;">Restore ${last.tabs.length} tabs from last session?</span>
+          </div>
+          <button id="session-restore-toast-btn" style="
+            background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:var(--r-sm);
+            padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;
+          ">Restore</button>
+        </div>
+      `, 8000);
+      t.querySelector('#session-restore-toast-btn')?.addEventListener('click', () => {
+        last.tabs.forEach(tab => createTab(tab.url));
+        t.remove();
+        showToast('📑 Session restored');
+      });
+    }, 1500);
+  }
 
   console.log('%c🌊 WAVEWEB', 'color:#ff1a35;font-weight:900;font-size:18px;');
   console.log('%cBrowser ready', 'color:#ff4444;font-size:12px;');
@@ -4034,7 +4139,163 @@ function closeOnboarding() {
     if (splash) { splash.classList.add('fade-out'); setTimeout(() => splash.remove(), 600); }
   }
 
-  // ===== TAB PREVIEW ON HOVER =====
+  function renderClipboardPanel() {
+  const list = $('clipboard-list');
+  if (!list) return;
+  window.electronAPI.clipboardGetHistory().then(items => {
+    if (!items || !items.length) {
+      list.innerHTML = `<div class="panel-empty"><div class="panel-empty-icon">📋</div><span>Clipboard is empty.<br>Copied text will appear here.</span></div>`;
+      return;
+    }
+    list.innerHTML = items.map(item => {
+      const preview = (item.text || '').substring(0, 120).replace(/</g, '&lt;');
+      const timeAgo = item.timestamp ? formatTimeAgo(item.timestamp) : '';
+      return `<div class="panel-item clip-item" data-id="${esc(item.id)}">
+        <div class="panel-item-icon" style="font-size:12px;">${item.pinned ? '📌' : '📋'}</div>
+        <div class="panel-item-info">
+          <div class="panel-item-title" style="white-space:normal;max-height:36px;overflow:hidden;">${esc(preview)}</div>
+          <div class="panel-item-sub">${esc(timeAgo)}${item.pinned ? ' • Pinned' : ''}</div>
+        </div>
+        <div class="panel-item-actions">
+          <button class="panel-item-btn" data-action="copy" title="Copy">📋</button>
+          <button class="panel-item-btn" data-action="pin" title="${item.pinned ? 'Unpin' : 'Pin'}">${item.pinned ? '📌' : '📎'}</button>
+          <button class="panel-item-btn danger" data-action="delete" title="Delete">✕</button>
+        </div>
+      </div>`;
+    }).join('');
+
+    list.querySelectorAll('.panel-item').forEach(el => {
+      const id = el.dataset.id;
+      el.querySelector('[data-action="copy"]')?.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const item = items.find(i => i.id === id);
+        if (item) { await window.electronAPI.clipboardCopy(item.text); showToast('Copied!'); }
+      });
+      el.querySelector('[data-action="pin"]')?.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        await window.electronAPI.clipboardPin(id);
+        renderClipboardPanel();
+      });
+      el.querySelector('[data-action="delete"]')?.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        await window.electronAPI.clipboardDelete(id);
+        renderClipboardPanel();
+      });
+    });
+  });
+}
+$('clipboard-clear-btn')?.addEventListener('click', async () => {
+  await window.electronAPI.clipboardClear(true);
+  renderClipboardPanel();
+  showToast('Clipboard cleared');
+});
+$('clipboard-search')?.addEventListener('input', () => {
+  const q = ($('clipboard-search')?.value || '').toLowerCase();
+  const items = $('clipboard-list')?.querySelectorAll('.panel-item') || [];
+  items.forEach(el => {
+    const text = el.textContent.toLowerCase();
+    el.style.display = text.includes(q) ? '' : 'none';
+  });
+});
+
+function formatTimeAgo(ts) {
+  const diff = Date.now() - ts;
+  if (diff < 60000) return 'just now';
+  if (diff < 3600000) return Math.floor(diff / 60000) + 'm ago';
+  if (diff < 86400000) return Math.floor(diff / 3600000) + 'h ago';
+  return Math.floor(diff / 86400000) + 'd ago';
+}
+
+// ===== PERFORMANCE PANEL =====
+let _perfInterval = null;
+function renderPerfPanel() {
+  if (_perfInterval) clearInterval(_perfInterval);
+  const update = () => {
+    const mem = process?.memory?.() || {};
+    const heapUsed = mem.heapUsed || 0;
+    const heapTotal = mem.heapTotal || 0;
+    const sysTotal = require('os').totalmem?.() || 8 * 1024 * 1024 * 1024;
+    const sysFree = require('os').freemem?.() || sysTotal;
+    const sysUsed = sysTotal - sysFree;
+    const cpu = process?.cpuUsage?.() || {};
+    const loadAvg = require('os').loadavg?.() || [0, 0, 0];
+
+    const setBar = (id, pct) => { const el = $(id); if (el) el.style.width = Math.min(100, pct) + '%'; };
+    const setText = (id, txt) => { const el = $(id); if (el) el.textContent = txt; };
+
+    setText('perf-sys-ram', `${formatBytes(sysUsed)} / ${formatBytes(sysTotal)}`);
+    setBar('perf-sys-ram-bar', (sysUsed / sysTotal) * 100);
+    setText('perf-elec-heap', `${formatBytes(heapUsed)} / ${formatBytes(heapTotal)}`);
+    setBar('perf-elec-heap-bar', heapTotal ? (heapUsed / heapTotal) * 100 : 0);
+    setText('perf-cpu-load', loadAvg[0]?.toFixed(2) || '—');
+    setBar('perf-cpu-bar', Math.min(100, (loadAvg[0] || 0) * 50));
+    setText('perf-tab-count', tabs.length + ' tabs');
+    setText('perf-processes', '1');
+  };
+  update();
+  _perfInterval = setInterval(update, 2000);
+}
+
+// ===== USER SCRIPTS PANEL =====
+async function renderScriptsPanel() {
+  const list = $('scripts-list');
+  if (!list) return;
+  const scripts = await window.electronAPI.userScriptsGet();
+  if (!scripts || !scripts.length) {
+    list.innerHTML = `<div class="panel-empty"><div class="panel-empty-icon">📜</div><span>No user scripts yet.<br>Click "+ New" to create one.</span></div>`;
+    return;
+  }
+  list.innerHTML = scripts.map((s, i) => `
+    <div class="panel-item script-item" data-index="${i}">
+      <div class="panel-item-icon" style="font-size:12px;">${s.type === 'css' ? '🎨' : '📜'}</div>
+      <div class="panel-item-info">
+        <div class="panel-item-title">${esc(s.name || 'Untitled')}</div>
+        <div class="panel-item-sub">${esc(s.pattern || '*')} • ${s.type || 'js'}${s.enabled !== false ? '' : ' • Disabled'}</div>
+      </div>
+      <div class="panel-item-actions">
+        <button class="panel-item-btn" data-action="edit" title="Edit">✏️</button>
+        <button class="panel-item-btn danger" data-action="delete" title="Delete">✕</button>
+      </div>
+    </div>
+  `).join('');
+
+  list.querySelectorAll('.script-item').forEach(el => {
+    el.querySelector('[data-action="edit"]')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const idx = parseInt(el.dataset.index);
+      editScript(idx, scripts[idx]);
+    });
+    el.querySelector('[data-action="delete"]')?.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const idx = parseInt(el.dataset.index);
+      scripts.splice(idx, 1);
+      await window.electronAPI.userScriptsSave(scripts);
+      renderScriptsPanel();
+    });
+  });
+}
+
+function editScript(idx, script) {
+  $('scripts-editor')?.classList.remove('hidden');
+  $('script-name').value = script?.name || '';
+  $('script-type').value = script?.type || 'js';
+  $('script-pattern').value = script?.pattern || '*';
+  $('script-code').value = script?.code || '';
+  $('scripts-save-btn')?.addEventListener('click', async () => {
+    const scripts = await window.electronAPI.userScriptsGet();
+    scripts[idx] = {
+      name: $('script-name').value,
+      type: $('script-type').value,
+      pattern: $('script-pattern').value,
+      code: $('script-code').value,
+      enabled: true,
+    };
+    await window.electronAPI.userScriptsSave(scripts);
+    $('scripts-editor')?.classList.add('hidden');
+    renderScriptsPanel();
+    showToast('Script saved');
+  }, { once: true });
+}
   const tabPreviewEl = document.getElementById('tab-preview');
   const tabPreviewImg = document.getElementById('tab-preview-img');
   const tabPreviewTitle = document.getElementById('tab-preview-title');

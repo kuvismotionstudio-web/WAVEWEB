@@ -118,7 +118,7 @@ const BUILTIN_PATTERNS = [
   /googleadservices\.com/, /googleads\.g\.doubleclick\.net/, /adservice\.google\./,
   /pagead2\.googlesyndication/, /ad\.google\.com/,
   /facebook\.com\/tr/, /connect\.facebook\.net\/.*\/analytics/,
-  /ads\.twitter\.com/, /t\.co\//,
+  /ads\.twitter\.com/, /analytics\.twitter\.com/, /platform\.twitter\.com\/i\/adsct/,
   /amazon-adsystem\.com/, /adtago\.s3\.amazonaws\.com/,
   
   // Ad exchanges & DSPs
@@ -247,8 +247,13 @@ function createWindow() {
   session.defaultSession.webRequest.onBeforeRequest({ urls: ['*://*/*'] }, (details, callback) => {
     if (adBlockEnabled && mainWindow) {
       const url = details.url;
-      // Check whitelist
-      const isWhitelisted = adWhitelist.some(d => url.includes(d));
+      // Check whitelist — exact domain match (not substring)
+      const isWhitelisted = adWhitelist.some(d => {
+        try {
+          const host = new URL(url).hostname;
+          return host === d || host.endsWith('.' + d);
+        } catch(_) { return false; }
+      });
       if (isWhitelisted) { callback({}); return; }
 
       if (AD_PATTERNS.some(r => r.test(url))) {
