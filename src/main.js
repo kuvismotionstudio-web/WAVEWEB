@@ -606,6 +606,18 @@ ipcMain.on('register-webview', (e, webviewId) => {
   });
 });
 
+// Tab preview — capture webview thumbnail
+ipcMain.handle('capture-page', async (e, webviewId) => {
+  try {
+    const wc = webContents.fromId(webviewId);
+    if (!wc) return null;
+    const image = await wc.capturePage({ x: 0, y: 0, width: 1280, height: 720 });
+    return image.toDataURL({ mimeType: 'image/jpeg', quality: 0.7 });
+  } catch (_) {
+    return null;
+  }
+});
+
 // Print
 ipcMain.on('print-page', () => {
   const wins = BrowserWindow.getAllWindows();

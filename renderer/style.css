@@ -4199,3 +4199,91 @@ webview.active {
   color: var(--red);
   transform: rotate(90deg);
 }
+
+/* ===========================================================
+   TAB PREVIEW ON HOVER
+   =========================================================== */
+.tab-preview {
+  position: fixed;
+  top: calc(var(--tb-h) + var(--tab-h) + 10px);
+  width: 260px;
+  background: rgba(18, 18, 24, 0.92);
+  backdrop-filter: blur(32px) saturate(1.4);
+  -webkit-backdrop-filter: blur(32px) saturate(1.4);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 8px;
+  z-index: 9999;
+  pointer-events: none;
+  box-shadow:
+    0 8px 40px rgba(0,0,0,0.6),
+    0 0 0 1px rgba(255,255,255,0.02),
+    0 0 60px rgba(255,26,53,0.04),
+    inset 0 1px 0 rgba(255,255,255,0.03);
+  transition: opacity 0.2s cubic-bezier(0.16,1,0.3,1), transform 0.2s cubic-bezier(0.16,1,0.3,1);
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+.tab-preview.hidden {
+  opacity: 0;
+  transform: translateY(-6px) scale(0.96);
+  pointer-events: none;
+}
+.tp-image-wrap {
+  position: relative;
+  width: 244px;
+  height: 148px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.04);
+}
+.tp-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 8px;
+  transition: opacity 0.25s;
+}
+.tp-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.tp-loading-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: rgba(255,26,53,0.5);
+  animation: tpDotBounce 1.2s ease-in-out infinite;
+}
+.tp-loading-dot:nth-child(2) { animation-delay: 0.15s; }
+.tp-loading-dot:nth-child(3) { animation-delay: 0.3s; }
+@keyframes tpDotBounce {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40%           { transform: scale(1);   opacity: 1;   }
+}
+.tp-info {
+  padding: 6px 4px 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.tp-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tp-url {
+  font-size: 10px;
+  color: var(--text-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

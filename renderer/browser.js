@@ -790,6 +790,17 @@ function createTab(url = null) {
     if (!e.target.classList.contains('tab-close')) switchTab(id);
   });
 
+  // Tab preview on hover
+  let previewTimeout = null;
+  tabEl.addEventListener('mouseenter', e => {
+    if (e.target.classList.contains('tab-close')) return;
+    previewTimeout = setTimeout(() => showTabPreview(id, tabEl), 450);
+  });
+  tabEl.addEventListener('mouseleave', () => {
+    clearTimeout(previewTimeout);
+    hideTabPreview();
+  });
+
   tabEl.addEventListener('auxclick', e => {
     if (e.button === 1) { e.preventDefault(); closeTab(id); }
   });
@@ -3996,5 +4007,52 @@ function closeOnboarding() {
     console.error('[WAVEWEB] Init error:', err);
     const splash = $('splash');
     if (splash) { splash.classList.add('fade-out'); setTimeout(() => splash.remove(), 600); }
+  }
+
+  // ===== TAB PREVIEW ON HOVER =====
+  const tabPreviewEl = document.getElementById('tab-preview');
+  const tabPreviewImg = document.getElementById('tab-preview-img');
+  const tabPreviewTitle = document.getElementById('tab-preview-title');
+  const tabPreviewUrl = document.getElementById('tab-preview-url');
+  let activePreviewTab = null;
+
+  function showTabPreview(id, tabEl) {
+    const tab = tabs.find(t => t.id === id);
+    if (!tab || !tab.webview || id === activeTabId) return;
+    activePreviewTab = id;
+
+    // Position below the tab
+    const rect = tabEl.getBoundingClientRect();
+    const previewWidth = 260;
+    let left = rect.left + (rect.width / 2) - (previewWidth / 2);
+    left = Math.max(8, Math.min(left, window.innerWidth - previewWidth - 8));
+    tabPreviewEl.style.left = left + 'px';
+
+    // Set info
+    tabPreviewTitle.textContent = tab.title || 'Untitled';
+    tabPreviewUrl.textContent = tab.url || 'about:blank';
+
+    // Show loading dots, hide image
+    tabPreviewImg.style.opacity = '0';
+    tabPreviewEl.querySelector('.tp-loading').style.display = 'flex';
+    tabPreviewEl.classList.remove('hidden');
+
+    // Capture webview thumbnail via IPC
+    const wvId = tab.webview.getWebContentsId?.();
+    if (!wvId) { hideTabPreview(); return; }
+
+    window.electronAPI.capturePage(wvId).then(dataUrl => {
+      if (activePreviewTab !== id || !dataUrl) return;
+      tabPreviewImg.src = dataUrl;
+      tabPreviewImg.style.opacity = '1';
+      tabPreviewEl.querySelector('.tp-loading').style.display = 'none';
+    }).catch(() => {
+      hideTabPreview();
+    });
+  }
+
+  function hideTabPreview() {
+    activePreviewTab = null;
+    tabPreviewEl.classList.add('hidden');
   }
 })();

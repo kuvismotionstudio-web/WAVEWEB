@@ -106,6 +106,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   userScriptsSave: (scripts) => ipcRenderer.send('userscripts-save', scripts),
   userScriptsInject: (webviewId, url) => ipcRenderer.send('userscripts-inject', webviewId, url),
 
+  // Tab Preview
+  capturePage: (webviewId) => ipcRenderer.invoke('capture-page', webviewId),
+
   // Auto Updater
   updateCheck: () => ipcRenderer.send('update-check'),
   updateDownload: () => ipcRenderer.send('update-download'),
