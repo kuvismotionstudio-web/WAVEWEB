@@ -8,7 +8,7 @@ const { autoUpdater } = require('electron-updater');
 let mainWindow;
 
 // ===== AUTO UPDATER =====
-autoUpdater.autoDownload = false;
+autoUpdater.autoDownload = true;
 autoUpdater.autoInstallOnAppQuit = true;
 
 autoUpdater.on('checking-for-update', () => {

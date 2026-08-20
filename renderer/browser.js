@@ -2611,43 +2611,49 @@ function initUpdater() {
   window.electronAPI.on('update-available', (data) => {
     const ver = data?.version || 'new';
     const t = showUpdateToast(`
-      <div style="display:flex;flex-direction:column;gap:8px;width:100%;">
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:16px;">🔄</span>
-          <span style="font-weight:600;">Update available: v${esc(ver)}</span>
+      <div style="display:flex;flex-direction:column;gap:10px;width:100%;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;flex-shrink:0;animation:spin 1s linear infinite;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </div>
+          <div style="display:flex;flex-direction:column;flex:1;min-width:0;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-weight:600;color:var(--text-1);font-size:13px;">Update v${esc(ver)} found</span>
+              <span id="update-pct" style="font-size:12px;color:var(--accent);font-weight:600;">0%</span>
+            </div>
+            <span id="update-speed" style="font-size:11px;color:var(--text-3);margin-top:1px;">Downloading...</span>
+          </div>
         </div>
-        <div style="display:flex;gap:6px;">
-          <button id="update-download-btn" style="
-            background:var(--accent);color:#fff;border:none;border-radius:var(--r-sm);
-            padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;
-          ">Download</button>
-          <button id="update-dismiss-btn" style="
-            background:var(--bg-3);color:var(--text-2);border:1px solid var(--border);
-            border-radius:var(--r-sm);padding:6px 12px;font-size:12px;cursor:pointer;
-          ">Later</button>
+        <div style="position:relative;width:100%;height:6px;background:var(--bg-4);border-radius:4px;overflow:hidden;">
+          <div id="update-bar" style="
+            width:0%;height:100%;border-radius:4px;
+            background:linear-gradient(90deg,var(--accent),var(--accent2));
+            transition:width 0.4s cubic-bezier(0.16,1,0.3,1);
+            box-shadow:0 0 8px var(--accent-glow);
+          "></div>
+          <div style="
+            position:absolute;top:0;left:0;width:100%;height:100%;
+            background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);
+            background-size:200% 100%;
+            animation:progShimmer 1.5s linear infinite;
+          "></div>
         </div>
       </div>
     `);
-    t.querySelector('#update-download-btn').addEventListener('click', () => {
-      window.electronAPI.updateDownload();
-      t.remove();
-      const dl = showUpdateToast(`
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:16px;">⏳</span>
-          <span>Downloading update v${esc(ver)}...</span>
-        </div>
-      `);
-      dl.id = 'update-progress-toast';
-    });
-    t.querySelector('#update-dismiss-btn').addEventListener('click', () => t.remove());
+    t.id = 'update-progress-toast';
   });
 
   window.electronAPI.on('update-download-progress', (data) => {
     const el = $('update-progress-toast');
-    if (el) {
-      const pct = data?.percent ? Math.round(data.percent) : 0;
-      el.querySelector('span:last-child').textContent = `Downloading update... ${pct}%`;
-    }
+    if (!el) return;
+    const pct = data?.percent ? Math.round(data.percent) : 0;
+    const speed = data?.bytesPerSecond ? formatBytes(data.bytesPerSecond) + '/s' : '';
+    const bar = el.querySelector('#update-bar');
+    const pctEl = el.querySelector('#update-pct');
+    const speedEl = el.querySelector('#update-speed');
+    if (bar) bar.style.width = pct + '%';
+    if (pctEl) pctEl.textContent = pct + '%';
+    if (speedEl && speed) speedEl.textContent = speed;
   });
 
   window.electronAPI.on('update-downloaded', (data) => {
@@ -2655,19 +2661,25 @@ function initUpdater() {
     if (el) el.remove();
     const ver = data?.version || 'new';
     const t = showUpdateToast(`
-      <div style="display:flex;flex-direction:column;gap:8px;width:100%;">
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:16px;">✅</span>
-          <span style="font-weight:600;">Update v${esc(ver)} ready!</span>
+      <div style="display:flex;flex-direction:column;gap:10px;width:100%;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#00d4a0,#00b894);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div style="display:flex;flex-direction:column;">
+            <span style="font-weight:600;color:var(--text-1);">Update ready!</span>
+            <span style="font-size:11px;color:var(--text-3);">v${esc(ver)} downloaded • Restart to install</span>
+          </div>
         </div>
-        <div style="display:flex;gap:6px;">
+        <div style="display:flex;gap:8px;">
           <button id="update-restart-btn" style="
-            background:var(--accent);color:#fff;border:none;border-radius:var(--r-sm);
-            padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;
+            background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:var(--r-sm);
+            padding:7px 18px;font-size:12px;font-weight:600;cursor:pointer;flex:1;
+            transition:transform 0.15s,box-shadow 0.15s;
           ">Restart now</button>
           <button id="update-later-btn" style="
             background:var(--bg-3);color:var(--text-2);border:1px solid var(--border);
-            border-radius:var(--r-sm);padding:6px 12px;font-size:12px;cursor:pointer;
+            border-radius:var(--r-sm);padding:7px 14px;font-size:12px;cursor:pointer;
           ">Later</button>
         </div>
       </div>
@@ -2680,6 +2692,19 @@ function initUpdater() {
 
   window.electronAPI.on('update-error', (msg) => {
     console.warn('[updater] error:', msg);
+    const el = $('update-progress-toast');
+    if (el) el.remove();
+    showUpdateToast(`
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="width:32px;height:32px;border-radius:8px;background:rgba(255,80,80,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ff4444" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        </div>
+        <div style="display:flex;flex-direction:column;">
+          <span style="font-weight:500;color:var(--text-1);font-size:13px;">Update failed</span>
+          <span style="font-size:11px;color:var(--text-3);">${esc(msg) || 'Check your connection and try again'}</span>
+        </div>
+      </div>
+    `, 5000);
   });
 }
 
