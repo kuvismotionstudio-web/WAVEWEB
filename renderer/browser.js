@@ -458,6 +458,11 @@ function updateStats() {
   const tabsEl = $('stat-tabs-count');
   if (blockedEl) blockedEl.textContent = adsBlockedCount;
   if (tabsEl) tabsEl.textContent = tabs.length;
+  // Update newtab widgets
+  const wBlocked = $('widget-blocked-count');
+  const wTabs = $('widget-tab-count');
+  if (wBlocked) wBlocked.textContent = adsBlockedCount;
+  if (wTabs) wTabs.textContent = tabs.length;
 }
 
 // ===== TOP SITES =====
@@ -844,6 +849,7 @@ function createTab(url = null) {
 
   switchTab(id);
   updateStats();
+  updateTabGroups();
   return id;
 }
 
@@ -1010,6 +1016,7 @@ function switchTab(id) {
     newtabPage.querySelector('#newtab-input')?.focus();
     renderTopSites();
     renderNewtabQuote();
+    renderSearchHistory();
   }
 }
 
@@ -1043,6 +1050,7 @@ function closeTab(id) {
     switchTab(tabs[Math.min(idx, tabs.length - 1)].id);
   }
   updateStats();
+  updateTabGroups();
 }
 
 function reopenClosedTab() {
@@ -1181,6 +1189,11 @@ function onNavigated(id, url, saveToHistory = true) {
     setUrlBar(url);
     updateNavButtons(tab);
     checkBookmarkState(url);
+  }
+
+  // Save to search history for newtab widget
+  if (tab.url && !tab.incognito && !tab.url.startsWith('chrome://') && !tab.url.startsWith('about:')) {
+    saveSearchHistory(tab.url, tab.title);
   }
 
   // Reset translate state on manual nav
@@ -2130,8 +2143,283 @@ function renderPasswordsList() {
         filterPasswordsList();
         renderPasswordsList();
         showToast('Password deleted');
-      }
+  }
+});
+
+// ===== COMMAND PALETTE (Ctrl+K) =====
+const CMD_COMMANDS = [
+  { name: 'New Tab', desc: 'Open a new tab', icon: '➕', shortcut: 'Ctrl+T', action: () => createTab(), cat: 'Tabs' },
+  { name: 'Close Tab', desc: 'Close current tab', icon: '❌', shortcut: 'Ctrl+W', action: () => closeTab(activeTabId), cat: 'Tabs' },
+  { name: 'Reopen Closed Tab', desc: 'Restore last closed tab', icon: '♻️', shortcut: 'Ctrl+Shift+T', action: () => reopenClosedTab(), cat: 'Tabs' },
+  { name: 'Next Tab', desc: 'Switch to next tab', icon: '➡️', shortcut: 'Ctrl+Tab', action: () => { const i = tabs.findIndex(t => t.id === activeTabId); if (tabs[i + 1]) switchTab(tabs[i + 1].id); else if (tabs[0]) switchTab(tabs[0].id); }, cat: 'Tabs' },
+  { name: 'Previous Tab', desc: 'Switch to previous tab', icon: '⬅️', shortcut: 'Ctrl+Shift+Tab', action: () => { const i = tabs.findIndex(t => t.id === activeTabId); if (tabs[i - 1]) switchTab(tabs[i - 1].id); else if (tabs[tabs.length - 1]) switchTab(tabs[tabs.length - 1].id); }, cat: 'Tabs' },
+  { name: 'Pin Tab', desc: 'Pin/unpin current tab', icon: '📌', action: () => { const t = tabs.find(t => t.id === activeTabId); if (t) togglePin(t.id); }, cat: 'Tabs' },
+
+  { name: 'Go Back', desc: 'Navigate back', icon: '◀️', shortcut: 'Alt+←', action: () => btnBack.click(), cat: 'Navigation' },
+  { name: 'Go Forward', desc: 'Navigate forward', icon: '▶️', shortcut: 'Alt+→', action: () => btnForward.click(), cat: 'Navigation' },
+  { name: 'Reload Page', desc: 'Refresh current page', icon: '🔄', shortcut: 'Ctrl+R', action: () => btnReload.click(), cat: 'Navigation' },
+  { name: 'Home', desc: 'Go to home page', icon: '🏠', action: () => goHome(), cat: 'Navigation' },
+  { name: 'Focus URL Bar', desc: 'Edit the current URL', icon: '🔗', shortcut: 'Ctrl+L', action: () => { urlBar.focus(); urlBar.select(); }, cat: 'Navigation' },
+
+  { name: 'Zoom In', desc: 'Increase zoom level', icon: '🔍', shortcut: 'Ctrl++', action: () => setZoom(0.1), cat: 'View' },
+  { name: 'Zoom Out', desc: 'Decrease zoom level', icon: '🔎', shortcut: 'Ctrl+-', action: () => setZoom(-0.1), cat: 'View' },
+  { name: 'Reset Zoom', desc: 'Reset to 100%', icon: '1️⃣', shortcut: 'Ctrl+0', action: () => { const t = tabs.find(t => t.id === activeTabId); if (t?.webview) { t.zoom = 1; t.webview.setZoomFactor(1); } }, cat: 'View' },
+  { name: 'Toggle Fullscreen', desc: 'Enter/exit fullscreen', icon: '⛶', shortcut: 'F11', action: () => toggleFullscreen(), cat: 'View' },
+  { name: 'Toggle Vertical Tabs', desc: 'Switch tab layout', icon: '📐', action: () => toggleVerticalTabs(), cat: 'View' },
+  { name: 'Toggle Bookmarks Bar', desc: 'Show/hide bookmarks bar', icon: '🔖', action: () => toggleBookmarksBar(), cat: 'View' },
+  { name: 'Find in Page', desc: 'Search text on page', icon: '🔎', shortcut: 'Ctrl+F', action: () => openFindBar(), cat: 'View' },
+  { name: 'View Page Source', desc: 'See HTML source', icon: '📄', action: () => { const t = tabs.find(t => t.id === activeTabId); if (t?.url) createTab('view-source:' + t.url); }, cat: 'View' },
+  { name: 'Screenshot', desc: 'Capture visible page', icon: '📸', action: () => takeScreenshot(), cat: 'View' },
+  { name: 'Picture in Picture', desc: 'Floating video player', icon: '📺', action: () => togglePiP(), cat: 'View' },
+
+  { name: 'Open Downloads', desc: 'Download manager', icon: '⬇️', shortcut: 'Ctrl+J', action: () => openPanel('downloads'), cat: 'Panels' },
+  { name: 'Open History', desc: 'Browsing history', icon: '📜', shortcut: 'Ctrl+H', action: () => openPanel('history'), cat: 'Panels' },
+  { name: 'Open Bookmarks', desc: 'Bookmark manager', icon: '🔖', shortcut: 'Ctrl+B', action: () => openPanel('bookmarks'), cat: 'Panels' },
+  { name: 'Open Passwords', desc: 'Password manager', icon: '🔑', shortcut: 'Ctrl+Shift+P', action: () => openPanel('passwords'), cat: 'Panels' },
+  { name: 'Open Notes', desc: 'Quick notes', icon: '📝', action: () => openPanel('notes'), cat: 'Panels' },
+  { name: 'Open Settings', desc: 'Browser settings', icon: '⚙️', action: () => openPanel('settings'), cat: 'Panels' },
+  { name: 'Open AI Assistant', desc: 'Chat with AI', icon: '🤖', shortcut: 'Ctrl+I', action: () => openPanel('ai-sidebar'), cat: 'Panels' },
+  { name: 'Open User Scripts', desc: 'Manage scripts', icon: '📜', action: () => openPanel('scripts'), cat: 'Panels' },
+  { name: 'Open Clipboard', desc: 'Clipboard history', icon: '📋', action: () => { openPanel('clipboard'); renderClipboardPanel(); }, cat: 'Panels' },
+  { name: 'Open Sessions', desc: 'Session manager', icon: '📑', action: () => openPanel('sessions'), cat: 'Panels' },
+  { name: 'Open Extensions', desc: 'Extension manager', icon: '🧩', action: () => openPanel('extensions'), cat: 'Panels' },
+  { name: 'Open Performance', desc: 'System monitor', icon: '📊', action: () => { openPanel('perf'); renderPerfPanel(); }, cat: 'Panels' },
+  { name: 'Open Ad Blocker', desc: 'Ad blocker settings', icon: '🛡', action: () => openPanel('adblock'), cat: 'Panels' },
+
+  { name: 'Toggle Dark Mode', desc: 'Invert page colors', icon: '🌙', action: () => { settings.darkMode = !settings.darkMode; applyDarkMode(); saveSettings(); }, cat: 'Features' },
+  { name: 'Reader Mode', desc: 'Clean reading view', icon: '📖', action: () => toggleReaderMode(), cat: 'Features' },
+  { name: 'Translate Page', desc: 'Translate this page', icon: '🌐', action: () => { const lang = prompt('Translate to (language code):', 'pl'); if (lang) translatePage(lang); }, cat: 'Features' },
+  { name: 'Clear Browsing Data', desc: 'Clear cache, cookies, history', icon: '🗑', action: () => clearBrowsingData(), cat: 'Features' },
+  { name: 'New Incognito Window', desc: 'Private browsing', icon: '🕵', action: () => createTab(null, true), cat: 'Features' },
+  { name: 'DevTools', desc: 'Open developer tools', icon: '🔧', shortcut: 'F12', action: () => toggleDevTools(), cat: 'Features' },
+  { name: 'Mute All Tabs', desc: 'Mute/unmute all tabs', icon: '🔇', shortcut: 'Ctrl+M', action: () => { const anyMuted = tabs.some(t => t.muted); muteAllTabs(!anyMuted); }, cat: 'Features' },
+];
+
+let _cmdIdx = 0;
+let _cmdFiltered = [];
+
+function openCommandPalette() {
+  const el = $('cmd-palette');
+  const input = $('cmd-input');
+  el.classList.remove('hidden');
+  input.value = '';
+  input.focus();
+  _cmdIdx = 0;
+  filterCommands('');
+}
+function closeCommandPalette() {
+  $('cmd-palette').classList.add('hidden');
+}
+function filterCommands(q) {
+  const list = $('cmd-results');
+  q = q.toLowerCase().trim();
+  _cmdFiltered = q ? CMD_COMMANDS.filter(c =>
+    c.name.toLowerCase().includes(q) || c.desc.toLowerCase().includes(q) || c.cat.toLowerCase().includes(q)
+  ) : CMD_COMMANDS.slice();
+  _cmdIdx = 0;
+
+  let html = '';
+  let lastCat = '';
+  _cmdFiltered.forEach((cmd, i) => {
+    if (cmd.cat !== lastCat) {
+      lastCat = cmd.cat;
+      html += `<div class="cmd-category">${esc(cmd.cat)}</div>`;
+    }
+    html += `<div class="cmd-item${i === 0 ? ' selected' : ''}" data-idx="${i}">
+      <div class="cmd-item-icon">${cmd.icon}</div>
+      <div class="cmd-item-info">
+        <div class="cmd-item-name">${esc(cmd.name)}</div>
+        <div class="cmd-item-desc">${esc(cmd.desc)}</div>
+      </div>
+      ${cmd.shortcut ? `<span class="cmd-item-shortcut">${esc(cmd.shortcut)}</span>` : ''}
+    </div>`;
+  });
+  list.innerHTML = html;
+  list.querySelectorAll('.cmd-item').forEach(el => {
+    el.addEventListener('click', () => {
+      const idx = parseInt(el.dataset.idx);
+      closeCommandPalette();
+      _cmdFiltered[idx]?.action();
     });
+  });
+}
+function moveCmd(delta) {
+  const items = $('cmd-results')?.querySelectorAll('.cmd-item') || [];
+  if (!items.length) return;
+  items[_cmdIdx]?.classList.remove('selected');
+  _cmdIdx = (_cmdIdx + delta + items.length) % items.length;
+  items[_cmdIdx]?.classList.add('selected');
+  items[_cmdIdx]?.scrollIntoView({ block: 'nearest' });
+}
+
+$('cmd-input')?.addEventListener('input', e => filterCommands(e.target.value));
+$('cmd-input')?.addEventListener('keydown', e => {
+  if (e.key === 'ArrowDown') { e.preventDefault(); moveCmd(1); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); moveCmd(-1); }
+  else if (e.key === 'Enter') { e.preventDefault(); closeCommandPalette(); _cmdFiltered[_cmdIdx]?.action(); }
+  else if (e.key === 'Escape') { closeCommandPalette(); }
+});
+$('.cmd-backdrop')?.addEventListener('click', closeCommandPalette);
+
+// ===== QUICK SWITCHER (Ctrl+Tab) =====
+let _qsActive = false;
+let _qsIdx = 0;
+let _qsList = [];
+
+function openQuickSwitcher() {
+  _qsActive = true;
+  _qsIdx = tabs.findIndex(t => t.id === activeTabId);
+  _qsList = [...tabs];
+  renderQuickSwitcher();
+  $('quick-switcher')?.classList.remove('hidden');
+}
+function closeQuickSwitcher() {
+  _qsActive = false;
+  $('quick-switcher')?.classList.add('hidden');
+}
+function renderQuickSwitcher() {
+  const list = $('qs-list');
+  if (!list) return;
+  list.innerHTML = _qsList.map((t, i) => `
+    <div class="qs-item${i === _qsIdx ? ' active' : ''}" data-idx="${i}">
+      <img class="qs-favicon" src="${t.favicon || defaultFavicon()}" onerror="this.src='${defaultFavicon()}'" />
+      <div class="qs-info">
+        <div class="qs-title">${esc(t.title || 'New Tab')}</div>
+        <div class="qs-url">${esc(t.url || 'about:blank')}</div>
+      </div>
+    </div>
+  `).join('');
+  list.querySelectorAll('.qs-item').forEach(el => {
+    el.addEventListener('click', () => {
+      const idx = parseInt(el.dataset.idx);
+      closeQuickSwitcher();
+      if (_qsList[idx]) switchTab(_qsList[idx].id);
+    });
+  });
+}
+
+// ===== VERTICAL TABS =====
+function toggleVerticalTabs() {
+  document.body.classList.toggle('vertical-tabs');
+  $('tabsbar')?.classList.toggle('vertical-mode');
+  const btn = $('btn-vertical-tabs');
+  if (btn) btn.classList.toggle('active');
+  localStorage.setItem('ww_vertical_tabs', document.body.classList.contains('vertical-tabs') ? '1' : '');
+}
+
+// ===== TAB GROUPS =====
+const GROUP_COLORS = ['#ff1a35','#ff4444','#ff8800','#ffcc00','#00d4a0','#00a8ff','#6c63ff','#cc44ff','#ff44aa','#888888'];
+let _groupMenuOpen = false;
+
+function showGroupMenu(tabId, x, y) {
+  closeGroupMenu();
+  const tab = tabs.find(t => t.id === tabId);
+  if (!tab) return;
+
+  const menu = document.createElement('div');
+  menu.className = 'group-menu';
+  menu.style.left = x + 'px';
+  menu.style.top = y + 'px';
+  menu.innerHTML = `
+    <div class="group-menu-item" data-action="none">No Group</div>
+    <div class="group-menu-item" data-action="new">+ New Group</div>
+    <div style="display:flex;gap:4px;padding:6px 10px;flex-wrap:wrap;">
+      ${GROUP_COLORS.map(c => `<div class="group-color-dot" style="background:${c}" data-color="${c}"></div>`).join('')}
+    </div>
+  `;
+  document.body.appendChild(menu);
+  _groupMenuOpen = true;
+
+  menu.querySelector('[data-action="none"]').addEventListener('click', () => { tab.group = ''; closeGroupMenu(); updateTabGroups(); });
+  menu.querySelector('[data-action="new"]').addEventListener('click', () => {
+    const name = prompt('Group name:', 'Group');
+    if (name) { tab.group = name; tab.groupColor = GROUP_COLORS[Math.floor(Math.random() * GROUP_COLORS.length)]; closeGroupMenu(); updateTabGroups(); }
+  });
+  menu.querySelectorAll('.group-color-dot').forEach(dot => {
+    dot.addEventListener('click', () => {
+      if (!tab.group) { tab.group = 'Group'; }
+      tab.groupColor = dot.dataset.color;
+      closeGroupMenu();
+      updateTabGroups();
+    });
+  });
+}
+function closeGroupMenu() {
+  document.querySelectorAll('.group-menu').forEach(m => m.remove());
+  _groupMenuOpen = false;
+}
+function updateTabGroups() {
+  const bar = $('tab-group-bar');
+  if (!bar) return;
+  const groups = {};
+  tabs.forEach(t => {
+    if (t.group) {
+      if (!groups[t.group]) groups[t.group] = { color: t.groupColor || '#888', count: 0 };
+      groups[t.group].count++;
+    }
+  });
+  bar.innerHTML = Object.entries(groups).map(([name, g]) => `
+    <div class="tab-group-pill" data-group="${esc(name)}">
+      <div class="group-dot" style="background:${g.color}"></div>
+      <span>${esc(name)}</span>
+      <span class="group-count">${g.count}</span>
+    </div>
+  `).join('');
+
+  // Color tabs in DOM
+  tabs.forEach(t => {
+    const el = document.querySelector(`[data-tab-id="${t.id}"]`);
+    if (el && t.group) {
+      el.style.borderTopColor = t.groupColor || 'transparent';
+    }
+  });
+}
+
+// ===== WEATHER WIDGET =====
+async function loadWeatherWidget() {
+  try {
+    const resp = await fetch('https://wttr.in/?format=j1');
+    const data = await resp.json();
+    const cur = data.current_condition?.[0];
+    if (!cur) return;
+    const temp = cur.temp_C;
+    const desc = cur.weatherDesc?.[0]?.value || '';
+    const humidity = cur.humidity;
+    const wind = cur.windspeedKmph;
+
+    const container = $('newtop-widgets');
+    if (!container) return;
+    const w = container.querySelector('.widget-weather');
+    if (w) {
+      w.querySelector('.widget-value').textContent = temp + '°C';
+      w.querySelector('.widget-sub').textContent = desc + ' • 💧' + humidity + '% • 💨' + wind + 'km/h';
+    }
+  } catch (_) {}
+}
+
+// ===== SEARCH HISTORY =====
+function renderSearchHistory() {
+  const list = $('newtab-recent-list');
+  if (!list) return;
+  const history = JSON.parse(localStorage.getItem('ww_search_history') || '[]');
+  if (!history.length) return;
+  list.innerHTML = history.slice(0, 6).map(h => `
+    <div class="newtab-recent-item" data-url="${esc(h.url)}">
+      <span>${esc(h.title || h.url)}</span>
+    </div>
+  `).join('');
+  list.querySelectorAll('.newtab-recent-item').forEach(el => {
+    el.addEventListener('click', () => navigateTo(el.dataset.url));
+  });
+}
+function saveSearchHistory(url, title) {
+  if (!url || url === 'about:blank' || url.startsWith('chrome://')) return;
+  let history = JSON.parse(localStorage.getItem('ww_search_history') || '[]');
+  history = history.filter(h => h.url !== url);
+  history.unshift({ url, title: title || url });
+  if (history.length > 12) history.length = 12;
+  localStorage.setItem('ww_search_history', JSON.stringify(history));
+}
   });
 }
 
@@ -2888,7 +3176,13 @@ function showTabContextMenu(tabId, x, y) {
     { icon: '🔍', label: 'Inspect', action: () => { const t = tabs.find(t2 => t2.id === tabId); if (t?.webview) t.webview.openDevTools(); } },
     { separator: true },
     { icon: '📌', label: isPinned ? 'Unpin Tab' : 'Pin Tab', action: () => pinTab(tabId) },
-    { separator: true },
+    { icon: '🏷', label: 'Set Group Name', action: () => {
+      const name = prompt('Group name:', tab?.group || '');
+      if (name !== null) {
+        tab.group = name;
+        updateTabGroups();
+      }
+    }},
     { icon: '🎨', label: 'Group Color', submenu: groupItems },
     { separator: true },
     { icon: '✕', label: 'Close Tab', action: () => closeTab(tabId) },
@@ -2984,12 +3278,19 @@ const GROUP_COLORS = ['', '#ff1a35', '#00d4a0', '#ff4444', '#ff8844', '#ffd060',
 function setGroupColor(tabId, color) {
   const tab = tabs.find(t => t.id === tabId);
   if (!tab) return;
-  tab.group = color;
+  tab.group = color ? (tab.group || 'Group') : '';
+  tab.groupColor = color || '';
   const tabEl = document.querySelector(`[data-tab-id="${tabId}"]`);
   if (tabEl) {
     tabEl.style.setProperty('--group-color', color || 'transparent');
     tabEl.classList.toggle('has-group', !!color);
+    if (color) {
+      tabEl.style.borderTopColor = color;
+    } else {
+      tabEl.style.borderTopColor = '';
+    }
   }
+  updateTabGroups();
 }
 
 // ===== TAB DRAG & DROP =====
@@ -3075,6 +3376,34 @@ window.electronAPI.on('show-context-menu-renderer', (data) => {
   createContextMenu(data.items, data.x, data.y);
 });
 
+// ===== BOOKMARKS BAR TOGGLE =====
+function toggleBookmarksBar() {
+  settings.showBookmarksBar = !settings.showBookmarksBar;
+  loadBookmarksBar();
+  showToast(settings.showBookmarksBar ? 'Bookmarks bar shown' : 'Bookmarks bar hidden');
+}
+
+// ===== PICTURE-IN-PICTURE TOGGLE =====
+function togglePiP() {
+  const tab = tabs.find(t => t.id === activeTabId);
+  if (!tab?.webview) { showToast('No page for PiP'); return; }
+  tab.webview.executeJavaScript(`
+    (function() {
+      const video = document.querySelector('video');
+      if (video) {
+        if (document.pictureInPictureElement) document.exitPictureInPicture();
+        else video.requestPictureInPicture();
+      }
+    })()
+  `).catch(() => showToast('PiP not available'));
+}
+
+// ===== CLEAR BROWSING DATA =====
+function clearBrowsingData() {
+  window.electronAPI.clearBrowsingData(['cache', 'cookies', 'history', 'indexedDB', 'localStorage']);
+  showToast('Browsing data cleared');
+}
+
 // ===== KEYBOARD SHORTCUTS =====
 document.addEventListener('keydown', e => {
   const ctrl = e.ctrlKey || e.metaKey;
@@ -3082,6 +3411,27 @@ document.addEventListener('keydown', e => {
     if (e.key === 'F5') { btnReload.click(); e.preventDefault(); }
     if (e.key === 'F11') { e.preventDefault(); toggleFullscreen(); }
     if (e.key === 'F12') { e.preventDefault(); toggleDevTools(); }
+    // Quick Switcher Ctrl+Tab / Ctrl+Shift+Tab
+    if (e.key === 'Tab' && ctrl) {
+      e.preventDefault();
+      if (!_qsActive) { openQuickSwitcher(); }
+      else {
+        _qsIdx = e.shiftKey
+          ? (_qsIdx - 1 + _qsList.length) % _qsList.length
+          : (_qsIdx + 1) % _qsList.length;
+        renderQuickSwitcher();
+      }
+      return;
+    }
+    return;
+  }
+
+  // Ctrl+K — Command Palette
+  if (e.key.toLowerCase() === 'k' && !e.shiftKey && !e.altKey) {
+    e.preventDefault();
+    const cp = $('cmd-palette');
+    if (cp?.classList.contains('hidden')) openCommandPalette();
+    else closeCommandPalette();
     return;
   }
 
@@ -4093,6 +4443,26 @@ function closeOnboarding() {
 
     // Auto-updater
     initUpdater();
+
+    // Vertical tabs restore
+    if (localStorage.getItem('ww_vertical_tabs')) {
+      document.body.classList.add('vertical-tabs');
+      $('tabsbar')?.classList.add('vertical-mode');
+      $('btn-vertical-tabs')?.classList.add('active');
+    }
+    $('btn-vertical-tabs')?.addEventListener('click', toggleVerticalTabs);
+
+    // Quick switcher — close on Ctrl release
+    document.addEventListener('keyup', e => {
+      if (!e.ctrlKey && !e.metaKey && _qsActive) {
+        closeQuickSwitcher();
+        if (_qsList[_qsIdx]) switchTab(_qsList[_qsIdx].id);
+      }
+    });
+
+    // Weather widget
+    loadWeatherWidget();
+    setInterval(loadWeatherWidget, 600000); // refresh every 10 min
 
     // Onboarding
     if (!localStorage.getItem('ww_onboarded')) {

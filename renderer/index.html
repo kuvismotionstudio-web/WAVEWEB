@@ -44,6 +44,10 @@
       </button>
     </div>
     <div id="tabsbar-right"></div>
+      <button id="btn-vertical-tabs" title="Toggle vertical tabs">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="11" width="7" height="5" rx="1"/></svg>
+      </button>
+    </div>
   </div>
 
   <!-- ===== NAVBAR ===== -->
@@ -203,6 +207,27 @@
           </div>
           <div id="quick-links"></div>
           <div id="newtab-top-sites"></div>
+          <div class="newtab-widgets" id="newtop-widgets">
+            <div class="newtab-widget widget-weather">
+              <div class="widget-label">Weather</div>
+              <div class="widget-value">--°C</div>
+              <div class="widget-sub">Loading...</div>
+            </div>
+            <div class="newtab-widget widget-tabs">
+              <div class="widget-label">Open Tabs</div>
+              <div class="widget-value" id="widget-tab-count">1</div>
+              <div class="widget-sub">across all groups</div>
+            </div>
+            <div class="newtab-widget widget-blocked">
+              <div class="widget-label">Blocked</div>
+              <div class="widget-value" id="widget-blocked-count">0</div>
+              <div class="widget-sub">requests today</div>
+            </div>
+          </div>
+          <div class="newtab-recent" id="newtab-recent">
+            <div class="newtab-recent-title">Recently Visited</div>
+            <div class="newtab-recent-list" id="newtab-recent-list"></div>
+          </div>
           <div id="newtab-stats">
             <span id="stat-blocked">🛡 <b id="stat-blocked-count">0</b> ads blocked</span>
             <span id="stat-tabs">📑 <b id="stat-tabs-count">1</b> tabs open</span>
@@ -860,6 +885,26 @@
     </div>
   </div>
   <div id="downloads-toast-container"></div>
+
+  <!-- ===== COMMAND PALETTE (Ctrl+K) ===== -->
+  <div id="cmd-palette" class="cmd-palette hidden">
+    <div class="cmd-backdrop"></div>
+    <div class="cmd-modal">
+      <div class="cmd-search-wrap">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" class="cmd-icon"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M16.5 16.5l4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <input id="cmd-input" class="cmd-input" type="text" placeholder="Type a command..." spellcheck="false" />
+        <span class="cmd-hint">ESC</span>
+      </div>
+      <div id="cmd-results" class="cmd-results"></div>
+    </div>
+  </div>
+
+  <!-- ===== QUICK SWITCHER (Ctrl+Tab) ===== -->
+  <div id="quick-switcher" class="quick-switcher hidden">
+    <div class="qs-modal">
+      <div id="qs-list" class="qs-list"></div>
+    </div>
+  </div>
 
   <!-- ===== TAB PREVIEW TOOLTIP ===== -->
   <div id="tab-preview" class="tab-preview hidden">
