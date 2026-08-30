@@ -187,6 +187,74 @@ const BUILTIN_PATTERNS = [
   /coinhive\.com/, /miner\./, /cryptoloot\.pro/,
 ];
 
+// ===== AUTH / OAUTH ALLOW =====
+// Endpoints required for "Continue with Google/Facebook/Discord/..." buttons.
+// These must never be blocked by the ad-blocker, and OAuth popups must be
+// allowed to open (popup flow relies on window.opener to return the token).
+const AUTH_ALLOW = [
+  // Facebook
+  /connect\.facebook\.net\/(en_US\/)?sdk/,
+  /connect\.facebook\.net\/(signin|config|sc)/,
+  /(www|m|mbasic)\.facebook\.com\/(dialog|login|oauth|v\d+\.\d+\.php)/,
+  /facebook\.com\/dialog\//,
+  /facebook\.com\/login\.php/,
+  // Google
+  /accounts\.google\.com/,
+  /apis\.google\.com\/js\/(platform|plusone)\.js/,
+  /(accounts\.)?google\.com\/o\/oauth2/,
+  /accounts\.google\.com\/signin/,
+  /googleapis\.com\/identitytoolkit/,
+  /www\.gstatic\.com\/firebasejs/,
+  /(www\.google\.com|www\.gstatic\.com)\/recaptcha/,
+  // Microsoft / Live
+  /login\.live\.com/,
+  /login\.microsoftonline\.com/,
+  /login\.microsoft\.com/,
+  /microsoftonline\.com\/.*\/oauth2/,
+  // GitHub
+  /github\.com\/(login|session|authorize|oauth)/,
+  // Discord
+  /(discord|discordapp)\.com\/api\/oauth2/,
+  /(discord|discordapp)\.com\/(oauth2|authorize|login|register)/,
+  // Apple
+  /appleid\.apple\.com/,
+  /appleid\.cdn-apple\.com/,
+  // X / Twitter
+  /(twitter|x)\.com\/(i\/oauth2|i\/flow\/login|oauth|authorize|oauth2)/,
+  /api\.twitter\.com\/oauth/,
+  // LinkedIn
+  /linkedin\.com\/(oauth|uas\/login|oauth\/v2|oauth2)/,
+  // Reddit
+  /reddit\.com\/(api\/v1\/authorize|login)/,
+  /oauth\.reddit\.com/,
+  // Twitch
+  /id\.twitch\.tv\/(oauth2|authorize)/,
+  // Spotify
+  /accounts\.spotify\.com\/(authorize|login)/,
+  // TikTok
+  /tiktok\.com\/(auth|login|oauth2)/,
+  // Amazon
+  /amazon\.com\/ap\/(oa2?|signin)/,
+  // Yahoo
+  /login\.yahoo\.com/,
+  // VK
+  /(oauth|id)\.vk\.com/,
+  // Steam
+  /steamcommunity\.com\/(openid|login)/,
+  // Dropbox / GitLab / Bitbucket
+  /dropbox\.com\/(oauth2|login)/,
+  /gitlab\.com\/oauth/,
+  /bitbucket\.org\/site\/oauth2/,
+];
+
+function isAuthUrl(url) {
+  try {
+    if (AUTH_ALLOW.some(re => re.test(url))) return true;
+    const host = new URL(url).hostname;
+    return /oauth|authorize/i.test(url) && (host.endsWith('.com') || host.endsWith('.net') || host.endsWith('.org'));
+  } catch (_) { return false; }
+}
+
 function rebuildPatterns() {
   // Built-in regex layer (fast fallback). Custom filters + subscriptions
   // are handled by the AdblockEngine.
@@ -359,6 +427,9 @@ function createWindow() {
         } catch(_) { return false; }
       });
       if (isWhitelisted) { callback({}); return; }
+
+      // OAuth / social login endpoints must never be blocked
+      if (isAuthUrl(url)) { callback({}); return; }
 
       const pageHost = getHostSafe(details.referrer || details.originURL || '');
       let blocked = false;
@@ -792,6 +863,19 @@ ipcMain.on('register-webview', (e, webviewId) => {
   const wc = webContents.fromId(webviewId);
   if (!wc) return;
   wc.setWindowOpenHandler(({ url }) => {
+    // OAuth / social login popups must open as real windows (not tabs),
+    // because the parent page expects the token back via window.opener.
+    if (isAuthUrl(url)) {
+      return {
+        action: 'allow',
+        overrideBrowserWindowOptions: {
+          width: 520,
+          height: 680,
+          autoHideMenuBar: true,
+          resizable: true,
+        },
+      };
+    }
     // Popup blocking via $popup filter rules
     if (adBlockEnabled && /^https?:/i.test(url)) {
       try {

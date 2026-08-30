@@ -651,6 +651,20 @@ const MOTIVATIONAL_QUOTES = [
   "Największa chwała w życiu nie leży w tym, że nigdy nie upadamy, ale w tym, że podnosimy się za każdym razem.",
   "Zacznij tam, gdzie jesteś. Użyj tego, co masz. Zrób, co możesz.",
   "Wytrwałość to nie jeden długi wyścig — to wiele krótkich wyścigów jeden po drugim.",
+  "Nie da się wypić oceanu jednym łykiem. Pij po trochu, krok po kroku.",
+  "97% myśli to powtórki. Działanie kończy spirale, bo rusza rzeczy naprzód.",
+  "Overthinking wie co jest złe, a nie co jest dobre. Przestań szukać problemów — zacznij szukać rozwiązań.",
+  "Nie myśl o tym, co mogłoby pójść źle. Pomyśl o tym, co możesz zrobić dobrze.",
+  "Umysł to wspaniały sługa, ale okropny pan. Nie pozwól mu przejąć sterów.",
+  "Twoje myśli to nie fakty. To tylko odgłosy mózgu.",
+  "Cisza w głowie nie jest celem. Celem jest spokój, że robisz wszystko, co możesz.",
+  "Kiedy zamartwiać się zaczyna, zacznij działać. Działanie rozprasza ciemność.",
+  "Idealny plan to ten, który zaczynasz dziś — nie ten, który dogrywasz we własnej głowie.",
+  "Analiza paraliżuje. Podjęcie decyzji uwalnia.",
+  "Możesz rozważyć gałąź po gałęzi, albo wejść na drzewo. Wybierz wejście.",
+  "Troska o szczegóły jest dobra, dopóki nie zabija całości. Zrób pierwszy krok.",
+  "Świat nie ustawi się po Twojej myśli, ale Ty możesz ustawić swoją myśl na działaniu.",
+  "Cokolwiek byś nie przemyślał po raz setny, prawdopodobne, że masz już odpowiedź.",
 ];
 
 function renderNewtabQuote() {
