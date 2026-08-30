@@ -164,6 +164,12 @@ body { display: flex; flex-direction: column; }
   filter: drop-shadow(0 0 12px rgba(255,26,53,0.2));
 }
 
+#logo img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
 #window-controls {
   display: flex;
   gap: 4px;
@@ -953,7 +959,10 @@ webview.active { display: flex; }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-#newtab-logo svg {
+#newtab-logo img {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
   filter: drop-shadow(0 0 24px rgba(255,26,53,0.3));
   animation: logoSvgPulse 3s ease-in-out infinite;
 }

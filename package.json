@@ -33,6 +33,7 @@
     "files": [
       "src/**/*",
       "renderer/**/*",
+      "assets/**/*",
       "package.json",
       "!node_modules/@huggingface/transformers/.cache/**"
     ],
