@@ -3138,110 +3138,291 @@ function showUpdateToast(html, duration) {
 }
 
 // ===== AUTO-UPDATER =====
+let _updateModal = null;
+let _updateCard = null;
+let _updateState = null;
+let _updateMinimized = false;
+let _updatePill = null;
+let _updateData = { version: '', percent: 0, speed: '' };
+
+const _UPD_ICONS = {
+  checking: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>',
+  available: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+  downloaded: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+  error: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
+};
+
+const _UPD_ICON_BG = {
+  checking: 'linear-gradient(135deg,#ff9f43,#ff6b35)',
+  available: 'linear-gradient(135deg,var(--accent),var(--accent2))',
+  downloaded: 'linear-gradient(135deg,#00d4a0,#00b894)',
+  error: 'linear-gradient(135deg,#ff5a5f,#ff2d55)',
+};
+
+const _UPD_PILL_DOT = {
+  checking: '#ff9f43',
+  available: 'var(--accent)',
+  downloaded: '#00d4a0',
+  error: '#ff5a5f',
+};
+
+function _updPillHTML() {
+  const state = _updateState || 'available';
+  const label = state === 'downloaded'
+    ? `Update v${_updateData.version} ready — click to restart`
+    : state === 'error'
+      ? 'Update failed — click for details'
+      : state === 'available'
+        ? `Updating to v${_updateData.version} — ${_updateData.percent || 0}%`
+        : `Checking for updates…`;
+  return `
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span class="upd-dot" style="background:${_UPD_PILL_DOT[state] || 'var(--accent)'};box-shadow:0 0 10px ${_UPD_PILL_DOT[state] || 'var(--accent)'};"></span>
+      <span style="font-size:12px;color:var(--text-1);font-weight:600;white-space:nowrap;">${label}</span>
+    </div>`;
+}
+
+function closeUpdateModal() {
+  if (_updateModal) { _updateModal.remove(); _updateModal = null; }
+  if (_updatePill) { _updatePill.remove(); _updatePill = null; }
+  _updateCard = null;
+  _updateState = null;
+  _updateMinimized = false;
+  _updateData = { version: '', percent: 0, speed: '' };
+}
+
+function updateModalFooter(buttons) {
+  const footer = _updateCard?.querySelector('#update-footer');
+  if (!footer) return;
+  footer.innerHTML = '';
+  (buttons || []).forEach(b => {
+    const btn = document.createElement('button');
+    btn.id = b.id;
+    btn.textContent = b.label;
+    btn.className = 'upd-update-btn ' + (b.kind || 'secondary');
+    btn.addEventListener('click', () => b.onClick && b.onClick());
+    footer.appendChild(btn);
+  });
+}
+
+function _seedUpdateParticles(el) {
+  if (!el) return;
+  const colors = ['var(--accent)', 'var(--accent2)', '#00d4a0', '#ff9f43', '#ffffff'];
+  let frag = '';
+  for (let i = 0; i < 18; i++) {
+    const size = 2 + Math.random() * 5;
+    const left = Math.random() * 100;
+    const top = 45 + Math.random() * 55;
+    const dur = 7 + Math.random() * 11;
+    const delay = Math.random() * 9;
+    const color = colors[i % colors.length];
+    const drift = (Math.random() * 120 - 60).toFixed(0);
+    frag += `<span class="upd-particle" style="
+      width:${size.toFixed(1)}px;height:${size.toFixed(1)}px;
+      left:${left.toFixed(1)}%;top:${top.toFixed(1)}%;
+      background:${color};box-shadow:0 0 ${(size * 2.6).toFixed(1)}px ${color};
+      animation-duration:${dur.toFixed(1)}s;animation-delay:${delay.toFixed(1)}s;
+      --upd-drift:${drift}px;"
+    ></span>`;
+  }
+  el.innerHTML = frag;
+}
+
+function showUpdateModal(cfg) {
+  closeUpdateModal();
+  _updateState = cfg.state || 'available';
+  _updateData = Object.assign(_updateData, cfg.data || {});
+  _updateModal = document.createElement('div');
+  _updateModal.id = 'update-modal-overlay';
+  _updateModal.dataset.state = _updateState;
+  _updateModal.innerHTML = `
+    <div class="upd-halo"></div>
+    <div class="upd-particles" id="update-particles"></div>
+    <div id="update-modal">
+      <div class="upd-corner upd-corner-tl"></div>
+      <div class="upd-corner upd-corner-br"></div>
+      <div class="upd-sheen"></div>
+      <div class="upd-head">
+        <div id="update-modal-icon" class="${_updateState === 'downloaded' ? 'upd-icon-success' : ''}" style="background:${_UPD_ICON_BG[_updateState] || _UPD_ICON_BG.available};">
+          ${_UPD_ICONS[_updateState] || _UPD_ICONS.available}
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div class="upd-title">${cfg.title || ''}</div>
+          <div class="upd-sub">${cfg.sub || ''}</div>
+        </div>
+        ${cfg.minimize === false ? '' : '<button id="update-modal-min" title="Minimize to pill"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg></button>'}
+      </div>
+      <div id="update-modal-body">${cfg.body || ''}</div>
+      <div id="update-footer"></div>
+    </div>`;
+  document.body.appendChild(_updateModal);
+  _updateCard = _updateModal.querySelector('#update-modal');
+  _updateModal.querySelector('#update-modal-min')?.addEventListener('click', minimizeUpdateModal);
+  _seedUpdateParticles(_updateModal.querySelector('#update-particles'));
+  updateModalFooter(cfg.buttons || []);
+}
+
+function minimizeUpdateModal() {
+  if (!_updateModal) return;
+  _updateModal.remove();
+  _updateModal = null;
+  _updateCard = null;
+  _updateMinimized = true;
+  _updatePill = document.createElement('div');
+  _updatePill.id = 'update-pill';
+  _updatePill.className = 'upd-pill';
+  _updatePill.innerHTML = _updPillHTML();
+  _updatePill.addEventListener('click', () => {
+    const prevState = _updateState;
+    const prevData = _updateData;
+    closeUpdateModal();
+    if (prevState === 'checking' || prevState === 'error') return;
+    showUpdateModal({
+      state: prevState,
+      title: prevState === 'downloaded' ? 'Update ready' : `Update v${esc(prevData.version)} available`,
+      sub: prevState === 'downloaded'
+        ? `v${esc(prevData.version)} downloaded — restart to install`
+        : 'Downloading and installing automatically',
+      body: updProgressHTML(prevData.percent),
+      buttons: updFooterButtons(prevState),
+    });
+  });
+  document.body.appendChild(_updatePill);
+}
+
+function updProgressHTML(pct) {
+  const v = pct || 0;
+  return `
+    <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
+      <span style="font-size:12px;color:var(--text-3);">Downloading update…</span>
+      <span style="font-size:12px;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums;"><span id="update-pct">${v}</span>%</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="upd-progress-track">
+        <div id="update-bar" class="upd-progress-bar" style="width:${v}%;"></div>
+        <span id="update-tip" class="upd-progress-tip" style="left:${v}%;"></span>
+        <div class="upd-progress-shimmer"></div>
+      </div>
+      <span id="update-speed" style="font-size:11px;color:var(--text-3);white-space:nowrap;"></span>
+    </div>`;
+}
+
+function updFooterButtons(state) {
+  if (state === 'downloaded') {
+    return [
+      { id: 'update-restart-btn', label: 'Restart now', kind: 'primary', onClick: () => window.electronAPI.updateInstall() },
+      { id: 'update-later-btn', label: 'Later', kind: 'secondary', onClick: closeUpdateModal },
+    ];
+  }
+  return [
+    { id: 'update-min-btn', label: 'Background', kind: 'secondary', onClick: minimizeUpdateModal },
+  ];
+}
+
+function updateUpdaterProgress(pct, speed) {
+  _updateData.percent = pct;
+  if (speed) _updateData.speed = speed;
+  if (_updateMinimized) {
+    if (_updatePill) _updatePill.innerHTML = _updPillHTML();
+    return;
+  }
+  const bar = _updateCard?.querySelector('#update-bar');
+  const pctEl = _updateCard?.querySelector('#update-pct');
+  const speedEl = _updateCard?.querySelector('#update-speed');
+  const tip = _updateCard?.querySelector('#update-tip');
+  if (bar) bar.style.width = pct + '%';
+  if (tip) tip.style.left = pct + '%';
+  if (pctEl) pctEl.textContent = pct;
+  if (speedEl && speed) speedEl.textContent = speed;
+}
+
 function initUpdater() {
   window.electronAPI.updateCheck();
 
   window.electronAPI.on('update-checking', () => {
-    console.log('[updater] checking...');
+    showUpdateModal({
+      state: 'checking',
+      title: 'Checking for updates…',
+      sub: 'Looking for a newer version',
+      body: '<div style="display:flex;justify-content:center;padding:6px 0 2px;"><div class="upd-spinner"></div></div>',
+      buttons: [],
+      minimize: false,
+      data: {},
+    });
   });
 
   window.electronAPI.on('update-available', (data) => {
     const ver = data?.version || 'new';
-    const t = showUpdateToast(`
-      <div style="display:flex;flex-direction:column;gap:10px;width:100%;">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;flex-shrink:0;animation:spin 1s linear infinite;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          </div>
-          <div style="display:flex;flex-direction:column;flex:1;min-width:0;">
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-              <span style="font-weight:600;color:var(--text-1);font-size:13px;">Update v${esc(ver)} found</span>
-              <span id="update-pct" style="font-size:12px;color:var(--accent);font-weight:600;">0%</span>
-            </div>
-            <span id="update-speed" style="font-size:11px;color:var(--text-3);margin-top:1px;">Downloading...</span>
-          </div>
-        </div>
-        <div style="position:relative;width:100%;height:6px;background:var(--bg-4);border-radius:4px;overflow:hidden;">
-          <div id="update-bar" style="
-            width:0%;height:100%;border-radius:4px;
-            background:linear-gradient(90deg,var(--accent),var(--accent2));
-            transition:width 0.4s cubic-bezier(0.16,1,0.3,1);
-            box-shadow:0 0 8px var(--accent-glow);
-          "></div>
-          <div style="
-            position:absolute;top:0;left:0;width:100%;height:100%;
-            background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);
-            background-size:200% 100%;
-            animation:progShimmer 1.5s linear infinite;
-          "></div>
-        </div>
-      </div>
-    `);
-    t.id = 'update-progress-toast';
+    _updateData.version = ver;
+    showUpdateModal({
+      state: 'available',
+      title: `Update v${esc(ver)} available`,
+      sub: 'Downloading and installing automatically',
+      body: updProgressHTML(0),
+      buttons: updFooterButtons('available'),
+      data: { version: ver },
+    });
+  });
+
+  window.electronAPI.on('update-not-available', () => {
+    if (_updateState === 'checking' || _updateState === 'error') closeUpdateModal();
   });
 
   window.electronAPI.on('update-download-progress', (data) => {
-    const el = $('update-progress-toast');
-    if (!el) return;
     const pct = data?.percent ? Math.round(data.percent) : 0;
     const speed = data?.bytesPerSecond ? formatBytes(data.bytesPerSecond) + '/s' : '';
-    const bar = el.querySelector('#update-bar');
-    const pctEl = el.querySelector('#update-pct');
-    const speedEl = el.querySelector('#update-speed');
-    if (bar) bar.style.width = pct + '%';
-    if (pctEl) pctEl.textContent = pct + '%';
-    if (speedEl && speed) speedEl.textContent = speed;
+    updateUpdaterProgress(pct, speed);
   });
 
   window.electronAPI.on('update-downloaded', (data) => {
-    const el = $('update-progress-toast');
-    if (el) el.remove();
     const ver = data?.version || 'new';
-    const t = showUpdateToast(`
-      <div style="display:flex;flex-direction:column;gap:10px;width:100%;">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#00d4a0,#00b894);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          </div>
-          <div style="display:flex;flex-direction:column;">
-            <span style="font-weight:600;color:var(--text-1);">Update ready!</span>
-            <span style="font-size:11px;color:var(--text-3);">v${esc(ver)} downloaded • Restart to install</span>
-          </div>
-        </div>
-        <div style="display:flex;gap:8px;">
-          <button id="update-restart-btn" style="
-            background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:var(--r-sm);
-            padding:7px 18px;font-size:12px;font-weight:600;cursor:pointer;flex:1;
-            transition:transform 0.15s,box-shadow 0.15s;
-          ">Restart now</button>
-          <button id="update-later-btn" style="
-            background:var(--bg-3);color:var(--text-2);border:1px solid var(--border);
-            border-radius:var(--r-sm);padding:7px 14px;font-size:12px;cursor:pointer;
-          ">Later</button>
-        </div>
-      </div>
-    `);
-    t.querySelector('#update-restart-btn').addEventListener('click', () => {
-      window.electronAPI.updateInstall();
+    _updateData.version = ver;
+    _updateData.percent = 100;
+    if (_updateMinimized) {
+      if (_updatePill) _updatePill.innerHTML = _updPillHTML();
+      _updatePill?.addEventListener('click', () => {
+        closeUpdateModal();
+        showUpdateModal({
+          state: 'downloaded',
+          title: 'Update ready',
+          sub: `v${esc(ver)} downloaded — restart to install`,
+          body: '<div style="display:flex;align-items:center;gap:10px;"><div class="upd-dot" style="background:#00d4a0;box-shadow:0 0 10px #00d4a0;"></div><span style="font-size:12.5px;color:var(--text-2);">The new version will be applied after restart. You can keep browsing.</span></div>',
+          buttons: updFooterButtons('downloaded'),
+        });
+      });
+      return;
+    }
+    showUpdateModal({
+      state: 'downloaded',
+      title: 'Update ready',
+      sub: `v${esc(ver)} downloaded — restart to install`,
+      body: '<div style="display:flex;align-items:center;gap:10px;"><div class="upd-dot" style="background:#00d4a0;box-shadow:0 0 10px #00d4a0;"></div><span style="font-size:12.5px;color:var(--text-2);">The new version will be applied after restart. You can keep browsing.</span></div>',
+      buttons: updFooterButtons('downloaded'),
     });
-    t.querySelector('#update-later-btn').addEventListener('click', () => t.remove());
   });
 
   window.electronAPI.on('update-error', (msg) => {
     console.warn('[updater] error:', msg);
-    const el = $('update-progress-toast');
-    if (el) el.remove();
-    showUpdateToast(`
-      <div style="display:flex;align-items:center;gap:10px;">
-        <div style="width:32px;height:32px;border-radius:8px;background:rgba(255,80,80,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ff4444" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+    _updateState = 'error';
+    if (_updateMinimized) {
+      if (_updatePill) _updatePill.innerHTML = _updPillHTML();
+      return;
+    }
+    showUpdateModal({
+      state: 'error',
+      title: 'Update failed',
+      sub: 'Something went wrong while downloading',
+      body: `<div style="display:flex;gap:10px;align-items:flex-start;">
+        <div style="width:32px;height:32px;border-radius:9px;background:rgba(255,90,95,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          ${_UPD_ICONS.error}
         </div>
-        <div style="display:flex;flex-direction:column;">
-          <span style="font-weight:500;color:var(--text-1);font-size:13px;">Update failed</span>
-          <span style="font-size:11px;color:var(--text-3);">${esc(msg) || 'Check your connection and try again'}</span>
-        </div>
-      </div>
-    `, 5000);
+        <span style="font-size:12.5px;color:var(--text-2);line-height:1.5;">${esc(msg) || 'Check your connection and try again.'}</span>
+      </div>`,
+      buttons: [
+        { id: 'update-retry-btn', label: 'Retry', kind: 'primary', onClick: () => { closeUpdateModal(); window.electronAPI.updateCheck(); } },
+        { id: 'update-close-btn', label: 'Close', kind: 'secondary', onClick: closeUpdateModal },
+      ],
+    });
   });
 }
 

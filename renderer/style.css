@@ -5478,3 +5478,277 @@ button { transition: background var(--transition), color var(--transition), bord
 
 /* Window controls — consistent hover shape */
 #window-controls button { border-radius: 999px; }
+
+/* ===== UPDATE MODAL ===== */
+@property --upd-angle { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+
+#update-modal-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: radial-gradient(ellipse at center, rgba(20, 10, 18, 0.42), rgba(6, 7, 12, 0.78));
+  backdrop-filter: blur(10px) saturate(1.15);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+  animation: updOverlayFade 0.25s ease both;
+}
+@keyframes updOverlayFade { from { opacity: 0; } to { opacity: 1; } }
+
+.upd-halo {
+  position: absolute; left: 50%; top: 50%; width: 460px; height: 460px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(255, 26, 53, 0.28), rgba(255, 26, 53, 0.06) 45%, transparent 68%);
+  filter: blur(40px); border-radius: 50%; pointer-events: none;
+  animation: updHaloPulse 3.2s ease-in-out infinite;
+}
+@keyframes updHaloPulse {
+  0%, 100% { opacity: 0.55; transform: translate(-50%, -50%) scale(1); }
+  50%      { opacity: 1;    transform: translate(-50%, -50%) scale(1.14); }
+}
+#update-modal-overlay[data-state="downloaded"] .upd-halo {
+  background: radial-gradient(circle, rgba(0, 212, 160, 0.32), rgba(0, 212, 160, 0.07) 45%, transparent 68%);
+  animation-duration: 2.4s;
+}
+#update-modal-overlay[data-state="error"] .upd-halo {
+  background: radial-gradient(circle, rgba(255, 90, 95, 0.32), rgba(255, 90, 95, 0.07) 45%, transparent 68%);
+  animation-duration: 2.4s;
+}
+
+.upd-particles { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.upd-particle {
+  position: absolute; border-radius: 50%; opacity: 0;
+  animation-name: updFloatUp; animation-timing-function: linear; animation-iteration-count: infinite;
+}
+@keyframes updFloatUp {
+  0%   { transform: translate(0, 0);            opacity: 0; }
+  8%   { opacity: 0.9; }
+  55%  { opacity: 0.45; }
+  100% { transform: translate(var(--upd-drift), -105vh); opacity: 0; }
+}
+
+#update-modal {
+  position: relative;
+  width: 430px; max-width: calc(100vw - 40px);
+  border-radius: 17px;
+  overflow: hidden;
+  border: 1.5px solid transparent;
+  background:
+    linear-gradient(rgba(20, 21, 30, 0.96), rgba(20, 21, 30, 0.96)) padding-box,
+    conic-gradient(from var(--upd-angle),
+      var(--accent),
+      rgba(255, 26, 53, 0) 22%,
+      var(--accent2) 48%,
+      rgba(255, 26, 53, 0) 74%,
+      var(--accent)) border-box;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6), 0 0 46px var(--accent-glow), 0 0 90px rgba(255, 26, 53, 0.14);
+  animation:
+    updPop 0.42s cubic-bezier(0.16, 1, 0.3, 1) both,
+    updAngleSpin 5s linear infinite;
+}
+@keyframes updPop {
+  0%   { opacity: 0; transform: translateY(28px) scale(0.86); filter: blur(6px); }
+  60%  { opacity: 1; transform: translateY(-4px) scale(1.02); filter: blur(0); }
+  100% { opacity: 1; transform: translateY(0) scale(1);       filter: blur(0); }
+}
+@keyframes updAngleSpin { to { --upd-angle: 360deg; } }
+
+.upd-corner {
+  position: absolute; width: 130px; height: 130px; border-radius: 50%;
+  filter: blur(30px); pointer-events: none; z-index: 0; opacity: 0.55;
+}
+.upd-corner-tl {
+  top: -52px; left: -52px;
+  background: radial-gradient(circle, var(--accent), transparent 70%);
+  animation: updCornerFloat 6s ease-in-out infinite;
+}
+.upd-corner-br {
+  bottom: -52px; right: -52px;
+  background: radial-gradient(circle, var(--accent2), transparent 70%);
+  animation: updCornerFloat 6s ease-in-out infinite reverse;
+}
+@keyframes updCornerFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(14px, -10px) scale(1.22); }
+}
+
+.upd-sheen {
+  position: absolute; top: -45%; bottom: -45%; left: -22%; width: 46%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.07), transparent);
+  transform: skewX(-18deg); pointer-events: none; z-index: 3;
+  animation: updCardSheen 7.5s ease-in-out infinite;
+}
+@keyframes updCardSheen {
+  0%, 68% { left: -28%; }
+  100%    { left: 135%; }
+}
+
+.upd-head {
+  position: relative; z-index: 1;
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px 18px; border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent);
+  animation: updReveal 0.5s 0.06s both;
+}
+#update-modal-icon {
+  width: 40px; height: 40px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  box-shadow: 0 0 22px rgba(255, 26, 53, 0.35), 0 6px 20px rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+#update-modal-icon::after {
+  content: ""; position: absolute; inset: -4px; border-radius: 15px;
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  animation: updRingPulse 1.9s ease-out infinite;
+}
+@keyframes updRingPulse {
+  0%   { transform: scale(0.88); opacity: 0.85; }
+  100% { transform: scale(1.55); opacity: 0; }
+}
+#update-modal-icon.upd-icon-success { animation: updIconBounce 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+@keyframes updIconBounce {
+  0%   { transform: scale(0.55); }
+  55%  { transform: scale(1.14); }
+  100% { transform: scale(1); }
+}
+#update-modal-icon.upd-icon-success::after { animation-duration: 1.2s; }
+
+.upd-title {
+  font-size: 14px; font-weight: 700; letter-spacing: 0.01em;
+  background: linear-gradient(100deg, var(--text-1) 38%, var(--accent) 52%, var(--text-1) 66%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  animation: updTitleSheen 5.5s linear infinite;
+}
+@keyframes updTitleSheen { to { background-position: -220% 0; } }
+.upd-sub { font-size: 11.5px; color: var(--text-3); margin-top: 2px; opacity: 0; animation: updReveal 0.5s 0.14s both; }
+
+#update-modal-min {
+  width: 28px; height: 28px; border-radius: 8px;
+  background: var(--bg-3); border: 1px solid var(--border);
+  color: var(--text-2); display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0;
+  transition: background 0.15s, color 0.15s, box-shadow 0.2s, transform 0.15s;
+}
+#update-modal-min:hover {
+  background: var(--bg-4); color: var(--text-1);
+  box-shadow: 0 0 14px var(--accent-glow);
+  transform: translateY(-1px);
+}
+#update-modal-min:active { transform: scale(0.9); }
+
+#update-modal-body {
+  position: relative; z-index: 1;
+  padding: 18px 18px 6px;
+  animation: updReveal 0.5s 0.16s both;
+}
+#update-modal-body .upd-stat {
+  font-size: 11px; color: var(--text-3);
+  text-transform: uppercase; letter-spacing: 0.14em;
+}
+@keyframes updReveal {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+#update-footer {
+  position: relative; z-index: 1;
+  display: flex; gap: 8px; align-items: center; justify-content: flex-end;
+  padding: 14px 18px;
+  margin-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  background: linear-gradient(0deg, rgba(255, 255, 255, 0.025), transparent);
+  animation: updReveal 0.5s 0.26s both;
+}
+
+.upd-update-btn {
+  position: relative;
+  border: none; border-radius: 9px; padding: 8px 16px;
+  font-size: 12px; font-weight: 600; cursor: pointer; overflow: hidden;
+  transition: transform 0.12s, box-shadow 0.18s, background 0.15s, color 0.15s;
+}
+.upd-update-btn:active { transform: scale(0.96); }
+.upd-primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #fff;
+  box-shadow: 0 4px 22px var(--accent-glow), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+.upd-primary:hover {
+  box-shadow: 0 8px 34px var(--accent-glow), 0 0 0 1px rgba(255, 26, 53, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  filter: brightness(1.08); transform: translateY(-1px);
+}
+.upd-primary::after {
+  content: ""; position: absolute; top: 0; left: -80%; width: 55%; height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  transform: skewX(-20deg);
+  animation: updBtnSheen 2.8s ease-in-out infinite;
+}
+@keyframes updBtnSheen { 0%, 55% { left: -80%; } 100% { left: 170%; } }
+.upd-secondary {
+  background: var(--bg-3); color: var(--text-2); border: 1px solid var(--border);
+}
+.upd-secondary:hover {
+  background: var(--bg-4); color: var(--text-1);
+  border-color: var(--accent);
+  box-shadow: 0 0 14px var(--accent-glow);
+  transform: translateY(-1px);
+}
+
+.upd-progress-track {
+  position: relative; height: 6px; flex: 1;
+  background: rgba(255, 255, 255, 0.06); border-radius: 4px; overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+.upd-progress-bar {
+  position: absolute; top: 0; left: 0; height: 100%; border-radius: 4px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  box-shadow: 0 0 18px var(--accent), 0 0 40px rgba(255, 26, 53, 0.35);
+  transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.upd-progress-tip {
+  position: absolute; top: 50%; width: 12px; height: 12px; border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff; z-index: 2;
+  box-shadow: 0 0 10px var(--accent), 0 0 24px var(--accent), 0 0 40px var(--accent2);
+  animation: updTipGlow 1s ease-in-out infinite;
+  transition: left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes updTipGlow {
+  0%, 100% { opacity: 1; box-shadow: 0 0 10px var(--accent), 0 0 24px var(--accent), 0 0 40px var(--accent2); }
+  50%      { opacity: 0.65; box-shadow: 0 0 6px var(--accent), 0 0 12px var(--accent), 0 0 20px var(--accent2); }
+}
+.upd-progress-shimmer {
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.16), transparent);
+  background-size: 200% 100%; animation: progShimmer 1.3s linear infinite;
+}
+
+.upd-spinner {
+  width: 26px; height: 26px; border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.08); border-top-color: var(--accent);
+  animation: spin 0.85s linear infinite;
+  box-shadow: 0 0 18px var(--accent-glow);
+}
+
+.upd-pill {
+  position: fixed; right: 20px; bottom: 20px; z-index: 9999;
+  display: flex; align-items: center; gap: 10px;
+  background: linear-gradient(135deg, var(--bg-2), var(--bg-3));
+  border: 1px solid var(--border); border-radius: 14px;
+  padding: 12px 16px;
+  cursor: pointer; user-select: none;
+  animation:
+    updPop 0.3s cubic-bezier(0.16, 1, 0.3, 1) both,
+    updPillGlow 2.6s ease-in-out infinite;
+}
+@keyframes updPillGlow {
+  0%, 100% { box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 0 rgba(255, 26, 53, 0); }
+  50%      { box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 26px var(--accent-glow), 0 0 60px rgba(255, 26, 53, 0.12); }
+}
+.upd-pill:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: 0 14px 44px rgba(0, 0, 0, 0.55), 0 0 34px var(--accent-glow);
+}
+.upd-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; animation: updDotPulse 1.6s ease-in-out infinite; }
+@keyframes updDotPulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.6); }
+}
