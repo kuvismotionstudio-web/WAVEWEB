@@ -1,6 +1,6 @@
 {
   "name": "waveweb",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "WAVEWEB - Modern Chromium Browser with AI",
   "main": "src/main.js",
   "scripts": {
@@ -38,6 +38,7 @@
     ],
     "win": {
       "icon": "assets/waveweb.png",
+      "artifactName": "WAVEWEB-Setup-${version}.${ext}",
       "target": [
         {
           "target": "nsis",

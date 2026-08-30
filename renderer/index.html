@@ -379,6 +379,25 @@
         </div>
 
         <div class="adblock-section">
+          <div class="adblock-section-title" style="display:flex;align-items:center;justify-content:space-between">
+            <span>Filter Subscriptions</span>
+            <button id="ab-sub-update-all" class="panel-action-btn" title="Update all lists">↻ All</button>
+          </div>
+          <div class="adblock-hint">EasyList/uBlock filter lists — auto-updated every 24h</div>
+          <div id="ab-subscriptions" class="ab-list"></div>
+          <div class="adblock-add-row">
+            <select id="ab-sub-preset" class="settings-input" style="flex:1;font-size:11px;padding:6px">
+              <option value="">— Choose a list —</option>
+            </select>
+            <button id="ab-sub-add-preset" class="settings-btn" style="font-size:11px;padding:5px 10px">Add</button>
+          </div>
+          <div class="adblock-add-row">
+            <input id="ab-sub-custom-url" class="settings-input" type="text" placeholder="Custom list URL (.txt)…" />
+            <button id="ab-sub-add-custom" class="settings-btn" style="font-size:11px;padding:5px 10px">Add</button>
+          </div>
+        </div>
+
+        <div class="adblock-section">
           <div class="adblock-section-title">Top Blocked Domains</div>
           <div id="ab-top-domains" class="ab-list"></div>
         </div>
@@ -1019,16 +1038,33 @@
 
   <!-- ===== SPLASH SCREEN ===== -->
   <div id="splash">
+    <div class="splash-bg">
+      <div class="splash-orb splash-orb-1"></div>
+      <div class="splash-orb splash-orb-2"></div>
+      <div class="splash-orb splash-orb-3"></div>
+    </div>
     <div class="splash-inner">
       <div class="splash-wave">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
-          <path d="M2 12 Q6 4 12 12 Q18 20 22 12" stroke="url(#sg)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <div class="splash-ring"></div>
+        <div class="splash-ring ring-2"></div>
+        <svg width="84" height="84" viewBox="0 0 24 24" fill="none">
+          <path d="M2 12 Q6 4 12 12 Q18 20 22 12" pathLength="100" stroke="url(#sg)" stroke-width="2" stroke-linecap="round" fill="none"/>
+          <path d="M2 16 Q6 8 12 16 Q18 24 22 16" pathLength="100" stroke="url(#sg)" stroke-width="1.4" stroke-linecap="round" fill="none" opacity="0.35"/>
           <defs><linearGradient id="sg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#ff1a35"/><stop offset="100%" style="stop-color:#ff4444"/></linearGradient></defs>
         </svg>
       </div>
-      <div class="splash-logo">WAVEWEB</div>
+      <div class="splash-logo" aria-label="WAVEWEB">
+        <span style="--i:0">W</span><span style="--i:1">A</span><span style="--i:2">V</span><span style="--i:3">E</span><span style="--i:4">W</span><span style="--i:5">E</span><span style="--i:6">B</span>
+      </div>
+      <div class="splash-tagline">Your AI-powered browser</div>
       <div class="splash-bar"><div class="splash-bar-fill"></div></div>
+      <div class="splash-status">
+        <span style="--p:0">Initializing engine&hellip;</span>
+        <span style="--p:1">Loading AI core&hellip;</span>
+        <span style="--p:2">Almost ready&hellip;</span>
+      </div>
     </div>
+    <div class="splash-footer"><b>WAVEWEB</b> &nbsp;&middot;&nbsp; Powered by ASTROWORLD</div>
   </div>
 
   <script src="browser.js"></script>

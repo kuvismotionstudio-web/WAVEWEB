@@ -1,15 +1,22 @@
-const { app, BrowserWindow, ipcMain, session, dialog, shell, Notification, webContents, clipboard } = require('electron');
+const { app, BrowserWindow, ipcMain, session, dialog, shell, Notification, webContents, clipboard, net } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const crypto = require('crypto');
 const { autoUpdater } = require('electron-updater');
+const AdblockEngine = require('./adblock-engine');
+const { NET_TYPE_MAP } = require('./adblock-engine');
 
 let mainWindow;
 
 // ===== AUTO UPDATER =====
 autoUpdater.autoDownload = true;
 autoUpdater.autoInstallOnAppQuit = true;
+autoUpdater.logger = { info: (m) => console.log('[updater]', m), warn: (m) => console.warn('[updater]', m), error: (m) => console.error('[updater]', m), debug: (m) => {} };
+const updaterFail = (err) => {
+  console.error('[updater] check failed:', err && err.stack ? err.stack : err);
+  if (mainWindow) mainWindow.webContents.send('update-error', (err && err.message) || 'Unknown update error');
+};
 
 autoUpdater.on('checking-for-update', () => {
   if (mainWindow) mainWindow.webContents.send('update-checking');
@@ -75,6 +82,10 @@ const userScriptsFile = path.join(userDataPath, 'user-scripts.json');
 function getDownloadPath() {
   const s = loadJSON(settingsFile, {});
   return s.downloadPath || downloadsPath;
+}
+
+function getHostSafe(url) {
+  try { return new URL(url).hostname.toLowerCase(); } catch (_) { return ''; }
 }
 
 function loadJSON(file, def) {
@@ -177,23 +188,116 @@ const BUILTIN_PATTERNS = [
 ];
 
 function rebuildPatterns() {
-  const patterns = [...BUILTIN_PATTERNS];
-  customFilters.forEach(f => {
-    try {
-      // Support basic patterns: domain.com, ||domain.com^, /regex/
-      if (f.startsWith('/') && f.endsWith('/')) {
-        patterns.push(new RegExp(f.slice(1, -1), 'i'));
-      } else {
-        const domain = f.replace(/^\|\|/, '').replace(/\^$/, '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        patterns.push(new RegExp(domain, 'i'));
-      }
-    } catch(e) {}
-  });
-  AD_PATTERNS = patterns;
+  // Built-in regex layer (fast fallback). Custom filters + subscriptions
+  // are handled by the AdblockEngine.
+  AD_PATTERNS = [...BUILTIN_PATTERNS];
 }
 
 loadAdBlockData();
 rebuildPatterns();
+
+// ===== FILTER SUBSCRIPTIONS (EasyList/uBlock engine) =====
+const ablockEngine = new AdblockEngine();
+const adblockDir = path.join(userDataPath, 'adblock');
+const listsDir = path.join(adblockDir, 'lists');
+const subsFile = path.join(adblockDir, 'subscriptions.json');
+const SUBSCRIPTION_PRESETS = [
+  { name: 'EasyList', url: 'https://easylist.to/easylist/easylist.txt', desc: 'Ads (EN)' },
+  { name: 'EasyPrivacy', url: 'https://easylist.to/easylist/easyprivacy.txt', desc: 'Trackers' },
+  { name: 'uBlock filters – Ads', url: 'https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters.min.txt', desc: 'uBO ads' },
+  { name: 'uBlock filters – Badware', url: 'https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/badware.txt', desc: 'Malware/phishing' },
+  { name: 'Polskie Filtry', url: 'https://raw.githubusercontent.com/MajkiIT/polish-ads-filter/master/polish-adblock-filters/adblock.txt', desc: 'Polskie reklamy' },
+];
+
+let subscriptions = loadJSON(subsFile, null);
+if (!Array.isArray(subscriptions)) {
+  // First run — default subscriptions
+  subscriptions = SUBSCRIPTION_PRESETS.slice(0, 2).map((p, i) => ({
+    id: crypto.createHash('md5').update(p.url).digest('hex').slice(0, 12),
+    name: p.name,
+    url: p.url,
+    enabled: true,
+    lastUpdate: 0,
+    rules: 0,
+  }));
+  saveJSON(subsFile, subscriptions);
+}
+
+try { fs.mkdirSync(listsDir, { recursive: true }); } catch (_) {}
+
+const subUpdating = new Set();
+
+function saveSubscriptions() {
+  saveJSON(subsFile, subscriptions);
+}
+
+function listFilePath(id) {
+  return path.join(listsDir, id + '.txt');
+}
+
+async function fetchSubscription(sub) {
+  if (subUpdating.has(sub.id)) return { ok: false, error: 'already updating' };
+  subUpdating.add(sub.id);
+  sendSubStatus(sub.id, 'updating');
+  try {
+    const res = await net.fetch(sub.url, { signal: AbortSignal.timeout(45000) });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    if (!text || text.length < 50) throw new Error('Empty filter list');
+    fs.writeFileSync(listFilePath(sub.id), text);
+    sub.lastUpdate = Date.now();
+    saveSubscriptions();
+    // Full rebuild — prevents duplicate rules on repeated updates
+    rebuildAdblockEngine();
+    sendSubStatus(sub.id, 'ok', sub.rules);
+    mainWindow?.webContents.send('adblock-subs-changed');
+    return { ok: true, rules };
+  } catch (err) {
+    sendSubStatus(sub.id, 'error', null, err.message || String(err));
+    return { ok: false, error: err.message || String(err) };
+  } finally {
+    subUpdating.delete(sub.id);
+  }
+}
+
+function sendSubStatus(id, status, rules, error) {
+  try {
+    mainWindow?.webContents.send('adblock-sub-status', { id, status, rules, error });
+  } catch (_) {}
+}
+
+function rebuildAdblockEngine() {
+  ablockEngine.clear();
+  // Custom filters through the real parser (supports @@, $options, ## etc.)
+  customFilters.forEach(f => ablockEngine.addLine(f));
+  for (const sub of subscriptions) {
+    if (!sub.enabled) continue;
+    try {
+      const file = listFilePath(sub.id);
+      if (fs.existsSync(file)) {
+        const text = fs.readFileSync(file, 'utf8');
+        const n = ablockEngine.loadFromText(text);
+        sub.rules = n;
+      }
+    } catch (_) {}
+  }
+  ablockEngine.finalize();
+  saveSubscriptions();
+}
+rebuildAdblockEngine();
+
+// Auto-update stale subscriptions (>24h): shortly after start + every 6h
+async function updateStaleSubscriptions(force = false) {
+  const now = Date.now();
+  for (const sub of subscriptions) {
+    if (!sub.enabled) continue;
+    if (force || !sub.lastUpdate || now - sub.lastUpdate > 24 * 3600 * 1000) {
+      await fetchSubscription(sub);
+    }
+  }
+}
+setTimeout(() => { updateStaleSubscriptions().catch(() => {}); }, 20000);
+setInterval(() => { updateStaleSubscriptions().catch(() => {}); }, 6 * 3600 * 1000);
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -256,7 +360,22 @@ function createWindow() {
       });
       if (isWhitelisted) { callback({}); return; }
 
+      const pageHost = getHostSafe(details.referrer || details.originURL || '');
+      let blocked = false;
+
+      // Legacy built-in regex layer
       if (AD_PATTERNS.some(r => r.test(url))) {
+        blocked = true;
+      } else {
+        // EasyList/uBlock engine (subscriptions + custom filters)
+        const type = NET_TYPE_MAP[details.resourceType] || 'other';
+        try {
+          const hit = ablockEngine.match(url, type, pageHost);
+          if (hit) blocked = true;
+        } catch (_) {}
+      }
+
+      if (blocked) {
         // Track stats
         adBlockStats.total++;
         try {
@@ -358,6 +477,12 @@ function createWindow() {
       if (item && typeof item.canResume === 'function' && item.canResume()) item.resume();
     } catch (_) {}
   });
+  ipcMain.on('download-cancel', (e, id) => {
+    try {
+      const item = activeDownloads[id];
+      if (item) item.cancel();
+    } catch (_) {}
+  });
 }
 
 app.whenReady().then(() => {
@@ -375,10 +500,10 @@ app.on('window-all-closed', () => {
 
 // Auto Updater
 ipcMain.on('update-check', () => {
-  autoUpdater.checkForUpdates().catch(() => {});
+  autoUpdater.checkForUpdates().catch(updaterFail);
 });
 ipcMain.on('update-download', () => {
-  autoUpdater.downloadUpdate().catch(() => {});
+  autoUpdater.downloadUpdate().catch(updaterFail);
 });
 ipcMain.on('update-install', () => {
   autoUpdater.quitAndInstall(false, true);
@@ -522,17 +647,78 @@ ipcMain.on('adblock-whitelist-remove', (e, domain) => {
 });
 ipcMain.handle('adblock-custom-filters', () => [...customFilters]);
 ipcMain.on('adblock-custom-filter-add', (e, filter) => {
-  if (!customFilters.includes(filter)) { customFilters.push(filter); saveAdBlockData(); rebuildPatterns(); }
+  if (!customFilters.includes(filter)) { customFilters.push(filter); saveAdBlockData(); rebuildPatterns(); rebuildAdblockEngine(); }
 });
 ipcMain.on('adblock-custom-filter-remove', (e, filter) => {
   customFilters = customFilters.filter(f => f !== filter);
   saveAdBlockData();
   rebuildPatterns();
+  rebuildAdblockEngine();
 });
 ipcMain.on('adblock-set-enabled', (e, enabled) => {
   adBlockEnabled = enabled;
 });
-ipcMain.handle('adblock-filter-count', () => AD_PATTERNS.length);
+ipcMain.handle('adblock-filter-count', () => AD_PATTERNS.length + ablockEngine.ruleCount);
+
+// Filter subscriptions
+ipcMain.handle('adblock-subscriptions-get', () => {
+  return subscriptions.map(s => ({
+    id: s.id, name: s.name, url: s.url, desc: s.desc || '',
+    enabled: !!s.enabled, lastUpdate: s.lastUpdate || 0,
+    rules: s.rules || 0, updating: subUpdating.has(s.id),
+  }));
+});
+
+ipcMain.handle('adblock-subscription-add', async (e, { name, url }) => {
+  try {
+    const u = new URL(url);
+    if (!/^https?:$/.test(u.protocol)) throw new Error('Invalid URL');
+  } catch (_) {
+    return { ok: false, error: 'Invalid URL' };
+  }
+  const id = crypto.createHash('md5').update(url).digest('hex').slice(0, 12);
+  if (subscriptions.some(s => s.id === id)) return { ok: false, error: 'Already added' };
+  const sub = {
+    id,
+    name: (name && name.trim()) || getHostSafe(url) || 'Custom list',
+    url, enabled: true, lastUpdate: 0, rules: 0,
+  };
+  subscriptions.push(sub);
+  saveSubscriptions();
+  mainWindow?.webContents.send('adblock-subs-changed');
+  fetchSubscription(sub).then(() => {}).catch(() => {});
+  return { ok: true };
+});
+
+ipcMain.on('adblock-subscription-remove', (e, id) => {
+  subscriptions = subscriptions.filter(s => s.id !== id);
+  saveSubscriptions();
+  try { fs.unlinkSync(listFilePath(id)); } catch (_) {}
+  rebuildAdblockEngine();
+  mainWindow?.webContents.send('adblock-subs-changed');
+});
+
+ipcMain.on('adblock-subscription-toggle', (e, { id, enabled }) => {
+  const sub = subscriptions.find(s => s.id === id);
+  if (!sub) return;
+  sub.enabled = !!enabled;
+  saveSubscriptions();
+  rebuildAdblockEngine();
+  mainWindow?.webContents.send('adblock-subs-changed');
+});
+
+ipcMain.handle('adblock-subscription-update', async (e, id) => {
+  const sub = subscriptions.find(s => s.id === id);
+  if (!sub) return { ok: false, error: 'Not found' };
+  return fetchSubscription(sub);
+});
+
+ipcMain.handle('adblock-subscriptions-update-all', async () => {
+  for (const sub of subscriptions.filter(s => s.enabled)) {
+    await fetchSubscription(sub);
+  }
+  return { ok: true };
+});
 
 // Context menu for webview
 ipcMain.on('show-context-menu', (e, params) => {
@@ -606,9 +792,37 @@ ipcMain.on('register-webview', (e, webviewId) => {
   const wc = webContents.fromId(webviewId);
   if (!wc) return;
   wc.setWindowOpenHandler(({ url }) => {
+    // Popup blocking via $popup filter rules
+    if (adBlockEnabled && /^https?:/i.test(url)) {
+      try {
+        const pageHost = getHostSafe(wc.getURL());
+        if (ablockEngine.match(url, 'popup', pageHost)) {
+          adBlockStats.total++;
+          try {
+            const host = getHostSafe(url);
+            adBlockStats.domains[host] = (adBlockStats.domains[host] || 0) + 1;
+          } catch (_) {}
+          mainWindow?.webContents.send('ad-blocked', { url, total: adBlockStats.total });
+          return { action: 'deny' };
+        }
+      } catch (_) {}
+    }
     mainWindow?.webContents.send('open-link-newtab', url);
     return { action: 'deny' };
   });
+
+  // Cosmetic (element-hiding) filters — inject CSS on navigation
+  const injectCosmetics = (_, url) => {
+    if (!adBlockEnabled || !ablockEngine.hasCosmetic()) return;
+    try {
+      const host = getHostSafe(url);
+      if (!host) return;
+      const css = ablockEngine.getCosmeticCSS(host);
+      if (css) wc.insertCSS(css, { cssOrigin: 'user' }).catch(() => {});
+    } catch (_) {}
+  };
+  wc.on('did-navigate', injectCosmetics);
+  wc.on('did-navigate-in-page', injectCosmetics);
 });
 
 // Tab preview — capture webview thumbnail
@@ -618,6 +832,31 @@ ipcMain.handle('capture-page', async (e, webviewId) => {
     if (!wc) return null;
     const image = await wc.capturePage({ x: 0, y: 0, width: 1280, height: 720 });
     return image.toDataURL({ mimeType: 'image/jpeg', quality: 0.7 });
+  } catch (_) {
+    return null;
+  }
+});
+
+// Screenshot — save PNG data URL to download dir + history
+ipcMain.handle('screenshot-save', (e, { dataUrl, filename }) => {
+  try {
+    if (!dataUrl || !filename) return null;
+    const b64 = dataUrl.split(',')[1];
+    if (!b64) return null;
+    const p = path.join(getDownloadPath(), filename);
+    fs.writeFileSync(p, Buffer.from(b64, 'base64'));
+    const dlHistory = loadJSON(path.join(userDataPath, 'downloads.json'), []);
+    dlHistory.unshift({
+      id: Date.now().toString(),
+      filename,
+      url: '',
+      savePath: p,
+      size: Buffer.byteLength(b64, 'base64'),
+      date: new Date().toISOString(),
+      type: 'screenshot',
+    });
+    saveJSON(path.join(userDataPath, 'downloads.json'), dlHistory.slice(0, 500));
+    return p;
   } catch (_) {
     return null;
   }

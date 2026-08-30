@@ -25,6 +25,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   downloadsClear: () => ipcRenderer.send('downloads-clear'),
   openFile: (p) => ipcRenderer.send('open-file', p),
   showInFolder: (p) => ipcRenderer.send('show-in-folder', p),
+  downloadPause: (id) => ipcRenderer.send('download-pause', id),
+  downloadResume: (id) => ipcRenderer.send('download-resume', id),
+  downloadCancel: (id) => ipcRenderer.send('download-cancel', id),
+  screenshotSave: (data) => ipcRenderer.invoke('screenshot-save', data),
 
   // Clear browsing data
   clearBrowsingData: (types) => ipcRenderer.invoke('clear-browsing-data', types),
@@ -61,6 +65,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   adblockCustomFilterRemove: (f) => ipcRenderer.send('adblock-custom-filter-remove', f),
   adblockSetEnabled: (e) => ipcRenderer.send('adblock-set-enabled', e),
   adblockFilterCount: () => ipcRenderer.invoke('adblock-filter-count'),
+  adblockSubscriptionsGet: () => ipcRenderer.invoke('adblock-subscriptions-get'),
+  adblockSubscriptionAdd: (data) => ipcRenderer.invoke('adblock-subscription-add', data),
+  adblockSubscriptionRemove: (id) => ipcRenderer.send('adblock-subscription-remove', id),
+  adblockSubscriptionToggle: (id, enabled) => ipcRenderer.send('adblock-subscription-toggle', { id, enabled }),
+  adblockSubscriptionUpdate: (id) => ipcRenderer.invoke('adblock-subscription-update', id),
+  adblockSubscriptionsUpdateAll: () => ipcRenderer.invoke('adblock-subscriptions-update-all'),
 
   // Extensions
   extensionsList: () => ipcRenderer.invoke('extensions-list'),
@@ -122,6 +132,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
       'save-page', 'print-page', 'view-source', 'inspect-element', 'save-image',
       'before-quit-save', 'ad-blocked', 'extensions-reloaded', 'save-to-reading-list', 'show-context-menu-renderer', 'fullscreen-changed',
       'clipboard-new-entry',
+      'adblock-subs-changed', 'adblock-sub-status',
       'update-checking', 'update-available', 'update-not-available', 'update-download-progress', 'update-downloaded', 'update-error',
     ];
     if (allowed.includes(channel)) {
