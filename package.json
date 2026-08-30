@@ -1,6 +1,6 @@
 {
   "name": "waveweb",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "WAVEWEB - Modern Chromium Browser with AI",
   "main": "src/main.js",
   "scripts": {
@@ -26,7 +26,7 @@
   "build": {
     "appId": "com.waveweb.browser",
     "productName": "WAVEWEB",
-    "icon": "assets/waveweb.png",
+    "icon": "assets/logowaveweb.png",
     "directories": {
       "output": "dist"
     },
@@ -37,7 +37,7 @@
       "!node_modules/@huggingface/transformers/.cache/**"
     ],
     "win": {
-      "icon": "assets/waveweb.png",
+"icon": "assets/logowaveweb.png",
       "artifactName": "WAVEWEB-Setup-${version}.${ext}",
       "target": [
         {
