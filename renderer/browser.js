@@ -313,21 +313,25 @@ async function initSettings() {
   updateDownloadPathLabel(settings.downloadPath);
 
   // System info
-  const info = await window.electronAPI.getSystemInfo();
-  _webviewPreloadPath = info.webviewPreload || null;
-  const infoEl = $('system-info-content');
-  const rows = [
-    ['Version', '1.0.0'],
-    ['Electron', info.electronVersion],
-    ['Chromium', info.chromiumVersion],
-    ['Node', info.nodeVersion],
-    ['Platform', info.platform],
-    ['RAM', info.memory],
-    ['Downloads', info.downloadsPath],
-  ];
-  infoEl.innerHTML = rows.map(([k, v]) =>
-    `<div class="system-info-row"><span>${k}</span><span>${v}</span></div>`
-  ).join('');
+  try {
+    const info = await window.electronAPI.getSystemInfo();
+    _webviewPreloadPath = (info && info.webviewPreload) || null;
+    const infoEl = $('system-info-content');
+    const rows = [
+      ['Version', '1.0.0'],
+      ['Electron', (info && info.electronVersion) || 'unknown'],
+      ['Chromium', (info && info.chromiumVersion) || 'unknown'],
+      ['Node', (info && info.nodeVersion) || 'unknown'],
+      ['Platform', (info && info.platform) || 'unknown'],
+      ['RAM', (info && info.memory) || 'unknown'],
+      ['Downloads', (info && info.downloadsPath) || 'unknown'],
+    ];
+    if (infoEl) {
+      infoEl.innerHTML = rows.map(([k, v]) =>
+        `<div class="system-info-row"><span>${k}</span><span>${v}</span></div>`
+      ).join('');
+    }
+  } catch (_) {}
 }
 
 function saveSettings() {
@@ -760,6 +764,7 @@ $('btn-notes')?.addEventListener('click', () => { openPanel('notes'); renderNote
 btnPasswords.addEventListener('click', () => { openPanel('passwords'); loadPasswordsPanel(); });
 btnClipboard.addEventListener('click', () => { openPanel('clipboard'); renderClipboardPanel(); });
 btnPerf.addEventListener('click', () => { openPanel('perf'); renderPerfPanel(); });
+$('perf-refresh')?.addEventListener('click', () => renderPerfPanel());
 btnScripts.addEventListener('click', () => { openPanel('scripts'); renderScriptsPanel(); });
 
 // ===== TAB MANAGEMENT =====
@@ -1299,6 +1304,25 @@ btnHome.addEventListener('click', () => {
     navigate(hp);
   }
 });
+
+function goHome() {
+  const hp = settings.homepage || 'about:blank';
+  if (hp === 'about:blank' || hp === '') {
+    const tab = tabs.find(t => t.id === activeTabId);
+    if (tab) {
+      if (tab.webview) { tab.webview.remove(); tab.webview = null; }
+      tab.url = '';
+      tab.title = 'New Tab';
+      setTabTitle(tab.id, 'New Tab');
+      setTabFavicon(tab.id, defaultFavicon());
+      newtabPage.classList.add('active');
+      hideSafetyScreen();
+      urlBar.value = '';
+    }
+  } else {
+    navigate(hp);
+  }
+}
 
 // ===== NEW TAB =====
 $('new-tab-btn').addEventListener('click', () => createTab());
@@ -2316,6 +2340,8 @@ function renderPasswordsList() {
         showToast('Password deleted');
   }
 });
+  });
+}
 
 // ===== COMMAND PALETTE (Ctrl+K) =====
 const CMD_COMMANDS = [
@@ -2324,7 +2350,7 @@ const CMD_COMMANDS = [
   { name: 'Reopen Closed Tab', desc: 'Restore last closed tab', icon: '♻️', shortcut: 'Ctrl+Shift+T', action: () => reopenClosedTab(), cat: 'Tabs' },
   { name: 'Next Tab', desc: 'Switch to next tab', icon: '➡️', shortcut: 'Ctrl+Tab', action: () => { const i = tabs.findIndex(t => t.id === activeTabId); if (tabs[i + 1]) switchTab(tabs[i + 1].id); else if (tabs[0]) switchTab(tabs[0].id); }, cat: 'Tabs' },
   { name: 'Previous Tab', desc: 'Switch to previous tab', icon: '⬅️', shortcut: 'Ctrl+Shift+Tab', action: () => { const i = tabs.findIndex(t => t.id === activeTabId); if (tabs[i - 1]) switchTab(tabs[i - 1].id); else if (tabs[tabs.length - 1]) switchTab(tabs[tabs.length - 1].id); }, cat: 'Tabs' },
-  { name: 'Pin Tab', desc: 'Pin/unpin current tab', icon: '📌', action: () => { const t = tabs.find(t => t.id === activeTabId); if (t) togglePin(t.id); }, cat: 'Tabs' },
+  { name: 'Pin Tab', desc: 'Pin/unpin current tab', icon: '📌', action: () => { const t = tabs.find(t => t.id === activeTabId); if (t) pinTab(t.id); }, cat: 'Tabs' },
 
   { name: 'Go Back', desc: 'Navigate back', icon: '◀️', shortcut: 'Alt+←', action: () => btnBack.click(), cat: 'Navigation' },
   { name: 'Go Forward', desc: 'Navigate forward', icon: '▶️', shortcut: 'Alt+→', action: () => btnForward.click(), cat: 'Navigation' },
@@ -2591,9 +2617,7 @@ function saveSearchHistory(url, title) {
   history = history.filter(h => h.url !== url);
   history.unshift({ url, title: title || url });
   if (history.length > 12) history.length = 12;
-  localStorage.setItem('ww_search_history', JSON.stringify(history));
-}
-  });
+localStorage.setItem('ww_search_history', JSON.stringify(history));
 }
 
 function getHost(url) {
@@ -3445,8 +3469,6 @@ function pinTab(tabId) {
     }, 250);
   }
 }
-
-const GROUP_COLORS = ['', '#ff1a35', '#00d4a0', '#ff4444', '#ff8844', '#ffd060', '#0078d4', '#ff66b2'];
 
 function setGroupColor(tabId, color) {
   const tab = tabs.find(t => t.id === tabId);
@@ -4932,30 +4954,46 @@ function formatTimeAgo(ts) {
 }
 
 // ===== PERFORMANCE PANEL =====
+function formatUptime(sec) {
+  const d = Math.floor(sec / 86400), h = Math.floor((sec % 86400) / 3600), m = Math.floor((sec % 3600) / 60);
+  let s = '';
+  if (d) s += d + 'd ';
+  if (h) s += h + 'h ';
+  if (m) s += m + 'm';
+  return s.trim() || '0m';
+}
+
 let _perfInterval = null;
 function renderPerfPanel() {
   if (_perfInterval) clearInterval(_perfInterval);
-  const update = () => {
-    const mem = process?.memory?.() || {};
-    const heapUsed = mem.heapUsed || 0;
-    const heapTotal = mem.heapTotal || 0;
-    const sysTotal = require('os').totalmem?.() || 8 * 1024 * 1024 * 1024;
-    const sysFree = require('os').freemem?.() || sysTotal;
-    const sysUsed = sysTotal - sysFree;
-    const cpu = process?.cpuUsage?.() || {};
-    const loadAvg = require('os').loadavg?.() || [0, 0, 0];
-
-    const setBar = (id, pct) => { const el = $(id); if (el) el.style.width = Math.min(100, pct) + '%'; };
-    const setText = (id, txt) => { const el = $(id); if (el) el.textContent = txt; };
-
-    setText('perf-sys-ram', `${formatBytes(sysUsed)} / ${formatBytes(sysTotal)}`);
-    setBar('perf-sys-ram-bar', (sysUsed / sysTotal) * 100);
-    setText('perf-elec-heap', `${formatBytes(heapUsed)} / ${formatBytes(heapTotal)}`);
-    setBar('perf-elec-heap-bar', heapTotal ? (heapUsed / heapTotal) * 100 : 0);
-    setText('perf-cpu-load', loadAvg[0]?.toFixed(2) || '—');
-    setBar('perf-cpu-bar', Math.min(100, (loadAvg[0] || 0) * 50));
-    setText('perf-tab-count', tabs.length + ' tabs');
-    setText('perf-processes', '1');
+  const setBar = (id, pct) => { const el = $(id); if (el) el.style.width = Math.min(100, pct || 0) + '%'; };
+  const setText = (id, txt) => { const el = $(id); if (el) el.textContent = txt; };
+  const paint = (s) => {
+    if (!s) return;
+    const e = s.electron || {}, sys = s.system || {};
+    setText('perf-sys-ram', `${formatBytes(sys.usedMem || 0)} / ${formatBytes(sys.totalMem || 0)}`);
+    setBar('perf-sys-ram-bar', sys.memPercent);
+    setText('perf-elec-heap', `${formatBytes(e.heapUsed || 0)} / ${formatBytes(e.heapTotal || 0)}`);
+    setBar('perf-elec-heap-bar', e.heapTotal ? ((e.heapUsed || 0) / e.heapTotal) * 100 : 0);
+    setText('perf-cpu-load', `${e.appCpuPct || 0}%`);
+    setBar('perf-cpu-bar', e.appCpuPct);
+    setText('perf-cpu-cores', sys.cpuCores || '—');
+    setText('perf-rss', formatBytes(e.rss || 0));
+    setText('perf-heap-used', formatBytes(e.heapUsed || 0));
+    setText('perf-heap-total', formatBytes(e.heapTotal || 0));
+    setText('perf-external', formatBytes(e.external || 0));
+    setText('perf-total-mem', formatBytes(sys.totalMem || 0));
+    setText('perf-free-mem', formatBytes(sys.freeMem || 0));
+    setText('perf-cpu-model', sys.cpuModel || '—');
+    setText('perf-uptime', formatUptime(sys.uptime || 0));
+    setText('perf-platform', (sys.platform || '') + ' ' + (sys.arch || ''));
+  };
+  const update = async () => {
+    try {
+      paint(await window.electronAPI.perfGetStats());
+    } catch (err) {
+      console.error('[perf] failed:', err);
+    }
   };
   update();
   _perfInterval = setInterval(update, 2000);
@@ -5066,4 +5104,10 @@ function editScript(idx, script) {
     activePreviewTab = null;
     tabPreviewEl.classList.add('hidden');
   }
+
+  window.renderClipboardPanel = renderClipboardPanel;
+  window.renderPerfPanel = renderPerfPanel;
+  window.renderScriptsPanel = renderScriptsPanel;
+  window.formatTimeAgo = formatTimeAgo;
+  window.hideTabPreview = hideTabPreview;
 })();

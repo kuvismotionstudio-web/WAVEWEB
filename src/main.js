@@ -1417,6 +1417,12 @@ function collectPerfStats() {
   const freeMem = os.freemem();
   const cpus = os.cpus();
   const loadAvg = os.loadavg();
+  let appCpuPct = 0, appProcCount = 0;
+  try {
+    const metrics = app.getAppMetrics();
+    appProcCount = metrics.length;
+    for (const m of metrics) appCpuPct += m.cpu.percentCPUUsage || 0;
+  } catch (_) {}
   const stats = {
     timestamp: Date.now(),
     electron: {
@@ -1424,6 +1430,8 @@ function collectPerfStats() {
       heapUsed: mem.heapUsed,
       heapTotal: mem.heapTotal,
       external: mem.external,
+      appCpuPct: Math.round(appCpuPct * 10) / 10,
+      appProcesses: appProcCount,
     },
     system: {
       totalMem,
@@ -1432,9 +1440,9 @@ function collectPerfStats() {
       memPercent: ((totalMem - freeMem) / totalMem * 100).toFixed(1),
       cpuModel: cpus[0]?.model || 'Unknown',
       cpuCores: cpus.length,
-      loadAvg1: loadAvg[0].toFixed(2),
-      loadAvg5: loadAvg[1].toFixed(2),
-      loadAvg15: loadAvg[2].toFixed(2),
+      loadAvg1: (loadAvg[0] || 0).toFixed(2),
+      loadAvg5: (loadAvg[1] || 0).toFixed(2),
+      loadAvg15: (loadAvg[2] || 0).toFixed(2),
       uptime: os.uptime(),
       platform: os.platform(),
       arch: os.arch(),
