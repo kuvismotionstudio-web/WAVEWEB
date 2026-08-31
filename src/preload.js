@@ -134,6 +134,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
       'clipboard-new-entry',
       'adblock-subs-changed', 'adblock-sub-status',
       'update-checking', 'update-available', 'update-not-available', 'update-download-progress', 'update-downloaded', 'update-error',
+      'ai-download-progress',
     ];
     if (allowed.includes(channel)) {
       ipcRenderer.on(channel, (event, ...args) => cb(...args));

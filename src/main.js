@@ -1284,12 +1284,19 @@ ipcMain.handle('get-system-info', () => ({
 let _aiPipeline = null;
 let _aiPipelinePromise = null;
 
+const AI_MODEL = 'onnx-community/Qwen2.5-3B-Instruct';
+
 async function getAIPipeline() {
   if (_aiPipeline) return _aiPipeline;
   if (_aiPipelinePromise) return _aiPipelinePromise;
   _aiPipelinePromise = (async () => {
     const { pipeline } = await import('@huggingface/transformers');
-    _aiPipeline = await pipeline('text-generation', 'Xenova/Phi-3-mini-4k-instruct');
+    _aiPipeline = await pipeline('text-generation', AI_MODEL, {
+      dtype: 'q4',
+      progress_callback: (data) => {
+        try { mainWindow?.webContents.send('ai-download-progress', data); } catch (_) {}
+      },
+    });
     return _aiPipeline;
   })();
   return _aiPipelinePromise;
@@ -1431,11 +1438,13 @@ ipcMain.handle('ai-load-model', async () => {
 ipcMain.handle('ai-generate', async (event, prompt, options) => {
   const pipe = await getAIPipeline();
   const result = await pipe(prompt, options || {
-    max_new_tokens: 300,
-    temperature: 0.3,
-    top_p: 0.9,
+    max_new_tokens: 512,
+    temperature: 0.4,
+    top_p: 0.92,
+    top_k: 40,
     do_sample: true,
-    repetition_penalty: 1.1,
+    repetition_penalty: 1.05,
+    return_full_text: false,
   });
   return result;
 });

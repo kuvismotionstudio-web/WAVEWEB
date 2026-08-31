@@ -2854,19 +2854,38 @@ $('clear-all-data-btn').addEventListener('click', async () => {
 
 // ===== AI SIDEBAR =====
 let _aiLoadPromise = null;
+let _aiLoadMsg = null;
+
+function aiProgressHTML(pct, label) {
+  const bar = Math.max(3, Math.round(pct));
+  return `<div class="ai-progress${pct >= 100 ? ' done' : ''}"><div class="ai-progress-bar" style="width:${bar}%"></div><span>${label || 'Pobieranie modelu…'} · ${bar}%</span></div>`;
+}
+
+window.electronAPI.on('ai-download-progress', (data) => {
+  if (!_aiLoadMsg || !data || data.status === 'initiate') return;
+  const total = data.total || 0;
+  let loaded = data.loaded || 0;
+  if (data.buffer) loaded += data.buffer?.byteLength || data.buffer?.length || 0;
+  const pct = total && total > 0 ? Math.min(100, Math.round((loaded / total) * 100)) : 0;
+  const name = data.file?.split('/').pop() || '';
+  const label = name ? `Pobieranie ${name}` : 'Pobieranie modelu';
+  _aiLoadMsg.querySelector('.ai-bubble').innerHTML = aiProgressHTML(pct, label);
+});
 
 async function loadAIModel() {
   if (aiPipeline) return true;
   if (_aiLoadPromise) return _aiLoadPromise;
-  addAIMessage('bot', '⏳ Loading Phi-3 AI model (~2.3GB, first time only, may take a few minutes)...');
+  _aiLoadMsg = addAIMessage('bot', aiProgressHTML(2, 'Pobieranie Qwen2.5-3B (~2GB, tylko raz)…'));
   _aiLoadPromise = window.electronAPI.aiLoadModel().then(() => {
     aiPipeline = true;
     _aiLoadPromise = null;
+    _aiLoadMsg = null;
     document.querySelector('.ai-bubble:last-child')?.remove();
     addAIMessage('bot', '✅ AI model ready! Ask me anything.');
     return true;
   }).catch(err => {
     _aiLoadPromise = null;
+    _aiLoadMsg = null;
     document.querySelector('.ai-bubble:last-child')?.remove();
     addAIMessage('bot', '❌ Failed to load AI model: ' + err.message);
     return false;
@@ -2880,6 +2899,7 @@ function formatAI(text) {
   return esc(text)
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/`(.+?)`/g, '<code>$1</code>')
+    .replace(/\[(.+?)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
     .replace(/\n/g, '<br>');
 }
 
@@ -2911,11 +2931,13 @@ async function sendAIMessage(text) {
 
   const tab = tabs.find(t => t.id === activeTabId);
   const currentUrl = tab?.url || 'New Tab';
-  const prompt = `<|system|>
-You are Wave AI, a smart browser assistant. User is viewing: ${currentUrl}. Keep replies short (2-3 sentences) and helpful. Reply in the user's language.<|end|>
-<|user|>
-${text}<|end|>
-<|assistant|>`;
+  const prompt = `<|im_start|>system
+You are Wave AI, a smart, helpful assistant built into the Wave browser. The user is currently viewing: ${currentUrl}.
+Be concise (2-4 sentences for casual questions, but give full detailed step-by-step answers when asked). Reply in the language the user writes in. Be friendly, accurate and never invent facts.<|im_end|>
+<|im_start|>user
+${text}<|im_end|>
+<|im_start|>assistant
+`;
 
   // Load model if needed
   if (!aiPipeline) {
@@ -2927,9 +2949,9 @@ ${text}<|end|>
   try {
     const output = await window.electronAPI.aiGenerate(prompt);
     loadMsg.remove();
-    const full = output[0]?.generated_text || '';
-    const reply = full.split('<|assistant|>').pop()?.trim() || full.slice(-200);
-    addAIMessage('bot', reply || '⚠️ No response.');
+    const full = Array.isArray(output) ? output[0]?.generated_text || '' : '';
+    const reply = full.trim() || '⚠️ No response.';
+    addAIMessage('bot', reply);
   } catch (err) {
     loadMsg.remove();
     addAIMessage('bot', '❌ Error: ' + err.message);

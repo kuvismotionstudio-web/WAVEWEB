@@ -2799,6 +2799,26 @@ webview.active { display: flex; }
   align-self: flex-start;
 }
 
+.ai-progress {
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 10px;
+  color: var(--text-3);
+}
+.ai-progress-bar {
+  height: 6px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3));
+  background-size: 200% 100%;
+  transition: width 0.3s ease;
+  box-shadow: 0 0 10px rgba(255,26,53,0.5);
+}
+.ai-progress.done .ai-progress-bar {
+  filter: saturate(1.2) brightness(1.15);
+}
+
 /* ===== LOADING BAR ===== */
 #loading-bar {
   position: fixed;
