@@ -1284,7 +1284,7 @@ ipcMain.handle('get-system-info', () => ({
 let _aiPipeline = null;
 let _aiPipelinePromise = null;
 
-const AI_MODEL = 'onnx-community/Qwen2.5-3B-Instruct';
+const AI_MODEL = 'opalitestudios/Qwen2.5-3B-Instruct-ONNX';
 
 async function getAIPipeline() {
   if (_aiPipeline) return _aiPipeline;
@@ -1292,7 +1292,7 @@ async function getAIPipeline() {
   _aiPipelinePromise = (async () => {
     const { pipeline } = await import('@huggingface/transformers');
     _aiPipeline = await pipeline('text-generation', AI_MODEL, {
-      dtype: 'q4',
+      dtype: 'q4f16',
       progress_callback: (data) => {
         try { mainWindow?.webContents.send('ai-download-progress', data); } catch (_) {}
       },
