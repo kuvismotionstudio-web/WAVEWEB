@@ -238,10 +238,37 @@
       <div class="panel-header">
         <span class="panel-title">Downloads</span>
         <div class="panel-header-actions">
-          <button id="dl-clear-btn" class="panel-action-btn" title="Clear history">Clear</button>
+          <button id="dl-clear-btn" class="panel-action-btn" title="Clear all history">Clear all</button>
           <button class="panel-close-btn" data-panel="downloads">✕</button>
         </div>
       </div>
+
+      <div id="dl-summary">
+        <div class="dl-sum-col">
+          <span class="dl-sum-num" id="dl-sum-active">0</span>
+          <span class="dl-sum-label">Active</span>
+        </div>
+        <div class="dl-sum-col">
+          <span class="dl-sum-num" id="dl-sum-speed">—</span>
+          <span class="dl-sum-label">Speed</span>
+        </div>
+        <div class="dl-sum-col">
+          <span class="dl-sum-num" id="dl-sum-total">0</span>
+          <span class="dl-sum-label">Files</span>
+        </div>
+      </div>
+
+      <div class="dl-search-wrap">
+        <svg class="dl-search-ico" viewBox="0 0 24 24" width="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5l4 4"/></svg>
+        <input id="dl-search" class="panel-search" type="text" placeholder="Filter downloads..."/>
+      </div>
+
+      <div id="dl-tabs">
+        <button class="dl-tab active" data-filter="all">All</button>
+        <button class="dl-tab" data-filter="active">Active</button>
+        <button class="dl-tab" data-filter="completed">Completed</button>
+      </div>
+
       <div id="active-downloads"></div>
       <div id="downloads-list" class="panel-list"></div>
     </div>

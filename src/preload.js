@@ -23,6 +23,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Downloads
   downloadsGet: () => ipcRenderer.invoke('downloads-get'),
   downloadsClear: () => ipcRenderer.send('downloads-clear'),
+  downloadsDeleteOne: (id) => ipcRenderer.send('downloads-delete-one', id),
   openFile: (p) => ipcRenderer.send('open-file', p),
   showInFolder: (p) => ipcRenderer.send('show-in-folder', p),
   downloadPause: (id) => ipcRenderer.send('download-pause', id),

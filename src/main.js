@@ -678,6 +678,10 @@ ipcMain.handle('bookmarks-import', async () => {
 // Downloads history
 ipcMain.handle('downloads-get', () => loadJSON(path.join(userDataPath, 'downloads.json'), []));
 ipcMain.on('downloads-clear', () => saveJSON(path.join(userDataPath, 'downloads.json'), []));
+ipcMain.on('downloads-delete-one', (e, id) => {
+  const stock = loadJSON(path.join(userDataPath, 'downloads.json'), []);
+  saveJSON(path.join(userDataPath, 'downloads.json'), stock.filter(d => String(d.id) !== String(id)));
+});
 
 // Open file in system
 ipcMain.on('open-file', (e, filePath) => {

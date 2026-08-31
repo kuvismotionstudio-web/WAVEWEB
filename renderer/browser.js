@@ -755,7 +755,7 @@ function openPanel(name) {
   // Load panel data
   if (name === 'history') loadHistoryPanel();
   if (name === 'bookmarks') loadBookmarksPanel();
-  if (name === 'downloads') loadDownloadsHistory();
+  if (name === 'downloads') { renderActiveSection(); _refreshDlSummary(); loadDownloadsHistory(); }
   if (name === 'passwords') loadPasswordsPanel();
   if (name === 'ai-sidebar') {
     if (aiPipeline) $('ai-api-setup').classList.add('hidden');
@@ -1965,15 +1965,44 @@ $('history-clear-btn').addEventListener('click', async () => {
 });
 
 // ===== DOWNLOADS =====
+let _dlFilter = 'all';
+let _dlSearchTerm = '';
+
+function getFileMeta(filename) {
+  const ext = (filename.split('.').pop() || '').toLowerCase();
+  const types = {
+    audio: ['mp3','wav','flac','ogg','m4a','aac'],
+    video: ['mp4','mkv','avi','mov','webm','flv'],
+    image: ['jpg','jpeg','png','gif','webp','svg','ico','bmp','heic'],
+    archive: ['zip','rar','7z','tar','gz','bz2','xz'],
+    doc: ['pdf','doc','docx','txt','md','rtf','odt','xls','xlsx','csv','ppt','pptx','json','xml'],
+    app: ['exe','msi','dmg','pkg','deb','rpm','apk'],
+  };
+  const type = Object.keys(types).find(k => types[k].includes(ext)) || 'other';
+  const colors = {
+    audio: '#8b5cf6', video: '#ec4899', image: '#f59e0b', archive: '#10b981',
+    doc: '#3b82f6', app: '#f43f5e', other: '#64748b',
+  };
+  return { ext, type, color: colors[type] };
+}
+
+function formatETA(seconds) {
+  if (!seconds || !isFinite(seconds) || seconds < 0) return '';
+  if (seconds < 60) return Math.round(seconds) + 's left';
+  const m = Math.floor(seconds / 60);
+  if (m < 60) return m + 'm left';
+  const h = Math.floor(m / 60);
+  return h + 'h ' + (m % 60) + 'm left';
+}
+
 // Receive events from main
 window.electronAPI.on('download-started', (dl) => {
-  activeDownloads[dl.id] = { ...dl, progress: 0, speed: 0, paused: false, canPause: dl.canPause, canResume: dl.canResume };
+  activeDownloads[dl.id] = { ...dl, progress: 0, speed: 0, startedAt: Date.now(), paused: false, canPause: dl.canPause, canResume: dl.canResume };
   renderActiveDownload(dl.id);
   showDownloadToast(dl.id);
   updateDlBadge();
-
-  // Auto-open downloads panel
-  if (!panelDownloads.classList.contains('hidden')) loadDownloadsHistory();
+  _refreshDlSummary();
+  if (!panelDownloads.classList.contains('hidden')) renderDownloadsPanel();
 });
 
 window.electronAPI.on('download-progress', (data) => {
@@ -1988,6 +2017,7 @@ window.electronAPI.on('download-progress', (data) => {
     updateActiveDownloadUI(data.id, pct, data.speed, data.receivedBytes, data.totalBytes);
     syncDownloadButtons(data.id);
     updateToastProgress(data.id, pct, data.speed);
+    _refreshDlSummary();
   }
 });
 
@@ -1996,7 +2026,8 @@ window.electronAPI.on('download-completed', (data) => {
   removeActiveDownloadUI(data.id);
   finishToast(data.id, data.filename, data.savePath);
   updateDlBadge();
-  if (activePanel === 'downloads') loadDownloadsHistory();
+  _refreshDlSummary();
+  if (activePanel === 'downloads') renderDownloadsPanel();
 });
 
 window.electronAPI.on('download-failed', (data) => {
@@ -2004,6 +2035,8 @@ window.electronAPI.on('download-failed', (data) => {
   removeActiveDownloadUI(data.id);
   failToast(data.id);
   updateDlBadge();
+  _refreshDlSummary();
+  if (activePanel === 'downloads') renderDownloadsPanel();
 });
 
 function updateDlBadge() {
@@ -2016,31 +2049,48 @@ function updateDlBadge() {
   }
 }
 
+function _refreshDlSummary() {
+  const active = Object.values(activeDownloads).filter(d => !d.paused);
+  const totalSpeed = active.reduce((s, d) => s + (d.speed || 0), 0);
+  const activeCount = Object.keys(activeDownloads).length;
+  const num = id => { const el = $(id); if (el) el.textContent = id === 'dl-sum-speed' ? (activeCount ? formatSpeed(totalSpeed) : '—') : String(id === 'dl-sum-total' ? 0 : activeCount); };
+  num('dl-sum-active');
+  num('dl-sum-speed');
+  const totalEl = $('dl-sum-total');
+  if (totalEl) window.electronAPI.downloadsGet().then(h => { totalEl.textContent = String((h || []).length); }).catch(() => {});
+}
+
 function renderActiveDownload(id) {
   const dl = activeDownloads[id];
   const container = $('active-downloads');
+  const meta = getFileMeta(dl.filename);
   const el = document.createElement('div');
   el.className = 'dl-active-item';
   el.id = `dl-active-${id}`;
+  el.setAttribute('data-id', id);
   el.innerHTML = `
     <div class="dl-active-header">
-      <span class="dl-status-icon">${getFileIcon(dl.filename)}</span>
-      <span class="dl-active-name">${esc(dl.filename)}</span>
-      <span class="dl-active-size" id="dl-sz-${id}">—</span>
-      <div class="dl-active-actions">
-        <button class="panel-item-btn dl-ctl-btn" id="dl-pause-${id}" title="${dl.paused ? 'Resume' : 'Pause'}">⏸</button>
-        <button class="panel-item-btn danger dl-ctl-btn" id="dl-cancel-${id}" title="Cancel">✕</button>
+      <span class="dl-status-icon" style="border-color:${meta.color}55;background:${meta.color}14">${getFileIcon(dl.filename)}</span>
+      <div class="dl-active-main">
+        <div class="dl-active-name" title="${esc(dl.filename)}">${esc(dl.filename)}</div>
+        <div class="dl-active-meta">
+          <span id="dl-sz-${id}">—</span>
+          <span id="dl-speed-${id}">Starting…</span>
+          <span id="dl-eta-${id}" class="dl-eta"></span>
+        </div>
       </div>
+      <div class="dl-pct-big" id="dl-pct-${id}">0%</div>
     </div>
     <div class="dl-progress-track">
       <div class="dl-progress-fill" id="dl-pf-${id}" style="width:0%"></div>
+      <div class="dl-progress-dot" id="dl-pd-${id}" style="left:0%"></div>
     </div>
-    <div class="dl-active-meta">
-      <span id="dl-speed-${id}">Starting...</span>
-      <span id="dl-pct-${id}">0%</span>
+    <div class="dl-active-actions">
+      <button class="dl-ctl-btn" id="dl-pause-${id}"><svg viewBox="0 0 24 24" width="14" fill="currentColor"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg></button>
+      <button class="dl-ctl-btn danger" id="dl-cancel-${id}" title="Cancel"><svg viewBox="0 0 24 24" width="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
   `;
-  container.appendChild(el);
+  container.prepend(el);
 
   $(`dl-pause-${id}`).addEventListener('click', () => toggleDownloadPause(id));
   $(`dl-cancel-${id}`).addEventListener('click', () => cancelDownload(id));
@@ -2058,6 +2108,7 @@ function toggleDownloadPause(id) {
     dl.paused = true;
   }
   syncDownloadButtons(id);
+  _refreshDlSummary();
 }
 
 function cancelDownload(id) {
@@ -2065,6 +2116,7 @@ function cancelDownload(id) {
   delete activeDownloads[id];
   removeActiveDownloadUI(id);
   updateDlBadge();
+  _refreshDlSummary();
   showToast('Download cancelled');
 }
 
@@ -2073,68 +2125,139 @@ function syncDownloadButtons(id) {
   if (!dl) return;
   const btn = $(`dl-pause-${id}`);
   const fill = $(`dl-pf-${id}`);
+  const dot = $(`dl-pd-${id}`);
   const speedEl = $(`dl-speed-${id}`);
+  const etaEl = $(`dl-eta-${id}`);
+  const item = $(`dl-active-${id}`);
   if (btn) {
-    btn.textContent = dl.paused ? '▶' : '⏸';
+    btn.innerHTML = dl.paused
+      ? '<svg viewBox="0 0 24 24" width="14" fill="currentColor"><path d="M6 4l14 8-14 8z"/></svg>'
+      : '<svg viewBox="0 0 24 24" width="14" fill="currentColor"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>';
     btn.title = dl.paused ? 'Resume' : 'Pause';
     btn.classList.toggle('is-paused', !!dl.paused);
     btn.disabled = dl.paused ? !dl.canResume : !dl.canPause;
+    btn.setAttribute('data-label', dl.paused ? 'resume' : 'pause');
   }
   if (fill) fill.classList.toggle('paused', !!dl.paused);
-  if (speedEl && dl.paused) speedEl.textContent = '⏸ Paused';
+  if (dot) dot.classList.toggle('paused', !!dl.paused);
+  if (item) item.classList.toggle('is-paused', !!dl.paused);
+  if (speedEl && dl.paused) speedEl.textContent = 'Paused';
+  if (etaEl) etaEl.textContent = dl.paused ? '' : formatETA(((dl.totalBytes || 0) - (dl.receivedBytes || 0)) / (dl.speed || 0));
 }
 
 function updateActiveDownloadUI(id, pct, speed, received, total) {
   const pf = $(`dl-pf-${id}`);
+  const dot = $(`dl-pd-${id}`);
   const sp = $(`dl-speed-${id}`);
   const pctEl = $(`dl-pct-${id}`);
   const sz = $(`dl-sz-${id}`);
+  const etaEl = $(`dl-eta-${id}`);
   if (pf) pf.style.width = pct + '%';
+  if (dot) dot.style.left = `calc(${pct}% - ${pct * 0.06}px)`;
   if (sp && !activeDownloads[id]?.paused) sp.textContent = formatSpeed(speed);
   if (pctEl) pctEl.textContent = pct + '%';
   if (sz) sz.textContent = `${formatBytes(received)} / ${formatBytes(total)}`;
+  if (etaEl && speed > 0 && total > 0) etaEl.textContent = formatETA((total - received) / speed);
 }
 
 function removeActiveDownloadUI(id) {
   $(`dl-active-${id}`)?.remove();
+  _refreshDlSummary();
+  if (!panelDownloads.classList.contains('hidden')) renderDownloadsPanel();
+}
+
+function renderActiveSection() {
+  const container = $('active-downloads');
+  const ids = Object.keys(activeDownloads);
+  if (ids.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
+  ids.forEach(id => { if (!$(`dl-active-${id}`)) renderActiveDownload(id); });
+}
+
+function renderDownloadsPanel() {
+  renderActiveSection();
+  loadDownloadsHistory();
 }
 
 async function loadDownloadsHistory() {
   const list = $('downloads-list');
-  const history = await window.electronAPI.downloadsGet();
+  const history = (await window.electronAPI.downloadsGet()) || [];
+  const term = _dlSearchTerm.trim().toLowerCase();
+  let filtered = history;
+  if (term) filtered = filtered.filter(d => (d.filename || '').toLowerCase().includes(term));
+  if (_dlFilter === 'active') filtered = filtered.filter(d => activeDownloads[d.id]);
+  if (_dlFilter === 'completed') filtered = filtered.filter(d => !activeDownloads[d.id]);
+  const hasActive = Object.keys(activeDownloads).length > 0;
 
-  if (!history.length) {
-    list.innerHTML = `<div class="panel-empty"><div class="panel-empty-icon">📥</div><span>No downloads yet.</span></div>`;
+  if (!filtered.length) {
+    const emptyText = (history.length === 0)
+      ? (hasActive ? '' : 'No downloads yet.')
+      : 'Nothing here.';
+    list.innerHTML = `<div class="panel-empty"><div class="panel-empty-icon">📥</div><span>${emptyText}</span></div>`;
     return;
   }
 
-  list.innerHTML = history.map(dl => `
+  list.innerHTML = filtered.map(dl => {
+    const meta = getFileMeta(dl.filename || '');
+    const isActive = !!activeDownloads[dl.id];
+    return `
     <div class="dl-history-item" data-path="${esc(dl.savePath)}">
-      <div class="dl-file-icon">${getFileIcon(dl.filename)}</div>
+      <div class="dl-file-icon" style="border-color:${meta.color}44;background:${meta.color}12;color:${meta.color}">
+        <svg viewBox="0 0 24 24" width="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+        <span class="dl-file-ext">${esc(dl.filename ? dl.filename.split('.').pop().slice(0,4).toUpperCase() : 'FILE')}</span>
+      </div>
       <div class="dl-info">
-        <div class="dl-name">${esc(dl.filename)}</div>
+        <div class="dl-name" title="${esc(dl.filename)}">${esc(dl.filename)}${isActive ? ' <span class="dl-badge-active">●</span>' : ''}</div>
         <div class="dl-meta">${formatBytes(dl.size)} · ${timeAgo(dl.date)}</div>
       </div>
       <div class="dl-actions">
-        <button class="panel-item-btn" data-action="open" data-path="${esc(dl.savePath)}" title="Open file">▶</button>
-        <button class="panel-item-btn" data-action="folder" data-path="${esc(dl.savePath)}" title="Show in folder">📁</button>
+        <button class="dl-act-btn" data-action="open" data-path="${esc(dl.savePath)}" title="Open file"><svg viewBox="0 0 24 24" width="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg></button>
+        <button class="dl-act-btn" data-action="folder" data-path="${esc(dl.savePath)}" title="Show in folder"><svg viewBox="0 0 24 24" width="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></button>
+        <button class="dl-act-btn danger" data-action="delete" data-id="${esc(dl.id)}" title="Remove from list"><svg viewBox="0 0 24 24" width="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></button>
       </div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 
   list.querySelectorAll('.dl-history-item').forEach(el => {
     el.addEventListener('click', e => {
-      const action = e.target.closest('[data-action]')?.dataset.action;
-      if (action === 'open') { window.electronAPI.openFile(e.target.closest('[data-action]').dataset.path); return; }
-      if (action === 'folder') { window.electronAPI.showInFolder(e.target.closest('[data-action]').dataset.path); return; }
-      window.electronAPI.openFile(el.dataset.path);
+      const btn = e.target.closest('[data-action]');
+      const action = btn?.dataset.action;
+      if (!action) { window.electronAPI.openFile(el.dataset.path); return; }
+      const path = btn.dataset.path;
+      if (action === 'open') { window.electronAPI.openFile(path); return; }
+      if (action === 'folder') { window.electronAPI.showInFolder(path); return; }
+      if (action === 'delete') {
+        e.stopPropagation();
+        window.electronAPI.downloadsDeleteOne(btn.dataset.id);
+        el.style.opacity = '0';
+        setTimeout(() => loadDownloadsHistory(), 150);
+      }
     });
   });
 }
 
-$('dl-clear-btn').addEventListener('click', () => {
-  window.electronAPI.downloadsClear();
+$('dl-search').addEventListener('input', (e) => {
+  _dlSearchTerm = e.target.value;
   loadDownloadsHistory();
+});
+
+document.querySelectorAll('.dl-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.dl-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    _dlFilter = tab.dataset.filter;
+    loadDownloadsHistory();
+  });
+});
+
+$('dl-clear-btn').addEventListener('click', () => {
+  if (confirm('Clear all download history?')) {
+    window.electronAPI.downloadsClear();
+    loadDownloadsHistory();
+    showToast('Download history cleared');
+  }
 });
 
 // ===== DOWNLOAD TOAST =====
