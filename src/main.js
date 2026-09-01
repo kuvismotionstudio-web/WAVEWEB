@@ -419,6 +419,11 @@ function createWindow() {
   session.defaultSession.webRequest.onBeforeRequest({ urls: ['*://*/*'] }, (details, callback) => {
     if (adBlockEnabled && mainWindow) {
       const url = details.url;
+      // Never block top-level navigations — a blocked main document makes the
+      // browser unusable. Ads are subresources; let the page itself load and
+      // the engine blocks its sub-requests instead.
+      if (details.resourceType === 'mainFrame') { callback({}); return; }
+
       // Check whitelist — exact domain match (not substring)
       const isWhitelisted = adWhitelist.some(d => {
         try {

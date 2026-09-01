@@ -427,7 +427,7 @@ class AdblockEngine {
       if (ch.test(u)) {
         const leftover = isAllow ? this.allowGenericLeftover : this.blockGenericLeftover;
         const hit = this._testRules(leftover, u, type, isFirstParty, pageHost);
-        return hit || {};
+        return hit || null;
       }
     }
     const regexList = isAllow ? this.allowRegexRules : this.blockRegexRules;
