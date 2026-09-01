@@ -203,9 +203,13 @@
           <div id="newtab-top-sites"></div>
           <div class="newtab-widgets" id="newtop-widgets">
             <div class="newtab-widget widget-weather">
-              <div class="widget-label">Weather</div>
+              <div class="widget-label">Weather <span class="widget-city" id="weather-city-label" title="Change city">🌍</span></div>
               <div class="widget-value">--°C</div>
               <div class="widget-sub">Loading...</div>
+              <div class="widget-city-input hidden">
+                <input id="weather-city-input" type="text" placeholder="City name..." maxlength="40" />
+                <button id="weather-city-ok">✓</button>
+              </div>
             </div>
             <div class="newtab-widget widget-tabs">
               <div class="widget-label">Open Tabs</div>

@@ -2714,7 +2714,9 @@ function updateTabGroups() {
 // ===== WEATHER WIDGET =====
 async function loadWeatherWidget() {
   try {
-    const resp = await fetch('https://wttr.in/?format=j1');
+    const city = (settings.weatherCity || '').trim();
+    const base = city ? `https://wttr.in/${encodeURIComponent(city)}?format=j1` : 'https://wttr.in/?format=j1';
+    const resp = await fetch(base);
     const data = await resp.json();
     const cur = data.current_condition?.[0];
     if (!cur) return;
@@ -2722,16 +2724,72 @@ async function loadWeatherWidget() {
     const desc = cur.weatherDesc?.[0]?.value || '';
     const humidity = cur.humidity;
     const wind = cur.windspeedKmph;
+    const area = data.nearest_area?.[0];
+    const locName = area ? [area.areaName?.[0]?.value, area.region?.[0]?.value].filter(Boolean).join(', ') : '';
 
     const container = $('newtop-widgets');
     if (!container) return;
     const w = container.querySelector('.widget-weather');
     if (w) {
       w.querySelector('.widget-value').textContent = temp + '°C';
-      w.querySelector('.widget-sub').textContent = desc + ' • 💧' + humidity + '% • 💨' + wind + 'km/h';
+      const sub = locName ? `${locName} · ${desc}` : desc;
+      w.querySelector('.widget-sub').textContent = sub + ' • 💧' + humidity + '% • 💨' + wind + 'km/h';
+      if (city) {
+        const label = $('weather-city-label');
+        if (label) {
+          label.textContent = '📍';
+          label.title = locName || city;
+        }
+      }
     }
   } catch (_) {}
 }
+
+function showWeatherCityInput() {
+  const box = document.querySelector('.widget-city-input');
+  const input = $('weather-city-input');
+  if (!box || !input) return;
+  box.classList.remove('hidden');
+  input.value = settings.weatherCity || '';
+  input.focus();
+  input.select();
+}
+
+function applyWeatherCity() {
+  const input = $('weather-city-input');
+  const box = document.querySelector('.widget-city-input');
+  if (!input || !box) return;
+  const city = input.value.trim();
+  if (city) {
+    settings.weatherCity = city;
+    window.electronAPI.settingsSet(settings);
+    showToast('Weather location set to ' + city);
+  } else {
+    delete settings.weatherCity;
+    window.electronAPI.settingsSet(settings);
+    showToast('Weather back to auto-location');
+    $('weather-city-label').textContent = '🌍';
+  }
+  box.classList.add('hidden');
+  loadWeatherWidget();
+}
+
+$('weather-city-label')?.addEventListener('click', (e) => {
+  e.stopPropagation();
+  showWeatherCityInput();
+});
+$('weather-city-ok')?.addEventListener('click', applyWeatherCity);
+$('weather-city-input')?.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') applyWeatherCity();
+  if (e.key === 'Escape') document.querySelector('.widget-city-input')?.classList.add('hidden');
+});
+$('weather-city-input')?.addEventListener('blur', (e) => {
+  setTimeout(() => {
+    if (!document.querySelector('.widget-city-input')?.contains(document.activeElement)) {
+      document.querySelector('.widget-city-input')?.classList.add('hidden');
+    }
+  }, 120);
+});
 
 // ===== SEARCH HISTORY =====
 function renderSearchHistory() {
