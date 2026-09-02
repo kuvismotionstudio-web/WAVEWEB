@@ -90,6 +90,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   passwordsCheckPin: (pin) => ipcRenderer.invoke('passwords-check-pin', pin),
   passwordsIsUnlocked: () => ipcRenderer.invoke('passwords-is-unlocked'),
   passwordsLock: () => ipcRenderer.invoke('passwords-lock'),
+  passwordsActivity: () => ipcRenderer.invoke('passwords-activity'),
   passwordsHasPin: () => ipcRenderer.invoke('passwords-has-pin'),
   passwordsGetAll: () => ipcRenderer.invoke('passwords-get-all'),
   passwordsGetForUrl: (url) => ipcRenderer.invoke('passwords-get-for-url', url),
@@ -136,6 +137,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
       'adblock-subs-changed', 'adblock-sub-status',
       'update-checking', 'update-available', 'update-not-available', 'update-download-progress', 'update-downloaded', 'update-error',
       'ai-download-progress',
+      'passwords-locked',
     ];
     if (allowed.includes(channel)) {
       ipcRenderer.on(channel, (event, ...args) => cb(...args));

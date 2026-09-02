@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const crypto = require('crypto');
+const https = require('https');
 const { autoUpdater } = require('electron-updater');
 const AdblockEngine = require('./adblock-engine');
 const { NET_TYPE_MAP } = require('./adblock-engine');
@@ -1293,15 +1294,100 @@ ipcMain.handle('get-system-info', () => ({
 let _aiPipeline = null;
 let _aiPipelinePromise = null;
 
-const AI_MODEL = 'opalitestudios/Qwen2.5-3B-Instruct-ONNX';
+const AI_MODEL = 'onnx-community/Llama-3.2-3B-Instruct-ONNX';
+const AI_DTYPE = 'q4';
+const AI_MODEL_FILES = ['onnx/model_q4.onnx', 'onnx/model_q4.onnx_data', 'onnx/model_q4.onnx_data_1'];
+const AI_DL_PARTS = 6;
+
+function _resolveUrl(url) {
+  return new Promise((resolve, reject) => {
+    https.get(url, { headers: { 'User-Agent': 'WaveWeb/1.1' } }, (res) => {
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        const loc = res.headers.location;
+        return resolve(_resolveUrl(loc.startsWith('http') ? loc : new URL(loc, url).href));
+      }
+      res.resume();
+      resolve({ url, total: Number(res.headers['content-length'] || 0) });
+    }).on('error', reject);
+  });
+}
+
+function _downloadRange(url, start, end, filePath) {
+  return new Promise((resolve, reject) => {
+    https.get(url, { headers: { 'Range': `bytes=${start}-${end}`, 'User-Agent': 'WaveWeb/1.1' } }, (res) => {
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        const loc = res.headers.location;
+        return resolve(_downloadRange(loc.startsWith('http') ? loc : new URL(loc, url).href, start, end, filePath));
+      }
+      const ws = fs.createWriteStream(filePath);
+      res.pipe(ws);
+      ws.on('finish', resolve);
+      ws.on('error', reject);
+    }).on('error', reject);
+  });
+}
+
+async function _parallelDownload(basePath, filename, sendProgress) {
+  const fileUrl = `https://huggingface.co/${AI_MODEL}/resolve/main/${encodeURIComponent(filename).replace(/%2F/g, '/')}`;
+  const { url: resolvedUrl, total } = await _resolveUrl(fileUrl);
+  if (total <= 0) return;
+
+  const targetPath = path.join(basePath, ...filename.split('/'));
+  const existing = fs.existsSync(targetPath) ? fs.statSync(targetPath).size : 0;
+  if (existing === total) return;
+
+  const tmpDir = targetPath + '.dl';
+  try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch (_) {}
+  fs.mkdirSync(tmpDir, { recursive: true });
+
+  const chunkSize = Math.ceil(total / AI_DL_PARTS);
+  let loaded = 0;
+
+  await Promise.all(Array.from({ length: AI_DL_PARTS }, (_, i) => {
+    const start = i * chunkSize;
+    const end = Math.min(start + chunkSize - 1, total - 1);
+    return _downloadRange(resolvedUrl, start, end, path.join(tmpDir, String(i))).then(() => {
+      loaded += (end - start + 1);
+      if (sendProgress) sendProgress({ status: 'progress', file: filename, loaded, total });
+    });
+  }));
+
+  const ws = fs.createWriteStream(targetPath);
+  for (let i = 0; i < AI_DL_PARTS; i++) {
+    await new Promise((resolve, reject) => {
+      const rs = fs.createReadStream(path.join(tmpDir, String(i)));
+      rs.pipe(ws, { end: false });
+      rs.on('end', resolve);
+      rs.on('error', reject);
+    });
+  }
+  ws.end();
+  await new Promise((resolve) => ws.on('finish', resolve));
+
+  for (let i = 0; i < AI_DL_PARTS; i++) fs.unlinkSync(path.join(tmpDir, String(i)));
+  try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch (_) {}
+}
 
 async function getAIPipeline() {
   if (_aiPipeline) return _aiPipeline;
   if (_aiPipelinePromise) return _aiPipelinePromise;
   _aiPipelinePromise = (async () => {
-    const { pipeline } = await import('@huggingface/transformers');
+    process.release.name = 'node';
+    const { env, pipeline } = await import('@huggingface/transformers');
+    const modelsDir = path.join(userDataPath, 'models');
+    fs.mkdirSync(modelsDir, { recursive: true });
+    env.cacheDir = modelsDir;
+    const sendProgress = (data) => {
+      try { mainWindow?.webContents.send('ai-download-progress', data); } catch (_) {}
+    };
+    const cacheDir = path.join(modelsDir, AI_MODEL);
+    fs.rmSync(path.join(modelsDir, 'opalitestudios'), { recursive: true, force: true });
+    for (const file of AI_MODEL_FILES) {
+      sendProgress({ status: 'initiate', name: AI_MODEL, file });
+      await _parallelDownload(cacheDir, file, sendProgress);
+    }
     _aiPipeline = await pipeline('text-generation', AI_MODEL, {
-      dtype: 'q4f16',
+      dtype: AI_DTYPE,
       progress_callback: (data) => {
         try { mainWindow?.webContents.send('ai-download-progress', data); } catch (_) {}
       },
@@ -1346,6 +1432,7 @@ ipcMain.handle('passwords-set-pin', (e, pin) => {
   const key = deriveKey(pin, Buffer.from(salt, 'base64'));
   const hash = hashKey(key);
   _vaultKey = key;
+  resetVaultTimer();
   const settings = loadJSON(settingsFile, {});
   settings.wavepass = { salt, hash };
   saveJSON(settingsFile, settings);
@@ -1361,12 +1448,39 @@ ipcMain.handle('passwords-check-pin', (e, pin) => {
   const key = deriveKey(pin, Buffer.from(wp.salt, 'base64'));
   if (hashKey(key) !== wp.hash) return false;
   _vaultKey = key;
+  resetVaultTimer();
   return true;
 });
 
 ipcMain.handle('passwords-is-unlocked', () => _vaultKey !== null);
 
-ipcMain.handle('passwords-lock', () => { _vaultKey = null; return true; });
+ipcMain.handle('passwords-lock', () => {
+  _vaultKey = null;
+  if (_vaultTimer) clearTimeout(_vaultTimer);
+  _vaultTimer = null;
+  return true;
+});
+
+// Auto-lock: vault locks itself after a period without user activity
+let _vaultTimer = null;
+function resetVaultTimer() {
+  if (_vaultTimer) clearTimeout(_vaultTimer);
+  _vaultTimer = null;
+  if (_vaultKey === null) return;
+  const mins = (loadJSON(settingsFile, {})).wpAutoLock ?? 5;
+  if (!mins || mins <= 0) return;
+  _vaultTimer = setTimeout(() => {
+    _vaultTimer = null;
+    if (_vaultKey === null) return;
+    _vaultKey = null;
+    for (const wc of BrowserWindow.getAllWindows()) wc.webContents.send('passwords-locked');
+  }, mins * 60 * 1000);
+}
+
+ipcMain.handle('passwords-activity', () => {
+  resetVaultTimer();
+  return true;
+});
 
 ipcMain.handle('passwords-has-pin', () => {
   const settings = loadJSON(settingsFile, {});

@@ -450,11 +450,15 @@ function updateClock() {
   const now = new Date();
   const h = now.getHours().toString().padStart(2, '0');
   const m = now.getMinutes().toString().padStart(2, '0');
+  const s = now.getSeconds().toString().padStart(2, '0');
+  const date = now.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
   const clockEl = $('newtab-clock');
-  if (clockEl) clockEl.textContent = `${h}:${m}`;
+  if (clockEl) {
+    clockEl.innerHTML = `<span class="clock-time"><span class="clock-hh">${h}</span><span class="clock-colon">:</span><span class="clock-mm">${m}</span><span class="clock-sec">${s}</span></span><span class="clock-date">${esc(date)}</span>`;
+  }
 }
 updateClock();
-setInterval(updateClock, 10000);
+setInterval(updateClock, 1000);
 
 // ===== STATS =====
 function updateStats() {
@@ -522,44 +526,86 @@ function trackTopSite(url, title, favicon) {
 }
 
 function showAddSiteModal() {
-  let existing = $('add-site-modal');
+  let existing = $('add-site-modal-wrap');
   if (existing) existing.remove();
 
   const overlay = document.createElement('div');
-  overlay.id = 'add-site-modal';
-  overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);';
+  overlay.id = 'add-site-modal-wrap';
+  overlay.className = 'as-overlay';
   overlay.innerHTML = `
-    <div style="background:var(--bg-1);border:1px solid var(--border);border-radius:var(--r-md);padding:24px;width:380px;box-shadow:0 20px 60px rgba(0,0,0,0.5);">
-      <h3 style="margin:0 0 16px;font-size:16px;color:var(--text-1);">Add site</h3>
-      <div style="display:flex;flex-direction:column;gap:10px;">
-        <div>
-          <label style="font-size:12px;color:var(--text-3);display:block;margin-bottom:4px;">URL</label>
-          <input id="add-site-url" type="text" placeholder="https://example.com" style="width:100%;padding:8px 12px;background:var(--bg-3);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text-1);font-size:13px;outline:none;box-sizing:border-box;" />
-        </div>
-        <div>
-          <label style="font-size:12px;color:var(--text-3);display:block;margin-bottom:4px;">Name</label>
-          <input id="add-site-title" type="text" placeholder="My Site" style="width:100%;padding:8px 12px;background:var(--bg-3);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text-1);font-size:13px;outline:none;box-sizing:border-box;" />
+    <div class="as-card" role="dialog" aria-modal="true">
+      <div class="as-card-glow"></div>
+      <div class="as-icon">＋</div>
+      <h3 class="as-title">Add site</h3>
+      <p class="as-sub">Pin a shortcut to your start page</p>
+      <div class="as-field">
+        <label class="as-label" for="add-site-url">URL</label>
+        <div class="as-input-wrap">
+          <img id="as-favicon" class="as-favicon" src="" alt="" hidden />
+          <input id="add-site-url" type="text" placeholder="https://example.com" autocomplete="off" spellcheck="false" />
         </div>
       </div>
-      <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end;">
-        <button id="add-site-cancel" style="padding:8px 16px;background:var(--bg-3);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text-2);font-size:13px;cursor:pointer;">Cancel</button>
-        <button id="add-site-confirm" style="padding:8px 16px;background:var(--accent);border:none;border-radius:var(--r-sm);color:#fff;font-size:13px;font-weight:600;cursor:pointer;">Add</button>
+      <div class="as-field">
+        <label class="as-label" for="add-site-title">Name</label>
+        <div class="as-input-wrap">
+          <input id="add-site-title" type="text" placeholder="My Site" autocomplete="off" spellcheck="false" />
+        </div>
+      </div>
+      <div class="as-actions">
+        <button id="add-site-cancel" class="as-btn as-btn-ghost">Cancel</button>
+        <button id="add-site-confirm" class="as-btn as-btn-primary">Add site</button>
       </div>
     </div>
   `;
   document.body.appendChild(overlay);
 
-  overlay.querySelector('#add-site-cancel').addEventListener('click', () => overlay.remove());
-  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
-  overlay.querySelector('#add-site-confirm').addEventListener('click', () => {
-    let url = overlay.querySelector('#add-site-url').value.trim();
-    let title = overlay.querySelector('#add-site-title').value.trim();
-    if (!url) return;
-    if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
-    addPinnedSite(url, title || new URL(url).hostname);
-    overlay.remove();
+  const favicon = overlay.querySelector('#as-favicon');
+  const urlInput = overlay.querySelector('#add-site-url');
+  const titleInput = overlay.querySelector('#add-site-title');
+
+  function updateFavicon() {
+    let raw = urlInput.value.trim();
+    let domain = '';
+    try {
+      domain = new URL(/^https?:\/\//i.test(raw) ? raw : 'https://' + raw).hostname;
+    } catch (_) {}
+    if (!domain) { favicon.hidden = true; return; }
+    favicon.src = 'https://www.google.com/s2/favicons?domain=' + encodeURIComponent(domain) + '&sz=64';
+    favicon.hidden = false;
+  }
+  let favTimer = null;
+  urlInput.addEventListener('input', () => {
+    if (favTimer) clearTimeout(favTimer);
+    favTimer = setTimeout(updateFavicon, 250);
   });
-  overlay.querySelector('#add-site-url').focus();
+
+  function close() { overlay.remove(); }
+  overlay.querySelector('#add-site-cancel').addEventListener('click', close);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+  overlay.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+  overlay.querySelector('#add-site-confirm').addEventListener('click', () => {
+    let url = urlInput.value.trim();
+    let title = titleInput.value.trim();
+    if (!url) {
+      urlInput.parentElement.classList.remove('as-error');
+      void urlInput.parentElement.offsetWidth;
+      urlInput.parentElement.classList.add('as-error');
+      urlInput.focus();
+      return;
+    }
+    if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+    let host = url;
+    try { host = new URL(url).hostname; } catch (_) {}
+    addPinnedSite(url, title || host);
+    close();
+  });
+  urlInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); titleInput.focus(); }
+  });
+  titleInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); overlay.querySelector('#add-site-confirm').click(); }
+  });
+  urlInput.focus();
 }
 
 function renderTopSites() {
@@ -2349,8 +2395,11 @@ function failToast(id) {
 let _wpUnlocked = false;
 let _wpData = [];
 let _wpFiltered = [];
+let _wpRevealed = {};
 
 async function loadPasswordsPanel() {
+  const autoLockSel = $('wp-auto-lock');
+  if (autoLockSel) autoLockSel.value = String(settings.wpAutoLock ?? 5);
   const hasPin = await window.electronAPI.passwordsHasPin();
   $('wp-lock-btn').classList.toggle('hidden', !hasPin);
 
@@ -2415,16 +2464,41 @@ function generatePassword(length = 16, opts = {}) {
   return pwd.split('').sort(() => Math.random() - 0.5).join('');
 }
 
-$('btn-gen-password')?.addEventListener('click', () => {
-  const pwd = generatePassword();
+function passwordStrength(pwd) {
+  let score = 0;
+  if (pwd.length >= 10) score++;
+  if (pwd.length >= 16) score++;
+  if (/[a-z]/.test(pwd) && /[A-Z]/.test(pwd)) score++;
+  if (/\d/.test(pwd)) score++;
+  if (/[^A-Za-z0-9]/.test(pwd)) score++;
+  return { label: ['Very weak', 'Weak', 'Okay', 'Good', 'Strong', 'Very strong'][score], score };
+}
+
+function updateGeneratedPassword() {
+  const len = Math.min(64, Math.max(8, parseInt($('wp-gen-len')?.value || '16', 10)));
+  const sym = $('wp-gen-symbols')?.checked !== false;
+  const pwd = generatePassword(len, { symbols: sym });
   $('wp-gen-pwd').textContent = pwd;
+  const st = passwordStrength(pwd);
+  const fill = $('wp-gen-strength-fill');
+  if (fill) fill.style.width = Math.round(((st.score + 1) / 6) * 100) + '%';
+  const lab = $('wp-gen-strength-label');
+  if (lab) lab.textContent = st.label;
+  const val = $('wp-gen-len-val');
+  if (val) val.textContent = len;
+}
+
+$('btn-gen-password')?.addEventListener('click', () => {
   $('wp-gen-result').classList.remove('hidden');
+  updateGeneratedPassword();
 });
+
+$('wp-gen-len')?.addEventListener('input', updateGeneratedPassword);
+$('wp-gen-symbols')?.addEventListener('change', updateGeneratedPassword);
 
 $('wp-gen-copy')?.addEventListener('click', () => {
   const pwd = $('wp-gen-pwd').textContent;
-  navigator.clipboard.writeText(pwd);
-  showToast('Password copied', 1000);
+  if (pwd) copySensitive(pwd, 'Password');
 });
 
 $('wp-gen-close')?.addEventListener('click', () => {
@@ -2443,15 +2517,22 @@ function renderPasswordsList() {
   list.innerHTML = items.map(p => {
     const host = getHost(p.url);
     const initial = host ? host[0].toUpperCase() : '?';
+    const revealed = _wpRevealed[p.id] === true;
+    const pwRow = revealed
+      ? `<div class="wp-item-password">${esc(p.password)}</div>`
+      : `<div class="wp-item-mask">••••••••</div>`;
     return `<div class="wp-item" data-id="${esc(p.id)}">
       <div class="wp-item-icon">${initial}</div>
       <div class="wp-item-info">
         <div class="wp-item-site">${esc(host || p.url)}</div>
-        <div class="wp-item-username">${esc(p.username)}</div>
+        <div class="wp-item-username">${esc(p.username || '—')}</div>
+        ${pwRow}
       </div>
       <div class="wp-item-actions">
+        <button class="wp-item-btn" data-action="reveal" title="${revealed ? 'Hide password' : 'Show password'}">${revealed ? '🙈' : '👁'}</button>
         <button class="wp-item-btn" data-action="copy-user" title="Copy username">👤</button>
         <button class="wp-item-btn" data-action="copy-pass" title="Copy password">🔑</button>
+        <button class="wp-item-btn" data-action="edit" title="Edit entry">✏️</button>
         <button class="wp-item-btn danger" data-action="delete" title="Delete">🗑</button>
       </div>
     </div>`;
@@ -2467,16 +2548,28 @@ function renderPasswordsList() {
         await navigator.clipboard.writeText(entry.username);
         showToast('Username copied');
       } else if (action === 'copy-pass') {
-        await navigator.clipboard.writeText(entry.password);
-        showToast('Password copied');
+        copySensitive(entry.password, 'Password');
+      } else if (action === 'reveal') {
+        _wpRevealed[entry.id] = !_wpRevealed[entry.id];
+        renderPasswordsList();
+      } else if (action === 'edit') {
+        openPasswordEditor(entry);
       } else if (action === 'delete') {
+        if (!confirm('Delete this password?')) return;
         await window.electronAPI.passwordsDelete(entry.id);
         _wpData = _wpData.filter(p => p.id !== entry.id);
         filterPasswordsList();
         renderPasswordsList();
         showToast('Password deleted');
-  }
-});
+      }
+    });
+  });
+  list.querySelectorAll('.wp-item').forEach(el => {
+    el.addEventListener('click', (e) => {
+      if (e.target.closest('.wp-item-btn')) return;
+      const entry = _wpData.find(p => p.id === el.dataset.id);
+      if (entry) openPasswordEditor(entry);
+    });
   });
 }
 
@@ -2819,6 +2912,9 @@ function getHost(url) {
   try { return new URL(url).hostname.replace('www.', ''); } catch (_) { return ''; }
 }
 
+const WP_USER_SEL = 'input[type="email"], input[autocomplete="username"], input[autocomplete="email"], input[name="email" i], input[name="login" i], input[name="username" i], input[name="user" i], input[id*="user" i], input[id*="login" i], input[type="text"][autocomplete="username"]';
+const WP_PASS_SEL = 'input[type="password"], input[autocomplete="current-password"]';
+
 function filterPasswordsList() {
   const q = ($('wp-search')?.value || '').toLowerCase();
   if (!q) { _wpFiltered = []; return; }
@@ -2834,12 +2930,14 @@ async function showSavePasswordPrompt(webview, url, username, password) {
   if (!hasPin) return;
   const unlocked = await window.electronAPI.passwordsIsUnlocked();
   if (!unlocked) return;
-  const exists = await window.electronAPI.passwordsHasEntry(url, username);
-  if (exists) return; // already saved
+  const existing = await window.electronAPI.passwordsGetForUrl(url);
+  const sameUser = existing.find(e => e.username === username);
+  if (sameUser && sameUser.password === password) return; // unchanged
   if (localStorage.getItem('wp_never_' + getHost(url))) return; // user chose "Never" for this site
 
   const el = $('wp-save-prompt');
   $('wp-save-prompt-url').textContent = getHost(url) || url;
+  $('wp-save-prompt-title').textContent = sameUser ? 'Update password?' : 'Save password?';
   el.classList.remove('hidden');
 
   const cleanup = () => { el.classList.add('hidden'); };
@@ -2848,7 +2946,7 @@ async function showSavePasswordPrompt(webview, url, username, password) {
     _wpData = await window.electronAPI.passwordsGetAll();
     filterPasswordsList();
     if (activePanel === 'passwords') renderPasswordsList();
-    showToast('Password saved');
+    showToast(sameUser ? 'Password updated' : 'Password saved');
     cleanup();
   };
   $('wp-save-prompt-ignore').onclick = () => {
@@ -2870,8 +2968,8 @@ async function autofillPasswords(webview, url) {
   function inject(cred) {
     webview.executeJavaScript(`
       (function(){
-        const u = document.querySelector('input[type="email"], input[name="email"], input[name="login"], input[name="username"], input[type="text"][autocomplete="username"]');
-        const p = document.querySelector('input[type="password"]');
+        const u = document.querySelector('${WP_USER_SEL}');
+        const p = document.querySelector('${WP_PASS_SEL}');
         if (u && p) {
           u.value = ${JSON.stringify(cred.username)};
           p.value = ${JSON.stringify(cred.password)};
@@ -2918,9 +3016,14 @@ async function autofillPasswords(webview, url) {
   }
 }
 
+function wpPinEnter(ev) {
+  if (ev.key === 'Enter') { ev.preventDefault(); $('wp-unlock-btn').click(); }
+}
+$('wp-unlock-input').addEventListener('keydown', wpPinEnter);
+
 $('wp-unlock-btn').addEventListener('click', async () => {
   const pin = $('wp-unlock-input').value;
-  if (!pin || !/^\d{4,6}$/.test(pin)) { $('wp-unlock-error').textContent = 'PIN must be 4-6 digits'; return; }
+  if (!pin || !/^\d{4,6}$/.test(pin)) { $('wp-unlock-error').textContent = 'PIN must be 4-6 digits'; wpShake(); return; }
 
   const hasPin = await window.electronAPI.passwordsHasPin();
   if (!hasPin) {
@@ -2938,6 +3041,7 @@ $('wp-unlock-btn').addEventListener('click', async () => {
         confirmEl.maxLength = 6;
         confirmEl.autocomplete = 'off';
         confirmEl.style.marginTop = '8px';
+        confirmEl.addEventListener('keydown', wpPinEnter);
         $('wp-unlock-input').parentNode.insertBefore(confirmEl, $('wp-unlock-error'));
         confirmEl.focus();
       }
@@ -2945,7 +3049,7 @@ $('wp-unlock-btn').addEventListener('click', async () => {
       $('wp-unlock-btn').textContent = 'Confirm';
       return;
     }
-    if (pin !== confirm) { $('wp-unlock-error').textContent = 'PINs do not match'; $('wp-unlock-confirm').value = ''; return; }
+    if (pin !== confirm) { $('wp-unlock-error').textContent = 'PINs do not match'; $('wp-unlock-confirm').value = ''; wpShake(); return; }
     await window.electronAPI.passwordsSetPin(pin);
     _wpUnlocked = true;
     _wpData = [];
@@ -2963,20 +3067,30 @@ $('wp-unlock-btn').addEventListener('click', async () => {
   if (!ok) {
     $('wp-unlock-error').textContent = 'Wrong PIN';
     $('wp-unlock-input').value = '';
+    wpShake();
     return;
   }
   _wpUnlocked = true;
   _wpData = await window.electronAPI.passwordsGetAll();
   $('wp-locked').classList.add('hidden');
   $('wp-vault').classList.remove('hidden');
+  $('wp-search')?.focus();
   renderPasswordsList();
 });
 
 $('wp-lock-btn').addEventListener('click', async () => {
   await window.electronAPI.passwordsLock();
+  showVaultLocked();
+});
+
+function showVaultLocked() {
   _wpUnlocked = false;
-  $('wp-vault').classList.add('hidden');
-  $('wp-locked').classList.remove('hidden');
+  const vault = $('wp-vault');
+  const locked = $('wp-locked');
+  if (vault) vault.classList.add('hidden');
+  if (locked) locked.classList.remove('hidden');
+  const err = $('wp-unlock-error');
+  if (err) err.textContent = '';
   $('wp-unlock-input').value = '';
   $('wp-unlock-input').placeholder = 'Enter PIN';
   $('wp-unlock-input').classList.remove('hidden');
@@ -2985,9 +3099,129 @@ $('wp-lock-btn').addEventListener('click', async () => {
   $('wp-lock-icon').textContent = '🔐';
   $('wp-lock-title').textContent = 'Vault Locked';
   $('wp-lock-sub').textContent = 'Enter your master PIN to unlock';
-  $('wp-unlock-error').textContent = '';
   $('wp-unlock-confirm')?.remove();
+}
+
+function wpShake() {
+  const c = $('wp-locked');
+  if (!c) return;
+  c.classList.remove('wp-pin-shake');
+  void c.offsetWidth;
+  c.classList.add('wp-pin-shake');
+}
+
+function copySensitive(text, label) {
+  navigator.clipboard.writeText(text);
+  showToast(`${label} copied · clears in 30s`);
+  setTimeout(() => { navigator.clipboard.writeText(''); }, 30000);
+}
+
+function openPasswordEditor(entry) {
+  let existing = $('wp-editor-wrap');
+  if (existing) existing.remove();
+
+  const url = entry ? entry.url : '';
+  const username = entry ? entry.username : '';
+  const password = entry ? entry.password : '';
+
+  const overlay = document.createElement('div');
+  overlay.id = 'wp-editor-wrap';
+  overlay.className = 'as-overlay';
+  overlay.innerHTML = `
+    <div class="as-card wp-editor" role="dialog" aria-modal="true">
+      <div class="as-card-glow"></div>
+      <div class="as-icon">🔑</div>
+      <h3 class="as-title">${entry ? 'Edit entry' : 'Add entry'}</h3>
+      <p class="as-sub">${entry ? esc(getHost(entry.url) || 'Saved credentials') : 'Store credentials for a website'}</p>
+      <div class="as-field">
+        <label class="as-label" for="wp-ed-url">URL</label>
+        <div class="as-input-wrap"><input id="wp-ed-url" type="text" value="${esc(url)}" placeholder="https://example.com" autocomplete="off" spellcheck="false" /></div>
+      </div>
+      <div class="as-field">
+        <label class="as-label" for="wp-ed-user">Username</label>
+        <div class="as-input-wrap"><input id="wp-ed-user" type="text" value="${esc(username)}" placeholder="you@example.com" autocomplete="off" spellcheck="false" /></div>
+      </div>
+      <div class="as-field">
+        <label class="as-label" for="wp-ed-pass">Password</label>
+        <div class="as-input-wrap"><input id="wp-ed-pass" type="password" value="${esc(password)}" placeholder="••••••" autocomplete="off" /><button class="wp-ed-eye" id="wp-ed-eye" tabindex="-1">👁</button></div>
+      </div>
+      <div class="as-actions">
+        <button class="as-btn as-btn-ghost" id="wp-ed-cancel">Cancel</button>
+        <button class="as-btn as-btn-primary" id="wp-ed-save">Save</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  const urlInput = overlay.querySelector('#wp-ed-url');
+  const userInput = overlay.querySelector('#wp-ed-user');
+  const passInput = overlay.querySelector('#wp-ed-pass');
+  const eyeBtn = overlay.querySelector('#wp-ed-eye');
+
+  eyeBtn.addEventListener('click', () => {
+    const show = passInput.type === 'password';
+    passInput.type = show ? 'text' : 'password';
+    eyeBtn.textContent = show ? '🙈' : '👁';
+  });
+
+  function close() { overlay.remove(); }
+  overlay.querySelector('#wp-ed-cancel').addEventListener('click', close);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+  overlay.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+
+  overlay.querySelector('#wp-ed-save').addEventListener('click', async () => {
+    let url = urlInput.value.trim();
+    if (!url) return;
+    if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+    await window.electronAPI.passwordsSave({ url, username: userInput.value.trim(), password: passInput.value });
+    _wpData = await window.electronAPI.passwordsGetAll();
+    filterPasswordsList();
+    renderPasswordsList();
+    close();
+    showToast(entry ? 'Entry updated' : 'Entry saved');
+  });
+
+  urlInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); userInput.focus(); }
+  });
+  userInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); passInput.focus(); }
+  });
+  passInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); overlay.querySelector('#wp-ed-save').click(); }
+  });
+
+  urlInput.focus();
+  if (url) userInput.select();
+}
+
+let _wpActThrottle = 0;
+function pingPasswordsActivity() {
+  if (!_wpUnlocked) return;
+  const now = Date.now();
+  if (now - _wpActThrottle < 15000) return;
+  _wpActThrottle = now;
+  window.electronAPI.passwordsActivity();
+}
+window.addEventListener('mousemove', pingPasswordsActivity);
+window.addEventListener('keydown', pingPasswordsActivity);
+window.addEventListener('click', pingPasswordsActivity);
+window.addEventListener('wheel', pingPasswordsActivity);
+
+$('wp-auto-lock')?.addEventListener('change', () => {
+  const sel = $('wp-auto-lock');
+  settings.wpAutoLock = parseInt(sel.value, 10);
+  window.electronAPI.settingsSet(settings);
+  if (_wpUnlocked) window.electronAPI.passwordsActivity();
 });
+
+window.electronAPI.on('passwords-locked', () => {
+  if (!_wpUnlocked) return;
+  showVaultLocked();
+  showToast('WavePass locked automatically');
+});
+
+$('wp-add-btn')?.addEventListener('click', () => openPasswordEditor(null));
 
 // Search passwords
 $('wp-search')?.addEventListener('input', () => {
@@ -2999,15 +3233,30 @@ $('wp-search')?.addEventListener('input', () => {
 function watchLoginForm(webview, url) {
   webview.executeJavaScript(`
     (function(){
-      const forms = document.querySelectorAll('form');
-      forms.forEach(f => {
-        const pwd = f.querySelector('input[type="password"]');
-        if (!pwd) return;
-        f.addEventListener('submit', function(e) {
-          const user = f.querySelector('input[type="email"], input[name="email"], input[name="login"], input[name="username"], input[type="text"][autocomplete="username"]');
-          const data = { username: user ? user.value : '', password: pwd.value };
-          setTimeout(() => { console.log('__WW_LOGIN__' + JSON.stringify(data)); }, 200);
+      const USER = '${WP_USER_SEL}';
+      const PASS = '${WP_PASS_SEL}';
+      const readLogin = () => {
+        const u = document.querySelector(USER);
+        const p = document.querySelector(PASS);
+        return { username: u ? u.value : '', password: p ? p.value : '' };
+      };
+      const emit = () => {
+        const d = readLogin();
+        if (d.username && d.password) setTimeout(() => { console.log('__WW_LOGIN__' + JSON.stringify(d)); }, 200);
+      };
+      document.querySelectorAll('form').forEach(f => {
+        const p = f.querySelector(PASS);
+        if (!p) return;
+        f.addEventListener('submit', function() {
+          const d = readLogin();
+          setTimeout(() => { console.log('__WW_LOGIN__' + JSON.stringify(d)); }, 200);
         }, { once: true });
+        f.querySelectorAll('button[type="submit"], input[type="submit"]').forEach(b => {
+          b.addEventListener('click', emit, { once: true });
+        });
+      });
+      document.querySelectorAll('button[type="submit"], input[type="submit"]').forEach(b => {
+        if (!b.closest('form')) b.addEventListener('click', emit, { once: true });
       });
     })();
   `);
@@ -3056,7 +3305,7 @@ window.electronAPI.on('ai-download-progress', (data) => {
 async function loadAIModel() {
   if (aiPipeline) return true;
   if (_aiLoadPromise) return _aiLoadPromise;
-  _aiLoadMsg = addAIMessage('bot', aiProgressHTML(2, 'Pobieranie Qwen2.5-3B (~2GB, tylko raz)…'));
+  _aiLoadMsg = addAIMessage('bot', aiProgressHTML(2, 'Pobieranie Llama 3.2-3B (~3.5GB, tylko raz)…'));
   _aiLoadPromise = window.electronAPI.aiLoadModel().then(() => {
     aiPipeline = true;
     _aiLoadPromise = null;
@@ -3112,12 +3361,12 @@ async function sendAIMessage(text) {
 
   const tab = tabs.find(t => t.id === activeTabId);
   const currentUrl = tab?.url || 'New Tab';
-  const prompt = `<|im_start|>system
+  const prompt = `<|begin_of_text|><|start_header_id|>system<|end_header_id|>
 You are Wave AI, a smart, helpful assistant built into the Wave browser. The user is currently viewing: ${currentUrl}.
-Be concise (2-4 sentences for casual questions, but give full detailed step-by-step answers when asked). Reply in the language the user writes in. Be friendly, accurate and never invent facts.<|im_end|>
-<|im_start|>user
-${text}<|im_end|>
-<|im_start|>assistant
+Be concise (2-4 sentences for casual questions, but give full detailed step-by-step answers when asked). Reply in the language the user writes in. Be friendly, accurate and never invent facts.<|eot_id|>
+<|start_header_id|>user<|end_header_id|>
+${text}<|eot_id|>
+<|start_header_id|>assistant<|end_header_id|>
 `;
 
   // Load model if needed

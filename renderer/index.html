@@ -180,7 +180,12 @@
 
       <!-- NEW TAB PAGE -->
       <div id="newtab-page" class="active">
-        <div id="newtab-bg"></div>
+        <div id="newtab-bg">
+          <div class="newtab-orb o1"></div>
+          <div class="newtab-orb o2"></div>
+          <div class="newtab-orb o3"></div>
+          <div class="newtab-orb o4"></div>
+        </div>
         <div id="newtab-content">
           <div id="newtab-clock"></div>
           <div id="newtab-logo">
@@ -282,6 +287,13 @@
       <div class="panel-header">
         <span class="panel-title">🔑 WavePass</span>
         <div class="panel-header-actions">
+          <select id="wp-auto-lock" class="wp-autolock-select" title="Auto-lock vault after inactivity">
+            <option value="1">1 min</option>
+            <option value="5" selected>5 min</option>
+            <option value="15">15 min</option>
+            <option value="60">1 h</option>
+            <option value="0">Never</option>
+          </select>
           <button id="wp-lock-btn" class="panel-action-btn hidden">Lock</button>
           <button class="panel-close-btn" data-panel="passwords">✕</button>
         </div>
@@ -292,12 +304,25 @@
           <input type="text" id="wp-search" class="panel-search" placeholder="Search passwords..." />
         </div>
         <div style="padding: 4px 12px; display: flex; gap: 6px;">
-          <button id="btn-gen-password" class="settings-btn" style="font-size:11px;flex:1">🎲 Generate Password</button>
+          <button id="btn-gen-password" class="settings-btn" style="font-size:11px;flex:1">🎲 Password Generator</button>
+          <button id="wp-add-btn" class="settings-btn" style="font-size:11px;flex:1">➕ Add</button>
         </div>
-        <div id="wp-gen-result" class="hidden" style="padding: 8px 14px; background: rgba(108,99,255,0.04); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px;">
-          <code id="wp-gen-pwd" style="flex:1;font-size:13px;color:var(--text-1);word-break:break-all"></code>
-          <button id="wp-gen-copy" class="settings-btn" style="font-size:11px">📋</button>
-          <button id="wp-gen-close" class="settings-btn" style="font-size:11px">✕</button>
+        <div id="wp-gen-result" class="wp-gen hidden">
+          <div class="wp-gen-top">
+            <code id="wp-gen-pwd"></code>
+            <div class="wp-gen-btns">
+              <button id="wp-gen-copy" title="Copy password">📋</button>
+              <button id="wp-gen-close" title="Close">✕</button>
+            </div>
+          </div>
+          <div class="wp-gen-strength">
+            <div class="wp-gen-strength-bar"><span id="wp-gen-strength-fill"></span></div>
+            <span id="wp-gen-strength-label">Strong</span>
+          </div>
+          <div class="wp-gen-opts">
+            <label class="wp-gen-len"><span>Length</span><input type="range" id="wp-gen-len" min="8" max="64" value="16" /><b id="wp-gen-len-val">16</b></label>
+            <label class="wp-gen-sym"><input type="checkbox" id="wp-gen-symbols" checked /> symbols</label>
+          </div>
         </div>
         <div id="wp-list" class="panel-list"></div>
       </div>
@@ -586,10 +611,10 @@
           <div class="settings-row">
             <div class="settings-label">
               <span>Model</span>
-              <small>Downloaded once, cached in browser (~250MB)</small>
+              <small>Downloaded once, cached in browser (~3.5GB)</small>
             </div>
             <select id="setting-ai-model" class="settings-select">
-              <option value="opalitestudios/Qwen2.5-3B-Instruct-ONNX">Qwen2.5-3B Instruct (best quality)</option>
+              <option value="onnx-community/Llama-3.2-3B-Instruct-ONNX">Llama 3.2-3B Instruct (best quality)</option>
             </select>
           </div>
         </div>
@@ -680,7 +705,7 @@
             <div class="ai-setup-option-title">🧠 Local AI</div>
             <p>Uses Transformers.js — model działa wprost w przeglądarce. Zero instalacji, zero kluczy API.</p>
             <button id="ai-load-model" class="settings-btn full-width">Start AI</button>
-            <small>Qwen2.5-3B-Instruct (~2GB — pobiera się raz, działa offline, świetnie mówi po polsku).</small>
+            <small>Llama 3.2-3B Instruct (~3.5GB — pobiera się raz, działa offline, świetnie mówi po polsku).</small>
           </div>
         </div>
       </div>
@@ -692,7 +717,7 @@
             <div class="ai-bubble">Hey! I'm <strong>Wave AI</strong>. Ask me anything — I can summarize pages, search, translate, and more.</div>
           </div>
         </div>
-        <div class="ai-model-badge"><span>🧠 Qwen2.5 · Local</span></div>
+        <div class="ai-model-badge"><span>🧠 Llama 3.2 · Local</span></div>
         <div id="ai-quick-actions">
           <button class="ai-quick-btn" id="ai-summarize">📄 <span>Summarize</span></button>
           <button class="ai-quick-btn" id="ai-translate">🌐 <span>Translate</span></button>
