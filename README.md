@@ -1,7 +1,7 @@
 # 🌊 WAVEWEB
 
 <p align="center">
-  <img src="assets/waveweb.png" alt="WAVEWEB" width="240">
+  <img src="assets/logowaveweb.png" alt="WAVEWEB" width="240">
 </p>
 
 > A modern, lightweight Chromium-based browser built on Electron — with a sleek dark UI, a built-in AI assistant, and a stack of features you won't find in a stock browser.
