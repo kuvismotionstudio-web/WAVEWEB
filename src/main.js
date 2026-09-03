@@ -16,7 +16,7 @@ autoUpdater.autoInstallOnAppQuit = true;
 autoUpdater.logger = { info: (m) => console.log('[updater]', m), warn: (m) => console.warn('[updater]', m), error: (m) => console.error('[updater]', m), debug: (m) => {} };
 const updaterFail = (err) => {
   console.error('[updater] check failed:', err && err.stack ? err.stack : err);
-  if (mainWindow) mainWindow.webContents.send('update-error', (err && err.message) || 'Unknown update error');
+  if (mainWindow) mainWindow.webContents.send('update-error', (err && err.message) || 'Nieznany błąd aktualizacji');
 };
 
 autoUpdater.on('checking-for-update', () => {
@@ -87,6 +87,45 @@ function getDownloadPath() {
 
 function getHostSafe(url) {
   try { return new URL(url).hostname.toLowerCase(); } catch (_) { return ''; }
+}
+
+// ===== AUTH HOST WHITELIST =====
+// Full network bypass for OAuth / social-login ecosystems. Google, Facebook,
+// Microsoft and others load many sub-resources (scripts, fonts, images) from
+// companion domains that do NOT match AUTH_ALLOW regexes but are REQUIRED for
+// the login flow to complete. Treating these hosts as always-allowed prevents
+// the ad blocker from silently breaking "Sign in with ..." buttons.
+const AUTH_HOSTS = [
+  'accounts.google.com', 'myaccount.google.com', 'ssl.gstatic.com',
+  'www.gstatic.com', 'lh3.googleusercontent.com', 'lh5.googleusercontent.com',
+  'lh6.googleusercontent.com', 'googleusercontent.com', 'play.google.com',
+  'googleapis.com', 'gstatic.com', 'client4.google.com', 'accounts.youtube.com',
+  'apis.google.com', 'oauth.googleusercontent.com',
+  'connect.facebook.net', 'connect.facebook.com', 'www.facebook.com', 'm.facebook.com',
+  'fbcdn.net', 'facebook.com',
+  'login.microsoftonline.com', 'login.microsoft.com', 'login.live.com',
+  'microsoftonline.com', 'graph.microsoft.com', 'graph.windows.net',
+  'github.com', 'githubusercontent.com', 'githublogin.com', 'github-cloud.s3.amazonaws.com',
+  'appleid.apple.com', 'apple.com', 'icloud.com',
+  'discord.com', 'discordapp.com', 'cdn.discordapp.com',
+  'id.twitch.tv', 'accounts.twitch.tv', 'twitch.tv',
+  'accounts.spotify.com', 'spotify.com', 'scdn.co',
+  'login.yahoo.com', 'yahoo.com', 'oath.com',
+  'auth.linkedin.com', 'linkedin.com', 'static.licdn.com',
+  'oauth.reddit.com', 'reddit.com', 'redd.it',
+  'login.vk.com', 'vk.com', 'id.vk.com',
+  'login.facebook.com', 'www.linkedin.com',
+  'twitter.com', 'x.com', 'platform.twitter.com', 'abs.twimg.com', 'twimg.com',
+  'login.paypal.com', 'paypal.com',
+  'steamcommunity.com', 'steampowered.com',
+  'dropbox.com', 'gitlab.com', 'bitbucket.org', 'atlassian.com',
+];
+
+function isAuthHost(url) {
+  try {
+    const host = new URL(url).hostname.toLowerCase();
+    return AUTH_HOSTS.some(d => host === d || host.endsWith('.' + d));
+  } catch (_) { return false; }
 }
 
 function loadJSON(file, def) {
@@ -249,6 +288,7 @@ const AUTH_ALLOW = [
 ];
 
 function isAuthUrl(url) {
+  if (isAuthHost(url)) return true;
   try {
     if (AUTH_ALLOW.some(re => re.test(url))) return true;
     const host = new URL(url).hostname;
@@ -310,9 +350,9 @@ async function fetchSubscription(sub) {
   sendSubStatus(sub.id, 'updating');
   try {
     const res = await net.fetch(sub.url, { signal: AbortSignal.timeout(45000) });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
+    if (!res.ok) throw new Error('Błąd HTTP ' + res.status);
     const text = await res.text();
-    if (!text || text.length < 50) throw new Error('Empty filter list');
+    if (!text || text.length < 50) throw new Error('Pusta lista filtrów');
     fs.writeFileSync(listFilePath(sub.id), text);
     sub.lastUpdate = Date.now();
     saveSubscriptions();
@@ -607,6 +647,15 @@ ipcMain.on('history-add', (e, entry) => {
   history.unshift({ ...entry, date: new Date().toISOString() });
   saveJSON(historyFile, history.slice(0, 5000));
 });
+ipcMain.on('history-delete', (e, url) => {
+  const history = loadJSON(historyFile, []);
+  saveJSON(historyFile, history.filter(h => h.url !== url));
+});
+ipcMain.on('history-clear-range', (e, ms) => {
+  const history = loadJSON(historyFile, []);
+  const cutoff = Date.now() - ms;
+  saveJSON(historyFile, history.filter(h => new Date(h.date).getTime() >= cutoff));
+});
 ipcMain.on('history-clear', () => saveJSON(historyFile, []));
 
 // Clear browsing data
@@ -753,15 +802,15 @@ ipcMain.handle('adblock-subscriptions-get', () => {
 ipcMain.handle('adblock-subscription-add', async (e, { name, url }) => {
   try {
     const u = new URL(url);
-    if (!/^https?:$/.test(u.protocol)) throw new Error('Invalid URL');
+    if (!/^https?:$/.test(u.protocol)) throw new Error('Nieprawidłowy adres URL');
   } catch (_) {
-    return { ok: false, error: 'Invalid URL' };
+    return { ok: false, error: 'Nieprawidłowy adres URL' };
   }
   const id = crypto.createHash('md5').update(url).digest('hex').slice(0, 12);
-  if (subscriptions.some(s => s.id === id)) return { ok: false, error: 'Already added' };
+  if (subscriptions.some(s => s.id === id)) return { ok: false, error: 'Lista już została dodana' };
   const sub = {
     id,
-    name: (name && name.trim()) || getHostSafe(url) || 'Custom list',
+    name: (name && name.trim()) || getHostSafe(url) || 'Lista niestandardowa',
     url, enabled: true, lastUpdate: 0, rules: 0,
   };
   subscriptions.push(sub);
@@ -790,7 +839,7 @@ ipcMain.on('adblock-subscription-toggle', (e, { id, enabled }) => {
 
 ipcMain.handle('adblock-subscription-update', async (e, id) => {
   const sub = subscriptions.find(s => s.id === id);
-  if (!sub) return { ok: false, error: 'Not found' };
+  if (!sub) return { ok: false, error: 'Nie znaleziono' };
   return fetchSubscription(sub);
 });
 
@@ -804,42 +853,83 @@ ipcMain.handle('adblock-subscriptions-update-all', async () => {
 // Context menu for webview
 ipcMain.on('show-context-menu', (e, params) => {
   const items = [];
+  const pageURL = params.pageURL || '';
+  const linkURL = params.linkURL || '';
+  const sel = params.selectionText || '';
+  const srcURL = params.srcURL || '';
 
-  if (params.linkURL) {
+  // ===== LINK =====
+  if (linkURL) {
     items.push(
-      { label: 'Open link in new tab', icon: '↗', action: 'open-link-newtab', arg: params.linkURL },
-      { label: 'Copy link address', icon: '📎', action: 'copy-text', arg: params.linkURL },
-      { label: 'Save link to reading list', icon: '⏱', action: 'save-to-reading-list', arg: { url: params.linkURL, title: params.linkText || params.linkURL } },
+      { label: 'Otwórz link', icon: '↗', action: 'open-link', arg: linkURL, shortcut: '⏎' },
+      { label: 'Otwórz link w nowej karcie', icon: '⧉', action: 'open-link-newtab', arg: linkURL, shortcut: 'Ctrl+⇧+⏎' },
+      { label: 'Otwórz link w nowej karcie (w tle)', icon: '🡻', action: 'open-link-background', arg: linkURL },
+      { label: 'Otwórz link w trybie incognito', icon: '🕵', action: 'open-link-incognito', arg: linkURL },
+      { separator: true },
+      { label: 'Kopiuj adres linku', icon: '📋', action: 'copy-text', arg: linkURL },
+      { label: 'Oznacz link', icon: '📌', action: 'bookmark-url', arg: { url: linkURL, title: params.linkText || linkURL } },
+      { label: 'Zapisz link na liście do przeczytania', icon: '⏱', action: 'save-to-reading-list', arg: { url: linkURL, title: params.linkText || linkURL } },
       { separator: true }
     );
   }
 
-  if (params.selectionText) {
+  // ===== SELECTION =====
+  if (sel) {
+    const preview = sel.replace(/\s+/g, ' ').trim().substring(0, 28);
     items.push(
-      { label: `Search "${params.selectionText.substring(0, 25)}..."`, icon: '🔎', action: 'search-selection', arg: params.selectionText },
-      { label: 'Copy', icon: '📋', action: 'copy-text', arg: params.selectionText },
+      { label: 'Kopiuj', icon: '📋', action: 'copy-text', arg: sel, shortcut: 'Ctrl+C' },
+      { label: 'Szukaj „' + preview + '…"', icon: '🔎', action: 'search-selection', arg: sel },
+      { label: 'Tłumacz na polski', icon: '🌐', action: 'translate-selection', arg: sel },
+      { label: 'Udostępnij wybrane…', icon: '💬', action: 'share-selection', arg: sel },
       { separator: true }
     );
   }
 
-  if (params.mediaType === 'image') {
+  // ===== IMAGE / MEDIA =====
+  if (params.mediaType === 'image' && srcURL) {
     items.push(
-      { label: 'Save image as...', icon: '💾', action: 'save-image', arg: params.srcURL },
-      { label: 'Copy image address', icon: '📎', action: 'copy-text', arg: params.srcURL },
+      { label: 'Pokaż obraz', icon: '🖼', action: 'open-link-newtab', arg: srcURL },
+      { label: 'Zapisz obraz jako…', icon: '💾', action: 'save-image', arg: srcURL },
+      { label: 'Kopiuj obraz', icon: '📇', action: 'copy-image', arg: srcURL },
+      { label: 'Kopiuj adres obrazu', icon: '📎', action: 'copy-text', arg: srcURL },
+      { label: 'Szukaj obrazu w Google', icon: '🔍', action: 'search-image', arg: srcURL },
+      { separator: true }
+    );
+  } else if (params.mediaType === 'canvas' || params.mediaType === 'video' || params.mediaType === 'audio') {
+    items.push(
+      { label: params.hasVideo ? 'Zapisz wideo jako…' : 'Zapisz media jako…', icon: '💾', action: 'save-image', arg: srcURL, disabled: !srcURL },
+      { label: 'Kopiuj adres mediów', icon: '📎', action: 'copy-text', arg: srcURL, disabled: !srcURL },
       { separator: true }
     );
   }
 
+  // ===== MISSPELLED WORD =====
+  if (params.misspelledWord && params.dictionarySuggestions && params.dictionarySuggestions.length > 0) {
+    params.dictionarySuggestions.slice(0, 4).forEach(word => {
+      items.push({ label: word, icon: '✓', action: 'replace-text', arg: { target: params.misspelledWord, replacement: word } });
+    });
+    items.push({ separator: true });
+  }
+
+  // ===== PAGE NAVIGATION =====
   items.push(
-    { label: 'Back', icon: '◀', action: 'nav-back' },
-    { label: 'Forward', icon: '▶', action: 'nav-forward' },
-    { label: 'Reload', icon: '🔄', action: 'nav-reload' },
+    { label: 'Wstecz', icon: '◀', action: 'nav-back', disabled: params.canGoBack === false, shortcut: 'Alt+←' },
+    { label: 'Dalej', icon: '▶', action: 'nav-forward', disabled: params.canGoForward === false, shortcut: 'Alt+→' },
+    { label: 'Odśwież', icon: '🔄', action: 'nav-reload', shortcut: 'Ctrl+R' },
     { separator: true },
-    { label: 'Save page as...', icon: '💾', action: 'save-page' },
-    { label: 'Print...', icon: '🖨', action: 'print-page' },
-    { label: 'View page source', icon: '📄', action: 'view-source' },
+  );
+
+  // ===== PAGE ACTIONS =====
+  items.push(
+    { label: 'Zaznacz wszystko', icon: '⌘', action: 'select-all', disabled: !sel && !linkURL && !srcURL, shortcut: 'Ctrl+A' },
+    { label: 'Szukaj na stronie…', icon: '🔍', action: 'open-find', shortcut: 'Ctrl+F' },
     { separator: true },
-    { label: 'Inspect element', icon: '🔍', action: 'inspect-element' },
+    { label: 'Dodaj stronę do zakładek', icon: '⭐', action: 'bookmark-page', arg: pageURL, shortcut: 'Ctrl+D' },
+    { label: 'Zapisz stronę jako…', icon: '💾', action: 'save-page', arg: pageURL },
+    { label: 'Drukuj…', icon: '🖨', action: 'print-page', shortcut: 'Ctrl+P' },
+    { separator: true },
+    { label: 'Pokaż kod źródłowy strony', icon: '⌨', action: 'view-source', shortcut: 'Ctrl+U' },
+    { label: 'Sprawdzanie elementu', icon: '🔎', action: 'inspect-element', shortcut: 'Ctrl+⇧+I' },
   );
 
   if (items.length > 0 && mainWindow) {
@@ -847,24 +937,76 @@ ipcMain.on('show-context-menu', (e, params) => {
   }
 });
 
-// Context menu action relay
+// ===== EXTENDED CONTEXT MENU ACTIONS =====
 ipcMain.on('context-menu-action', async (e, action, arg) => {
   if (!mainWindow) return;
-  if (action === 'copy-text') {
-    require('electron').clipboard.writeText(arg);
-  } else if (action === 'save-image') {
-    mainWindow.webContents.downloadURL(arg);
-  } else if (action === 'save-page') {
-    const { dialog } = require('electron');
-    const result = await dialog.showSaveDialog(mainWindow, {
-      defaultPath: 'page.html',
-      filters: [{ name: 'HTML', extensions: ['html'] }, { name: 'Web Page, Complete', extensions: ['htm', 'html'] }]
-    });
-    if (!result.canceled && result.filePath) {
-      mainWindow.webContents.downloadURL(arg);
+  const { clipboard, dialog } = require('electron');
+
+  switch (action) {
+    // ---- clipboard / files handled in main ----
+    case 'copy-text':
+      clipboard.writeText(String(arg));
+      return;
+    case 'save-image':
+      mainWindow.webContents.downloadURL(String(arg));
+      return;
+    case 'copy-image': {
+      try {
+        const res = await fetch(String(arg));
+        const data = await res.arrayBuffer();
+        if (data && data.byteLength) {
+          const nativeImage = require('electron').nativeImage.createFromBuffer(Buffer.from(data));
+          clipboard.writeImage(nativeImage);
+          mainWindow.webContents.send('context-toast', 'Skopiowano obraz do schowka');
+          return;
+        }
+      } catch (_) {}
+      mainWindow.webContents.downloadURL(String(arg));
+      return;
     }
-  } else {
-    mainWindow.webContents.send(action, arg);
+    case 'save-page': {
+      const result = await dialog.showSaveDialog(mainWindow, {
+        defaultPath: 'page.html',
+        filters: [{ name: 'HTML', extensions: ['html'] }, { name: 'Web Page, Complete', extensions: ['htm', 'html'] }]
+      });
+      if (!result.canceled && result.filePath && arg) {
+        mainWindow.webContents.downloadURL(String(arg));
+      }
+      return;
+    }
+    case 'search-image': {
+      const imgURL = encodeURIComponent(String(arg));
+      mainWindow.webContents.send('open-link-newtab', 'https://www.google.com/searchbyimage?image_url=' + imgURL);
+      return;
+    }
+    case 'translate-selection': {
+      const q = encodeURIComponent(String(arg));
+      mainWindow.webContents.send('open-link-newtab', 'https://translate.google.com/?sl=auto&tl=pl&text=' + q);
+      return;
+    }
+    case 'share-selection': {
+      mainWindow.webContents.send('open-link-newtab', 'https://x.com/intent/post?text=' + encodeURIComponent(String(arg)));
+      return;
+    }
+
+    // ---- everything else runs in the renderer ----
+    case 'replace-text':
+    case 'open-link':
+    case 'open-link-newtab':
+    case 'open-link-incognito':
+    case 'open-link-background':
+    case 'bookmark-url':
+    case 'bookmark-page':
+    case 'open-find':
+    case 'select-all':
+    case 'nav-back':
+    case 'nav-forward':
+    case 'nav-reload':
+    case 'view-source':
+    case 'print-page':
+    case 'inspect-element':
+    default:
+      mainWindow.webContents.send(action, arg);
   }
 });
 
@@ -883,6 +1025,12 @@ ipcMain.on('register-webview', (e, webviewId) => {
           height: 680,
           autoHideMenuBar: true,
           resizable: true,
+          webPreferences: {
+            preload: path.join(__dirname, 'popup-stealth.js'),
+            contextIsolation: true,
+            nodeIntegration: false,
+            webviewTag: false,
+          },
         },
       };
     }

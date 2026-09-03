@@ -17,13 +17,13 @@
       </div>
     </div>
     <div id="window-controls">
-      <button id="btn-minimize" onclick="window.electronAPI.minimize()" title="Minimize">
+      <button id="btn-minimize" onclick="window.electronAPI.minimize()" title="Minimalizuj">
         <svg width="11" height="11" viewBox="0 0 11 11"><rect y="5" width="11" height="1.2" rx="0.6" fill="currentColor"/></svg>
       </button>
-      <button id="btn-maximize" onclick="window.electronAPI.maximize()" title="Maximize">
+      <button id="btn-maximize" onclick="window.electronAPI.maximize()" title="Maksymalizuj">
         <svg width="11" height="11" viewBox="0 0 11 11"><rect x="0.6" y="0.6" width="9.8" height="9.8" rx="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>
       </button>
-      <button id="btn-close" onclick="window.electronAPI.close()" title="Close">
+      <button id="btn-close" onclick="window.electronAPI.close()" title="Zamknij">
         <svg width="11" height="11" viewBox="0 0 11 11"><line x1="1" y1="1" x2="10" y2="10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="10" y1="1" x2="1" y2="10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
       </button>
     </div>
@@ -36,12 +36,12 @@
       <div id="tabs-container">
         <!-- tabs injected here, new-tab-btn is injected after last tab by JS -->
       </div>
-      <button id="new-tab-btn" title="New Tab (Ctrl+T)">
+      <button id="new-tab-btn" title="Nowa karta (Ctrl+T)">
         <svg width="12" height="12" viewBox="0 0 12 12"><line x1="6" y1="1" x2="6" y2="11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><line x1="1" y1="6" x2="11" y2="6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
       </button>
     </div>
     <div id="tabsbar-right"></div>
-      <button id="btn-vertical-tabs" title="Toggle vertical tabs">
+      <button id="btn-vertical-tabs" title="Przełącz pionowe karty">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="11" width="7" height="5" rx="1"/></svg>
       </button>
     </div>
@@ -50,50 +50,50 @@
   <!-- ===== NAVBAR ===== -->
   <div id="navbar">
     <div id="nav-left">
-      <button class="nav-btn" id="btn-back" title="Back (Alt+Left)" disabled>
-        <svg width="16" height="16" viewBox="0 0 16 16"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+      <button class="nav-btn" id="btn-back" title="Wstecz (Alt+Strzałka w lewo)" disabled>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
-      <button class="nav-btn" id="btn-forward" title="Forward (Alt+Right)" disabled>
-        <svg width="16" height="16" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+      <button class="nav-btn" id="btn-forward" title="Dalej (Alt+Strzałka w prawo)" disabled>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
-      <button class="nav-btn" id="btn-reload" title="Reload (Ctrl+R)">
+      <button class="nav-btn" id="btn-reload" title="Odśwież (Ctrl+R)">
         <svg width="16" height="16" viewBox="0 0 16 16"><path d="M13.5 8A5.5 5.5 0 1 1 10 3.08" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/><polyline points="10,1 10,4 13,4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
       </button>
-      <button class="nav-btn" id="btn-home" title="Home">
+      <button class="nav-btn" id="btn-home" title="Strona główna">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M3 12L12 3l9 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 21V12h6v9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
     </div>
 
     <div id="url-bar-wrapper">
       <div id="security-icon"></div>
-      <input id="url-bar" type="text" placeholder="Search or enter URL..." spellcheck="false" autocomplete="off" />
+      <input id="url-bar" type="text" placeholder="Szukaj lub wpisz adres URL..." spellcheck="false" autocomplete="off" />
       <div id="url-bar-actions">
-        <button id="btn-bookmark-page" title="Bookmark this page" class="url-action-btn">
+        <button id="btn-bookmark-page" title="Zapisz tę stronę w zakładkach" class="url-action-btn">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 3h14v18l-7-4-7 4V3z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
-        <button id="btn-read-later" title="Read later" class="url-action-btn">
+        <button id="btn-read-later" title="Przeczytaj później" class="url-action-btn">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v7l4 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/></svg>
         </button>
-        <button id="btn-translate" title="Translate page" class="url-action-btn">
+        <button id="btn-translate" title="Przetłumacz stronę" class="url-action-btn">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 5h8M3 12h5M3 19h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M14 4l5 16M19 4l5 16M17 8h6M16 14h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" transform="translate(1,2) scale(0.7)"/></svg>
         </button>
       </div>
       <div id="translate-popup" class="hidden">
-        <div class="tp-header">Translate page</div>
+        <div class="tp-header">Przetłumacz stronę</div>
         <div class="tp-langs" id="translate-langs"></div>
-        <button id="btn-translate-original" class="tp-reset">Show original</button>
+        <button id="btn-translate-original" class="tp-reset">Pokaż oryginał</button>
       </div>
     </div>
 
     <div id="nav-right">
-      <button class="nav-btn" id="btn-downloads" title="Downloads (Ctrl+J)">
+      <button class="nav-btn" id="btn-downloads" title="Pobieranie (Ctrl+J)">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 3v13M7 11l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 19h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
         <span id="dl-badge" class="badge hidden">0</span>
       </button>
-      <button class="nav-btn" id="btn-history" title="History (Ctrl+H)">
+      <button class="nav-btn" id="btn-history" title="Historia (Ctrl+H)">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M12 7v5l3 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
-      <button class="nav-btn" id="btn-bookmarks-panel" title="Bookmarks (Ctrl+B)">
+      <button class="nav-btn" id="btn-bookmarks-panel" title="Zakładki (Ctrl+B)">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 3h14v18l-7-4-7 4V3z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
       <button class="nav-btn" id="btn-ai-sidebar" title="Wave AI (Ctrl+I)">
@@ -103,34 +103,34 @@
           <defs><linearGradient id="aiN" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#ff1a35"/><stop offset="100%" style="stop-color:#ff4444"/></linearGradient></defs>
         </svg>
       </button>
-      <button class="nav-btn" id="btn-reader" title="Reader Mode (Ctrl+Shift+R)">
+      <button class="nav-btn" id="btn-reader" title="Tryb czytnika (Ctrl+Shift+R)">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M7 8h10M7 12h10M7 16h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
       </button>
-      <button class="nav-btn" id="btn-screenshot" title="Screenshot (Ctrl+Shift+S)">
+      <button class="nav-btn" id="btn-screenshot" title="Zrzut ekranu (Ctrl+Shift+S)">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M8 5l1.5-2h5L16 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
-      <button class="nav-btn" id="btn-pip" title="Picture in Picture">
+      <button class="nav-btn" id="btn-pip" title="Obraz w obrazie">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="2" y="4" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.8"/><rect x="12" y="11" width="8" height="5" rx="1" stroke="currentColor" stroke-width="1.5" fill="var(--bg-1)"/></svg>
       </button>
-      <button class="nav-btn" id="btn-incognito" title="New Incognito Tab (Ctrl+Shift+N)">
+      <button class="nav-btn" id="btn-incognito" title="Nowa karta incognito (Ctrl+Shift+N)">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="18" y1="4" x2="20" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="4" y1="4" x2="6" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
       </button>
-      <button class="nav-btn" id="btn-notes" title="Notes (Ctrl+M)">
+      <button class="nav-btn" id="btn-notes" title="Notatki (Ctrl+M)">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="4" y="3" width="16" height="18" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 8h8M8 12h8M8 16h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
       </button>
       <button class="nav-btn" id="btn-passwords" title="WavePass (Ctrl+Shift+P)">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="16" r="1.5" fill="currentColor"/><path d="M8 11V8a4 4 0 1 1 8 0v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
-      <button class="nav-btn" id="btn-clipboard" title="Clipboard Manager">
+      <button class="nav-btn" id="btn-clipboard" title="Schowek">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="6" y="3" width="12" height="18" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M9 3V1h6v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M9 9h6M9 12h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
       </button>
-      <button class="nav-btn" id="btn-perf" title="Performance Monitor">
+      <button class="nav-btn" id="btn-perf" title="Monitor wydajności">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="14" width="3" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="8" y="10" width="3" height="11" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="13" y="6" width="3" height="15" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="18" y="3" width="3" height="18" rx="1" stroke="currentColor" stroke-width="1.5"/></svg>
       </button>
-      <button class="nav-btn" id="btn-scripts" title="User Scripts">
+      <button class="nav-btn" id="btn-scripts" title="Skrypty użytkownika">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M8 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M15 3l6 6-9 9H6v-6l9-9z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
-      <button class="nav-btn" id="btn-settings" title="Settings">
+      <button class="nav-btn" id="btn-settings" title="Ustawienia">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M12 1v3M12 20v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M1 12h3M20 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
       </button>
     </div>
@@ -144,12 +144,12 @@
     <div id="bookmarks-bar-scroll">
       <div id="bookmarks-bar-list"></div>
     </div>
-    <button id="bb-more-btn" class="hidden" title="More bookmarks">▶</button>
+    <button id="bb-more-btn" class="hidden" title="Więcej zakładek">▶</button>
   </div>
 
   <!-- ===== FIND BAR ===== -->
   <div id="find-bar" class="hidden">
-    <input id="find-input" type="text" placeholder="Find in page..." />
+    <input id="find-input" type="text" placeholder="Szukaj na stronie..." />
     <span id="find-count"></span>
     <button id="find-prev">↑</button>
     <button id="find-next">↓</button>
@@ -167,14 +167,14 @@
       <div id="safety-screen" class="hidden">
         <div id="safety-content">
           <div id="safety-icon">⚠️</div>
-          <h2 id="safety-title">Site Blocked by WAVEWEB</h2>
+          <h2 id="safety-title">Strona zablokowana przez WAVEWEB</h2>
           <p id="safety-reason"></p>
           <p id="safety-url"></p>
           <div id="safety-actions">
-            <button id="safety-go-back" class="settings-btn" style="background:var(--accent);color:#fff">Go Back</button>
-            <button id="safety-proceed" class="settings-btn" style="background:transparent;border:1px solid var(--border);color:var(--text-2)">I Understand, Proceed</button>
+            <button id="safety-go-back" class="settings-btn" style="background:var(--accent);color:#fff">Wróć</button>
+            <button id="safety-proceed" class="settings-btn" style="background:transparent;border:1px solid var(--border);color:var(--text-2)">Rozumiem, przejdź dalej</button>
           </div>
-          <p id="safety-footer">WAVEWEB Safety Filter helps protect you from harmful content.</p>
+          <p id="safety-footer">Filtr bezpieczeństwa WAVEWEB pomaga chronić Cię przed szkodliwymi treściami.</p>
         </div>
       </div>
 
@@ -191,14 +191,14 @@
           <div id="newtab-logo">
             <img src="../assets/logowaveweb.png" alt="WAVEWEB" draggable="false" />
             <h1>WAVEWEB</h1>
-            <p class="newtab-sub">Your AI-powered browser</p>
+            <p class="newtab-sub">Twoja przeglądarka z AI</p>
           </div>
           <div id="newtab-search-wrap">
             <div id="newtab-search">
               <div id="newtab-search-icon">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M16.5 16.5l4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
               </div>
-              <input id="newtab-input" type="text" placeholder="Search or enter URL..." />
+              <input id="newtab-input" type="text" placeholder="Szukaj lub wpisz adres URL..." />
               <button id="newtab-go">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </button>
@@ -208,32 +208,32 @@
           <div id="newtab-top-sites"></div>
           <div class="newtab-widgets" id="newtop-widgets">
             <div class="newtab-widget widget-weather">
-              <div class="widget-label">Weather <span class="widget-city" id="weather-city-label" title="Change city">🌍</span></div>
+              <div class="widget-label">Pogoda <span class="widget-city" id="weather-city-label" title="Zmień miasto">🌍</span></div>
               <div class="widget-value">--°C</div>
-              <div class="widget-sub">Loading...</div>
+              <div class="widget-sub">Ładowanie...</div>
               <div class="widget-city-input hidden">
-                <input id="weather-city-input" type="text" placeholder="City name..." maxlength="40" />
+                <input id="weather-city-input" type="text" placeholder="Nazwa miasta..." maxlength="40" />
                 <button id="weather-city-ok">✓</button>
               </div>
             </div>
             <div class="newtab-widget widget-tabs">
-              <div class="widget-label">Open Tabs</div>
+              <div class="widget-label">Otwarte karty</div>
               <div class="widget-value" id="widget-tab-count">1</div>
-              <div class="widget-sub">across all groups</div>
+              <div class="widget-sub">we wszystkich grupach</div>
             </div>
             <div class="newtab-widget widget-blocked">
-              <div class="widget-label">Blocked</div>
+              <div class="widget-label">Zablokowane</div>
               <div class="widget-value" id="widget-blocked-count">0</div>
-              <div class="widget-sub">requests today</div>
+              <div class="widget-sub">żądań dzisiaj</div>
             </div>
           </div>
           <div class="newtab-recent" id="newtab-recent">
-            <div class="newtab-recent-title">Recently Visited</div>
+            <div class="newtab-recent-title">Ostatnio odwiedzone</div>
             <div class="newtab-recent-list" id="newtab-recent-list"></div>
           </div>
           <div id="newtab-stats">
-            <span id="stat-blocked">🛡 <b id="stat-blocked-count">0</b> ads blocked</span>
-            <span id="stat-tabs">📑 <b id="stat-tabs-count">1</b> tabs open</span>
+            <span id="stat-blocked">🛡 <b id="stat-blocked-count">0</b> zablokowanych reklam</span>
+            <span id="stat-tabs">📑 <b id="stat-tabs-count">1</b> otwartych kart</span>
           </div>
           <div id="newtab-quote"></div>
         </div>
@@ -245,9 +245,9 @@
     <!-- DOWNLOADS PANEL -->
     <div id="panel-downloads" class="side-panel hidden">
       <div class="panel-header">
-        <span class="panel-title">Downloads</span>
+        <span class="panel-title">Pobieranie</span>
         <div class="panel-header-actions">
-          <button id="dl-clear-btn" class="panel-action-btn" title="Clear all history">Clear all</button>
+          <button id="dl-clear-btn" class="panel-action-btn" title="Wyczyść całą historię">Wyczyść wszystko</button>
           <button class="panel-close-btn" data-panel="downloads">✕</button>
         </div>
       </div>
@@ -255,27 +255,27 @@
       <div id="dl-summary">
         <div class="dl-sum-col">
           <span class="dl-sum-num" id="dl-sum-active">0</span>
-          <span class="dl-sum-label">Active</span>
+          <span class="dl-sum-label">Aktywne</span>
         </div>
         <div class="dl-sum-col">
           <span class="dl-sum-num" id="dl-sum-speed">—</span>
-          <span class="dl-sum-label">Speed</span>
+          <span class="dl-sum-label">Prędkość</span>
         </div>
         <div class="dl-sum-col">
           <span class="dl-sum-num" id="dl-sum-total">0</span>
-          <span class="dl-sum-label">Files</span>
+          <span class="dl-sum-label">Pliki</span>
         </div>
       </div>
 
       <div class="dl-search-wrap">
         <svg class="dl-search-ico" viewBox="0 0 24 24" width="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5l4 4"/></svg>
-        <input id="dl-search" class="panel-search" type="text" placeholder="Filter downloads..."/>
+        <input id="dl-search" class="panel-search" type="text" placeholder="Filtruj pobieranie..."/>
       </div>
 
       <div id="dl-tabs">
-        <button class="dl-tab active" data-filter="all">All</button>
-        <button class="dl-tab" data-filter="active">Active</button>
-        <button class="dl-tab" data-filter="completed">Completed</button>
+        <button class="dl-tab active" data-filter="all">Wszystkie</button>
+        <button class="dl-tab" data-filter="active">Aktywne</button>
+        <button class="dl-tab" data-filter="completed">Ukończone</button>
       </div>
 
       <div id="active-downloads"></div>
@@ -287,67 +287,69 @@
       <div class="panel-header">
         <span class="panel-title">🔑 WavePass</span>
         <div class="panel-header-actions">
-          <select id="wp-auto-lock" class="wp-autolock-select" title="Auto-lock vault after inactivity">
+          <select id="wp-auto-lock" class="wp-autolock-select" title="Automatyczne blokowanie sejfu po bezczynności">
             <option value="1">1 min</option>
             <option value="5" selected>5 min</option>
             <option value="15">15 min</option>
             <option value="60">1 h</option>
-            <option value="0">Never</option>
+            <option value="0">Nigdy</option>
           </select>
-          <button id="wp-lock-btn" class="panel-action-btn hidden">Lock</button>
+          <button id="wp-lock-btn" class="panel-action-btn hidden">Zablokuj</button>
           <button class="panel-close-btn" data-panel="passwords">✕</button>
         </div>
       </div>
       <div id="wp-vault" class="hidden">
         <div class="panel-search-wrap">
           <svg viewBox="0 0 24 24" width="16" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-3);pointer-events:none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8" fill="none"/><path d="M16.5 16.5l4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-          <input type="text" id="wp-search" class="panel-search" placeholder="Search passwords..." />
+          <input type="text" id="wp-search" class="panel-search" placeholder="Szukaj haseł..." />
         </div>
         <div style="padding: 4px 12px; display: flex; gap: 6px;">
-          <button id="btn-gen-password" class="settings-btn" style="font-size:11px;flex:1">🎲 Password Generator</button>
-          <button id="wp-add-btn" class="settings-btn" style="font-size:11px;flex:1">➕ Add</button>
+          <button id="btn-gen-password" class="settings-btn" style="font-size:11px;flex:1">🎲 Generator haseł</button>
+          <button id="wp-add-btn" class="settings-btn" style="font-size:11px;flex:1">➕ Dodaj</button>
         </div>
         <div id="wp-gen-result" class="wp-gen hidden">
           <div class="wp-gen-top">
             <code id="wp-gen-pwd"></code>
             <div class="wp-gen-btns">
-              <button id="wp-gen-copy" title="Copy password">📋</button>
-              <button id="wp-gen-close" title="Close">✕</button>
+              <button id="wp-gen-copy" title="Kopiuj hasło">📋</button>
+              <button id="wp-gen-close" title="Zamknij">✕</button>
             </div>
           </div>
           <div class="wp-gen-strength">
             <div class="wp-gen-strength-bar"><span id="wp-gen-strength-fill"></span></div>
-            <span id="wp-gen-strength-label">Strong</span>
+            <span id="wp-gen-strength-label">Silne</span>
           </div>
           <div class="wp-gen-opts">
-            <label class="wp-gen-len"><span>Length</span><input type="range" id="wp-gen-len" min="8" max="64" value="16" /><b id="wp-gen-len-val">16</b></label>
-            <label class="wp-gen-sym"><input type="checkbox" id="wp-gen-symbols" checked /> symbols</label>
+            <label class="wp-gen-len"><span>Długość</span><input type="range" id="wp-gen-len" min="8" max="64" value="16" /><b id="wp-gen-len-val">16</b></label>
+            <label class="wp-gen-sym"><input type="checkbox" id="wp-gen-symbols" checked /> symbole</label>
           </div>
         </div>
         <div id="wp-list" class="panel-list"></div>
       </div>
       <div id="wp-locked" class="wp-locked-view">
         <div id="wp-lock-icon" class="wp-lock-icon">🔐</div>
-        <div id="wp-lock-title" class="wp-lock-title">Vault Locked</div>
-        <div id="wp-lock-sub" class="wp-lock-sub">Enter your master PIN to unlock</div>
-        <input type="password" id="wp-unlock-input" class="wp-pin-input" placeholder="Enter PIN" maxlength="6" autocomplete="off" />
+        <div id="wp-lock-title" class="wp-lock-title">Sejf zablokowany</div>
+        <div id="wp-lock-sub" class="wp-lock-sub">Wpisz główny PIN, aby odblokować</div>
+        <input type="password" id="wp-unlock-input" class="wp-pin-input" placeholder="Wpisz PIN" maxlength="6" autocomplete="off" />
         <div class="wp-pin-error" id="wp-unlock-error"></div>
-        <button id="wp-unlock-btn" class="wp-pin-btn">Unlock</button>
-        <button id="wp-setup-btn" class="wp-pin-btn wp-pin-btn-secondary hidden">Set up WavePass</button>
+        <button id="wp-unlock-btn" class="wp-pin-btn">Odblokuj</button>
+        <button id="wp-setup-btn" class="wp-pin-btn wp-pin-btn-secondary hidden">Skonfiguruj WavePass</button>
       </div>
     </div>
 
     <!-- HISTORY PANEL -->
     <div id="panel-history" class="side-panel hidden">
       <div class="panel-header">
-        <span class="panel-title">History</span>
+        <span class="panel-title">📜 Historia</span>
         <div class="panel-header-actions">
-          <button id="history-clear-btn" class="panel-action-btn">Clear</button>
+          <span id="history-stats" class="panel-stats"></span>
+          <button id="history-clear-btn" class="panel-action-btn">Wyczyść</button>
           <button class="panel-close-btn" data-panel="history">✕</button>
         </div>
       </div>
       <div class="panel-search-wrap">
-        <input id="history-search" class="panel-search" type="text" placeholder="Search history..." />
+        <svg viewBox="0 0 24 24" width="16" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-3);pointer-events:none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8" fill="none"/><path d="M16.5 16.5l4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <input id="history-search" class="panel-search" type="text" placeholder="Szukaj w historii..." />
       </div>
       <div id="history-list" class="panel-list"></div>
     </div>
@@ -355,14 +357,14 @@
     <!-- BOOKMARKS PANEL -->
     <div id="panel-bookmarks" class="side-panel hidden">
       <div class="panel-header">
-        <span class="panel-title">Bookmarks</span>
+        <span class="panel-title">Zakładki</span>
         <button class="panel-close-btn" data-panel="bookmarks">✕</button>
       </div>
       <div class="panel-search-wrap">
-        <input id="bookmarks-search" class="panel-search" type="text" placeholder="Search bookmarks..." />
+        <input id="bookmarks-search" class="panel-search" type="text" placeholder="Szukaj w zakładkach..." />
         <div style="display:flex;gap:4px;padding:4px 0">
-          <button id="bm-export-btn" class="panel-item-btn" title="Export bookmarks (HTML)" style="font-size:10px;padding:3px 8px">↗ Export</button>
-          <button id="bm-import-btn" class="panel-item-btn" title="Import bookmarks (HTML)" style="font-size:10px;padding:3px 8px">↙ Import</button>
+          <button id="bm-export-btn" class="panel-item-btn" title="Wyeksportuj zakładki (HTML)" style="font-size:10px;padding:3px 8px">↗ Eksportuj</button>
+          <button id="bm-import-btn" class="panel-item-btn" title="Importuj zakładki (HTML)" style="font-size:10px;padding:3px 8px">↙ Importuj</button>
         </div>
       </div>
       <div id="reading-list" class="panel-list" style="border-bottom:1px solid var(--border);max-height:200px;overflow-y:auto"></div>
@@ -372,31 +374,31 @@
     <!-- ADBLOCK PANEL -->
     <div id="panel-adblock" class="side-panel hidden">
       <div class="panel-header">
-        <span class="panel-title">🛡 Ad Blocker</span>
+        <span class="panel-title">🛡 Bloker reklam</span>
         <button class="panel-close-btn" data-panel="adblock">✕</button>
       </div>
       <div id="adblock-content" class="panel-list">
         <div class="adblock-stats-header">
           <div class="ab-stat-card">
             <span class="ab-stat-num" id="ab-total-blocked">0</span>
-            <span class="ab-stat-label">Total Blocked</span>
+            <span class="ab-stat-label">Zablokowane ogółem</span>
           </div>
           <div class="ab-stat-card">
             <span class="ab-stat-num" id="ab-domains-blocked">0</span>
-            <span class="ab-stat-label">Domains</span>
+            <span class="ab-stat-label">Domeny</span>
           </div>
           <div class="ab-stat-card">
             <span class="ab-stat-num" id="ab-filters-count">0</span>
-            <span class="ab-stat-label">Filters</span>
+            <span class="ab-stat-label">Filtry</span>
           </div>
         </div>
 
         <div class="adblock-section">
-          <div class="adblock-section-title">Toggle</div>
+          <div class="adblock-section-title">Przełącz</div>
           <div class="settings-row">
             <div class="settings-label">
-              <span>Ad Blocker Enabled</span>
-              <small>Block ads and trackers</small>
+              <span>Bloker reklam włączony</span>
+              <small>Blokuj reklamy i trackery</small>
             </div>
             <label class="toggle">
               <input type="checkbox" id="ab-enabled" checked />
@@ -404,51 +406,51 @@
             </label>
           </div>
           <div class="settings-row">
-            <button id="ab-reset-stats" class="panel-action-btn">Reset Stats</button>
+            <button id="ab-reset-stats" class="panel-action-btn">Zresetuj statystyki</button>
           </div>
         </div>
 
         <div class="adblock-section">
-          <div class="adblock-section-title">Per-Site Whitelist</div>
-          <div class="adblock-hint">Sites where ad blocking is disabled</div>
+          <div class="adblock-section-title">Biała lista na stronę</div>
+          <div class="adblock-hint">Strony, na których blokowanie reklam jest wyłączone</div>
           <div id="ab-whitelist" class="ab-list"></div>
           <div class="adblock-add-row">
             <input id="ab-whitelist-input" class="settings-input" type="text" placeholder="example.com" />
-            <button id="ab-whitelist-add" class="settings-btn" style="font-size:11px;padding:5px 10px">Add</button>
+            <button id="ab-whitelist-add" class="settings-btn" style="font-size:11px;padding:5px 10px">Dodaj</button>
           </div>
         </div>
 
         <div class="adblock-section">
-          <div class="adblock-section-title">Custom Filters</div>
-          <div class="adblock-hint">Add filter rules (e.g. ||ads.example.com^ or /pattern/)</div>
+          <div class="adblock-section-title">Własne filtry</div>
+          <div class="adblock-hint">Dodaj reguły filtrów (np. ||ads.example.com^ lub /pattern/)</div>
           <div id="ab-custom-filters" class="ab-list"></div>
           <div class="adblock-add-row">
             <input id="ab-filter-input" class="settings-input" type="text" placeholder="||example.com^" />
-            <button id="ab-filter-add" class="settings-btn" style="font-size:11px;padding:5px 10px">Add</button>
+            <button id="ab-filter-add" class="settings-btn" style="font-size:11px;padding:5px 10px">Dodaj</button>
           </div>
         </div>
 
         <div class="adblock-section">
           <div class="adblock-section-title" style="display:flex;align-items:center;justify-content:space-between">
-            <span>Filter Subscriptions</span>
-            <button id="ab-sub-update-all" class="panel-action-btn" title="Update all lists">↻ All</button>
+            <span>Subskrypcje filtrów</span>
+            <button id="ab-sub-update-all" class="panel-action-btn" title="Zaktualizuj wszystkie listy">↻ Wszystkie</button>
           </div>
-          <div class="adblock-hint">EasyList/uBlock filter lists — auto-updated every 24h</div>
+          <div class="adblock-hint">Listy filtrów EasyList/uBlock — automatyczna aktualizacja co 24 h</div>
           <div id="ab-subscriptions" class="ab-list"></div>
           <div class="adblock-add-row">
             <select id="ab-sub-preset" class="settings-input" style="flex:1;font-size:11px;padding:6px">
-              <option value="">— Choose a list —</option>
+              <option value="">— Wybierz listę —</option>
             </select>
-            <button id="ab-sub-add-preset" class="settings-btn" style="font-size:11px;padding:5px 10px">Add</button>
+            <button id="ab-sub-add-preset" class="settings-btn" style="font-size:11px;padding:5px 10px">Dodaj</button>
           </div>
           <div class="adblock-add-row">
-            <input id="ab-sub-custom-url" class="settings-input" type="text" placeholder="Custom list URL (.txt)…" />
-            <button id="ab-sub-add-custom" class="settings-btn" style="font-size:11px;padding:5px 10px">Add</button>
+            <input id="ab-sub-custom-url" class="settings-input" type="text" placeholder="Własny adres listy (.txt)…" />
+            <button id="ab-sub-add-custom" class="settings-btn" style="font-size:11px;padding:5px 10px">Dodaj</button>
           </div>
         </div>
 
         <div class="adblock-section">
-          <div class="adblock-section-title">Top Blocked Domains</div>
+          <div class="adblock-section-title">Najczęściej blokowane domeny</div>
           <div id="ab-top-domains" class="ab-list"></div>
         </div>
       </div>
@@ -457,14 +459,14 @@
     <!-- EXTENSIONS PANEL -->
     <div id="panel-extensions" class="side-panel hidden">
       <div class="panel-header">
-        <span class="panel-title">🧩 Extensions</span>
+        <span class="panel-title">🧩 Rozszerzenia</span>
         <div class="panel-header-actions">
-          <button id="ext-reload-btn" class="panel-action-btn" title="Reload all extensions">↻</button>
+          <button id="ext-reload-btn" class="panel-action-btn" title="Przeładuj wszystkie rozszerzenia">↻</button>
           <button class="panel-close-btn" data-panel="extensions">✕</button>
         </div>
       </div>
       <div class="panel-search-wrap">
-        <div class="ext-hint">Extensions are loaded from <code>userData/extensions/</code></div>
+        <div class="ext-hint">Rozszerzenia są ładowane z <code>userData/extensions/</code></div>
       </div>
       <div id="extensions-list" class="panel-list"></div>
     </div>
@@ -472,33 +474,33 @@
     <!-- SETTINGS PANEL -->
     <div id="panel-settings" class="side-panel hidden">
       <div class="panel-header">
-        <span class="panel-title">Settings</span>
+        <span class="panel-title">Ustawienia</span>
         <button class="panel-close-btn" data-panel="settings">✕</button>
       </div>
 
       <!-- Settings search -->
       <div class="panel-search-wrap">
-        <input id="settings-search" class="panel-search" type="text" placeholder="Search settings..." />
+        <input id="settings-search" class="panel-search" type="text" placeholder="Szukaj w ustawieniach..." />
       </div>
 
       <!-- Settings categories -->
       <div id="settings-categories">
-        <button class="set-cat active" data-cat="general">General</button>
-        <button class="set-cat" data-cat="privacy">Privacy</button>
+        <button class="set-cat active" data-cat="general">Ogólne</button>
+        <button class="set-cat" data-cat="privacy">Prywatność</button>
         <button class="set-cat" data-cat="ai">AI</button>
-        <button class="set-cat" data-cat="appearance">Appearance</button>
-        <button class="set-cat" data-cat="about">About</button>
+        <button class="set-cat" data-cat="appearance">Wygląd</button>
+        <button class="set-cat" data-cat="about">O aplikacji</button>
       </div>
 
       <div id="settings-content" class="panel-list">
 
         <!-- GENERAL -->
         <div class="settings-section" data-category="general">
-          <div class="settings-section-title">General</div>
+          <div class="settings-section-title">Ogólne</div>
           <div class="settings-row">
             <div class="settings-label">
-              <span>Search Engine</span>
-              <small>Default search provider</small>
+              <span>Wyszukiwarka</span>
+              <small>Domyślny dostawca wyszukiwania</small>
             </div>
             <select id="setting-search-engine" class="settings-select">
               <option value="google">Google</option>
@@ -510,22 +512,22 @@
           </div>
           <div class="settings-row">
             <div class="settings-label">
-              <span>Homepage</span>
-              <small>Page shown when clicking Home</small>
+              <span>Strona startowa</span>
+              <small>Strona pokazywana po kliknięciu Strona główna</small>
             </div>
             <input id="setting-homepage" class="settings-input" type="text" placeholder="https://..." />
           </div>
           <div class="settings-row">
             <div class="settings-label">
-              <span>Download Location</span>
-              <small id="download-path-label">Default downloads folder</small>
+              <span>Miejsce pobierania</span>
+              <small id="download-path-label">Domyślny folder pobierania</small>
             </div>
-            <button id="btn-change-download-path" class="settings-btn" style="font-size:11px">Change</button>
+            <button id="btn-change-download-path" class="settings-btn" style="font-size:11px">Zmień</button>
           </div>
           <div class="settings-row">
             <div class="settings-label">
-              <span>Bookmarks Bar</span>
-              <small>Show bookmarks bar below the address bar</small>
+              <span>Pasek zakładek</span>
+              <small>Pokaż pasek zakładek pod paskiem adresu</small>
             </div>
             <label class="toggle">
               <input type="checkbox" id="setting-show-bookmarks-bar" />
@@ -534,8 +536,8 @@
           </div>
           <div class="settings-row">
             <div class="settings-label">
-              <span>Save History</span>
-              <small>Remember visited pages</small>
+              <span>Zapisuj historię</span>
+              <small>Pamiętaj odwiedzane strony</small>
             </div>
             <label class="toggle">
               <input type="checkbox" id="setting-history" checked />
@@ -546,11 +548,11 @@
 
         <!-- PRIVACY -->
         <div class="settings-section" data-category="privacy">
-          <div class="settings-section-title">Privacy & Security</div>
+          <div class="settings-section-title">Prywatność i bezpieczeństwo</div>
           <div class="settings-row">
             <div class="settings-label">
-              <span>Ad Blocker</span>
-              <small>Block ads and trackers</small>
+              <span>Bloker reklam</span>
+              <small>Blokuj reklamy i trackery</small>
             </div>
             <label class="toggle">
               <input type="checkbox" id="setting-adblock" checked />
@@ -559,8 +561,8 @@
           </div>
           <div class="settings-row">
             <div class="settings-label">
-              <span>Safety Screen</span>
-              <small>Warn about harmful, adult, gambling and phishing sites</small>
+              <span>Ekran bezpieczeństwa</span>
+              <small>Ostrzegaj przed szkodliwymi, dla dorosłych, hazardowymi i phishingowymi stronami</small>
             </div>
             <label class="toggle">
               <input type="checkbox" id="setting-safety-screen" checked />
@@ -569,8 +571,8 @@
           </div>
           <div class="settings-row">
             <div class="settings-label">
-              <span>Clear Data on Exit</span>
-              <small>Auto-clear history on browser close</small>
+              <span>Wyczyść dane przy wyjściu</span>
+              <small>Automatycznie czyść historię przy zamknięciu przeglądarki</small>
             </div>
             <label class="toggle">
               <input type="checkbox" id="setting-clear-on-exit" />
@@ -579,22 +581,22 @@
           </div>
           <div class="settings-row">
             <div>
-              <div class="settings-section-subtitle">Clear Browsing Data</div>
+              <div class="settings-section-subtitle">Wyczyść dane przeglądania</div>
               <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:8px">
                 <label class="cb-label">
-                  <input type="checkbox" id="cd-history" checked /><span class="cb-box"></span> History
+                  <input type="checkbox" id="cd-history" checked /><span class="cb-box"></span> Historia
                 </label>
                 <label class="cb-label">
-                  <input type="checkbox" id="cd-cache" checked /><span class="cb-box"></span> Cache
+                  <input type="checkbox" id="cd-cache" checked /><span class="cb-box"></span> Pamięć podręczna
                 </label>
                 <label class="cb-label">
-                  <input type="checkbox" id="cd-cookies" checked /><span class="cb-box"></span> Cookies & Site Data
+                  <input type="checkbox" id="cd-cookies" checked /><span class="cb-box"></span> Cookies i dane stron
                 </label>
                 <label class="cb-label">
-                  <input type="checkbox" id="cd-downloads" /><span class="cb-box"></span> Downloads History
+                  <input type="checkbox" id="cd-downloads" /><span class="cb-box"></span> Historia pobierania
                 </label>
               </div>
-              <button id="clear-all-data-btn" class="danger-btn" style="font-size:11px;padding:6px 14px">Clear Selected</button>
+              <button id="clear-all-data-btn" class="danger-btn" style="font-size:11px;padding:6px 14px">Wyczyść zaznaczone</button>
             </div>
           </div>
         </div>
@@ -604,28 +606,28 @@
           <div class="settings-section-title">Wave AI</div>
           <div class="settings-row">
             <div class="settings-label">
-              <span>🧠 AI Engine</span>
-              <small>Uses Transformers.js — runs locally in your browser, no API key needed.</small>
+              <span>🧠 Silnik AI</span>
+              <small>Używa Transformers.js — działa lokalnie w przeglądarce, bez klucza API.</small>
             </div>
           </div>
           <div class="settings-row">
             <div class="settings-label">
               <span>Model</span>
-              <small>Downloaded once, cached in browser (~3.5GB)</small>
+              <small>Pobierany raz, buforowany w przeglądarce (~3,5 GB)</small>
             </div>
             <select id="setting-ai-model" class="settings-select">
-              <option value="onnx-community/Llama-3.2-3B-Instruct-ONNX">Llama 3.2-3B Instruct (best quality)</option>
+              <option value="onnx-community/Llama-3.2-3B-Instruct-ONNX">Llama 3.2-3B Instruct (najlepsza jakość)</option>
             </select>
           </div>
         </div>
 
         <!-- APPEARANCE -->
         <div class="settings-section" data-category="appearance">
-          <div class="settings-section-title">Appearance</div>
+          <div class="settings-section-title">Wygląd</div>
           <div class="settings-row">
             <div class="settings-label">
-              <span>Zoom Level</span>
-              <small>Default page zoom</small>
+              <span>Poziom powiększenia</span>
+              <small>Domyślne powiększenie strony</small>
             </div>
             <select id="setting-zoom" class="settings-select">
               <option value="0.75">75%</option>
@@ -638,33 +640,33 @@
           </div>
           <div class="settings-row">
             <div class="settings-label">
-              <span>Accent Color</span>
-              <small>Primary accent color</small>
+              <span>Kolor akcentu</span>
+              <small>Główny kolor akcentu</small>
             </div>
             <div id="accent-picker">
-              <button class="accent-opt active" data-color="6c63ff" style="background:#ff1a35" title="Purple"></button>
-              <button class="accent-opt" data-color="0078d4" style="background:#0078d4" title="Blue"></button>
-              <button class="accent-opt" data-color="00d4a0" style="background:#00d4a0" title="Teal"></button>
-              <button class="accent-opt" data-color="ff5050" style="background:#ff5050" title="Red"></button>
-              <button class="accent-opt" data-color="ff8844" style="background:#ff8844" title="Orange"></button>
-              <button class="accent-opt" data-color="ffd060" style="background:#ffd060" title="Yellow"></button>
+              <button class="accent-opt active" data-color="6c63ff" style="background:#ff1a35" title="Fioletowy"></button>
+              <button class="accent-opt" data-color="0078d4" style="background:#0078d4" title="Niebieski"></button>
+              <button class="accent-opt" data-color="00d4a0" style="background:#00d4a0" title="Morski"></button>
+              <button class="accent-opt" data-color="ff5050" style="background:#ff5050" title="Czerwony"></button>
+              <button class="accent-opt" data-color="ff8844" style="background:#ff8844" title="Pomarańczowy"></button>
+              <button class="accent-opt" data-color="ffd060" style="background:#ffd060" title="Żółty"></button>
             </div>
           </div>
           <div class="settings-row">
             <div class="settings-label">
-              <span>Background Effect</span>
-              <small>New tab page background</small>
+              <span>Efekt tła</span>
+              <small>Tło strony nowej karty</small>
             </div>
             <select id="setting-bg-effect" class="settings-select">
               <option value="gradient">Gradient</option>
-              <option value="solid">Solid</option>
-              <option value="none">None</option>
+              <option value="solid">Jednolite</option>
+              <option value="none">Brak</option>
             </select>
           </div>
           <div class="settings-row">
             <div class="settings-label">
-              <span>Dark Mode for Websites</span>
-              <small>Force dark theme on all pages</small>
+              <span>Tryb ciemny dla stron</span>
+              <small>Wymuś ciemny motyw na wszystkich stronach</small>
             </div>
             <label class="toggle">
               <input type="checkbox" id="setting-dark-mode" />
@@ -675,10 +677,10 @@
 
         <!-- ABOUT -->
         <div class="settings-section" data-category="about">
-          <div class="settings-section-title">About WAVEWEB</div>
+          <div class="settings-section-title">O WAVEWEB</div>
           <div id="system-info-content" class="system-info"></div>
           <div class="settings-row" style="border:none;margin-top:16px;justify-content:center;opacity:0.6;font-size:12px;">
-            Powered by <strong style="margin-left:4px;background:linear-gradient(135deg,#ff1a35,#ff4444);-webkit-background-clip:text;-webkit-text-fill-color:transparent">ASTROWORLD</strong>
+            Zasilany przez <strong style="margin-left:4px;background:linear-gradient(135deg,#ff1a35,#ff4444);-webkit-background-clip:text;-webkit-text-fill-color:transparent">ASTROWORLD</strong>
           </div>
         </div>
 
@@ -704,8 +706,8 @@
           <div class="ai-setup-option">
             <div class="ai-setup-option-title">🧠 Local AI</div>
             <p>Uses Transformers.js — model działa wprost w przeglądarce. Zero instalacji, zero kluczy API.</p>
-            <button id="ai-load-model" class="settings-btn full-width">Start AI</button>
-            <small>Llama 3.2-3B Instruct (~3.5GB — pobiera się raz, działa offline, świetnie mówi po polsku).</small>
+            <button id="ai-load-model" class="settings-btn full-width">Uruchom AI</button>
+            <small>Llama 3.2-3B Instruct (~3,5 GB — pobiera się raz, działa offline, świetnie mówi po polsku).</small>
           </div>
         </div>
       </div>
@@ -714,18 +716,18 @@
         <div id="ai-messages">
           <div class="ai-msg ai-msg-bot">
             <div class="ai-avatar">W</div>
-            <div class="ai-bubble">Hey! I'm <strong>Wave AI</strong>. Ask me anything — I can summarize pages, search, translate, and more.</div>
+            <div class="ai-bubble">Cześć! Jestem <strong>Wave AI</strong>. Pytaj o cokolwiek — potrafię streszczać strony, wyszukiwać, tłumaczyć i wiele więcej.</div>
           </div>
         </div>
-        <div class="ai-model-badge"><span>🧠 Llama 3.2 · Local</span></div>
+        <div class="ai-model-badge"><span>🧠 Llama 3.2 · Lokalnie</span></div>
         <div id="ai-quick-actions">
-          <button class="ai-quick-btn" id="ai-summarize">📄 <span>Summarize</span></button>
-          <button class="ai-quick-btn" id="ai-translate">🌐 <span>Translate</span></button>
-          <button class="ai-quick-btn" id="ai-explain">💡 <span>Explain</span></button>
-          <button class="ai-quick-btn" id="ai-clear-chat">🗑 <span>Clear</span></button>
+          <button class="ai-quick-btn" id="ai-summarize">📄 <span>Streszczaj</span></button>
+          <button class="ai-quick-btn" id="ai-translate">🌐 <span>Tłumacz</span></button>
+          <button class="ai-quick-btn" id="ai-explain">💡 <span>Wyjaśnij</span></button>
+          <button class="ai-quick-btn" id="ai-clear-chat">🗑 <span>Wyczyść</span></button>
         </div>
         <div id="ai-input-row">
-          <input id="ai-input" type="text" placeholder="Ask Wave AI anything..." />
+          <input id="ai-input" type="text" placeholder="Zapytaj Wave AI o cokolwiek..." />
           <button id="ai-send">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
           </button>
@@ -736,9 +738,9 @@
     <!-- NOTES PANEL -->
     <div id="panel-notes" class="side-panel hidden">
       <div class="panel-header">
-        <span class="panel-title">Notes</span>
+        <span class="panel-title">Notatki</span>
         <div class="panel-header-actions">
-          <button id="notes-new-btn" class="panel-action-btn">+ New</button>
+          <button id="notes-new-btn" class="panel-action-btn">+ Nowa</button>
           <button class="panel-close-btn" data-panel="notes">✕</button>
         </div>
       </div>
@@ -747,26 +749,26 @@
       </div>
       <div id="notes-editor-view" class="hidden">
         <div id="notes-editor-toolbar">
-          <button id="notes-back-btn" class="panel-action-btn">← Back</button>
-          <input id="notes-title-input" type="text" placeholder="Note title..." class="notes-title-field" />
-          <button id="notes-delete-btn" class="panel-action-btn" style="color:var(--red)">Delete</button>
+          <button id="notes-back-btn" class="panel-action-btn">← Wstecz</button>
+          <input id="notes-title-input" type="text" placeholder="Tytuł notatki..." class="notes-title-field" />
+          <button id="notes-delete-btn" class="panel-action-btn" style="color:var(--red)">Usuń</button>
         </div>
-        <textarea id="notes-textarea" placeholder="Write your note here...&#10;&#10;Tip: Notes are saved automatically."></textarea>
+        <textarea id="notes-textarea" placeholder="Napisz notatkę tutaj...&#10;&#10;Wskazówka: Notatki są zapisywane automatycznie."></textarea>
       </div>
     </div>
 
     <!-- SESSIONS PANEL -->
     <div id="panel-sessions" class="side-panel hidden">
       <div class="panel-header">
-        <span class="panel-title">Session Manager</span>
+        <span class="panel-title">Menedżer sesji</span>
         <div class="panel-header-actions">
-          <button id="session-save-btn" class="panel-action-btn">+ Save Current</button>
+          <button id="session-save-btn" class="panel-action-btn">+ Zapisz bieżącą</button>
           <button class="panel-close-btn" data-panel="sessions">✕</button>
         </div>
       </div>
       <div id="session-auto" class="session-auto-bar">
-        <span>🔄 Auto-save enabled</span>
-        <button id="session-restore-last" class="panel-action-btn">Restore Last</button>
+        <span>🔄 Auto-zapis włączony</span>
+        <button id="session-restore-last" class="panel-action-btn">Przywróć ostatnią</button>
       </div>
       <div id="sessions-list" class="panel-list"></div>
     </div>
@@ -774,14 +776,14 @@
     <!-- CLIPBOARD MANAGER PANEL -->
     <div id="panel-clipboard" class="side-panel hidden">
       <div class="panel-header">
-        <span class="panel-title">📋 Clipboard</span>
+        <span class="panel-title">📋 Schowek</span>
         <div class="panel-header-actions">
-          <button id="clipboard-clear-btn" class="panel-action-btn">Clear</button>
+          <button id="clipboard-clear-btn" class="panel-action-btn">Wyczyść</button>
           <button class="panel-close-btn" data-panel="clipboard">✕</button>
         </div>
       </div>
       <div class="panel-search-wrap">
-        <input id="clipboard-search" class="panel-search" type="text" placeholder="Search clipboard history..." />
+        <input id="clipboard-search" class="panel-search" type="text" placeholder="Szukaj w historii schowka..." />
       </div>
       <div id="clipboard-list" class="panel-list"></div>
     </div>
@@ -789,76 +791,101 @@
     <!-- PERFORMANCE MONITOR PANEL -->
     <div id="panel-perf" class="side-panel hidden">
       <div class="panel-header">
-        <span class="panel-title">📊 Performance</span>
-        <button class="panel-close-btn" data-panel="perf">✕</button>
+        <span class="panel-title">📊 Wydajność</span>
+        <div class="panel-header-actions">
+          <button id="perf-refresh" class="panel-action-btn">↻ Odśwież</button>
+          <button class="panel-close-btn" data-panel="perf">✕</button>
+        </div>
       </div>
       <div id="perf-content" class="panel-list" style="padding:12px">
+        <div class="perf-health" id="perf-health">
+          <span class="perf-health-dot" id="perf-health-dot"></span>
+          <span id="perf-health-text">Monitorowanie…</span>
+        </div>
+
+        <div class="perf-charts">
+          <div class="perf-chart-card">
+            <div class="perf-chart-head"><span class="perf-chart-label">CPU</span><span class="perf-chart-now" id="perf-cpu-now">0%</span></div>
+            <div class="perf-chart" id="perf-cpu-chart"></div>
+            <div class="perf-chart-scale"><span>0s</span><span>60s</span><span>120s</span></div>
+          </div>
+          <div class="perf-chart-card">
+            <div class="perf-chart-head"><span class="perf-chart-label">Pamięć (Electron)</span><span class="perf-chart-now" id="perf-mem-now">—</span></div>
+            <div class="perf-chart" id="perf-mem-chart"></div>
+          </div>
+        </div>
+
         <div class="perf-stats-grid">
           <div class="perf-card">
-            <div class="perf-card-label">System RAM</div>
+            <div class="perf-card-head"><span class="perf-card-ico">🧠</span><span class="perf-card-label">Pamięć systemu</span></div>
             <div class="perf-card-value" id="perf-sys-ram">—</div>
             <div class="perf-card-bar"><div class="perf-bar-fill" id="perf-sys-ram-bar"></div></div>
           </div>
           <div class="perf-card">
-            <div class="perf-card-label">Electron Heap</div>
+            <div class="perf-card-head"><span class="perf-card-ico">🗜️</span><span class="perf-card-label">Pamięć Electron</span></div>
             <div class="perf-card-value" id="perf-elec-heap">—</div>
-            <div class="perf-card-bar"><div class="perf-bar-fill" id="perf-elec-heap-bar"></div></div>
+            <div class="perf-card-bar"><div class="perf-bar-fill heap" id="perf-elec-heap-bar"></div></div>
           </div>
           <div class="perf-card">
-            <div class="perf-card-label">Electron CPU</div>
+            <div class="perf-card-head"><span class="perf-card-ico">⚡</span><span class="perf-card-label">CPU Electron</span></div>
             <div class="perf-card-value" id="perf-cpu-load">—</div>
-            <div class="perf-card-bar"><div class="perf-bar-fill" id="perf-cpu-bar"></div></div>
+            <div class="perf-card-bar"><div class="perf-bar-fill cpu" id="perf-cpu-bar"></div></div>
           </div>
           <div class="perf-card">
-            <div class="perf-card-label">CPU Cores</div>
+            <div class="perf-card-head"><span class="perf-card-ico">🧵</span><span class="perf-card-label">Procesy</span></div>
             <div class="perf-card-value" id="perf-cpu-cores">—</div>
           </div>
         </div>
-        <div class="perf-section-title">Electron Process</div>
-        <div class="perf-detail-row"><span>RSS Memory</span><span id="perf-rss">—</span></div>
-        <div class="perf-detail-row"><span>Heap Used</span><span id="perf-heap-used">—</span></div>
-        <div class="perf-detail-row"><span>Heap Total</span><span id="perf-heap-total">—</span></div>
-        <div class="perf-detail-row"><span>External</span><span id="perf-external">—</span></div>
+
+        <div class="perf-section-title">Proces Electron</div>
+        <div class="perf-detail-row"><span>Pamięć RSS</span><span id="perf-rss">—</span></div>
+        <div class="perf-detail-row"><span>Użyta pamięć sterty</span><span id="perf-heap-used">—</span></div>
+        <div class="perf-detail-row"><span>Sterta ogółem</span><span id="perf-heap-total">—</span></div>
+        <div class="perf-detail-row"><span>Zewnętrzna</span><span id="perf-external">—</span></div>
+        <div class="perf-detail-row"><span>Procesy aplikacji</span><span id="perf-procs">—</span></div>
+
+        <div class="perf-section-title">Obciążenie systemu</div>
+        <div class="perf-detail-row"><span>Obciążenie 1 min</span><span id="perf-load1">—</span></div>
+        <div class="perf-detail-row"><span>Obciążenie 5 min</span><span id="perf-load5">—</span></div>
+        <div class="perf-detail-row"><span>Obciążenie 15 min</span><span id="perf-load15">—</span></div>
+
         <div class="perf-section-title">System</div>
-        <div class="perf-detail-row"><span>Total RAM</span><span id="perf-total-mem">—</span></div>
-        <div class="perf-detail-row"><span>Free RAM</span><span id="perf-free-mem">—</span></div>
-        <div class="perf-detail-row"><span>CPU Model</span><span id="perf-cpu-model" style="font-size:11px;text-align:right;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">—</span></div>
-        <div class="perf-detail-row"><span>Uptime</span><span id="perf-uptime">—</span></div>
-        <div class="perf-detail-row"><span>Platform</span><span id="perf-platform">—</span></div>
-        <div style="margin-top:10px;text-align:center">
-          <button id="perf-refresh" class="panel-action-btn">↻ Refresh</button>
-        </div>
+        <div class="perf-detail-row"><span>Całkowita pamięć RAM</span><span id="perf-total-mem">—</span></div>
+        <div class="perf-detail-row"><span>Wolna pamięć RAM</span><span id="perf-free-mem">—</span></div>
+        <div class="perf-detail-row"><span>Model CPU</span><span id="perf-cpu-model" style="font-size:11px;text-align:right;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">—</span></div>
+        <div class="perf-detail-row"><span>Czas pracy</span><span id="perf-uptime">—</span></div>
+        <div class="perf-detail-row"><span>Platforma</span><span id="perf-platform">—</span></div>
       </div>
     </div>
 
     <!-- USER SCRIPTS PANEL -->
     <div id="panel-scripts" class="side-panel hidden">
       <div class="panel-header">
-        <span class="panel-title">📜 User Scripts</span>
+        <span class="panel-title">📜 Skrypty użytkownika</span>
         <div class="panel-header-actions">
-          <button id="scripts-add-btn" class="panel-action-btn">+ New</button>
+          <button id="scripts-add-btn" class="panel-action-btn">+ Nowy</button>
           <button class="panel-close-btn" data-panel="scripts">✕</button>
         </div>
       </div>
       <div id="scripts-list" class="panel-list"></div>
       <div id="scripts-editor" class="hidden" style="display:flex;flex-direction:column;flex:1;overflow:hidden">
         <div class="panel-search-wrap" style="display:flex;gap:6px;flex-wrap:wrap">
-          <input id="script-name" class="panel-search" type="text" placeholder="Script name..." style="flex:1;min-width:120px" />
+          <input id="script-name" class="panel-search" type="text" placeholder="Nazwa skryptu..." style="flex:1;min-width:120px" />
           <select id="script-type" class="panel-search" style="width:70px;min-width:70px;flex:none">
             <option value="js">JavaScript</option>
             <option value="css">CSS</option>
           </select>
         </div>
         <div class="panel-search-wrap">
-          <input id="script-pattern" class="panel-search" type="text" placeholder="URL pattern (* = wildcard, e.g. *://example.com/*)" />
+          <input id="script-pattern" class="panel-search" type="text" placeholder="Wzorzec URL (* = dowolny znak, np. *://example.com/*)" />
         </div>
         <div style="flex:1;overflow:hidden;padding:0 0 6px">
-          <textarea id="script-code" placeholder="// Paste your script or CSS here..." style="width:100%;height:100%;background:var(--bg-3);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px;color:var(--text-1);font-family:'Courier New',monospace;font-size:12px;resize:none;outline:none"></textarea>
+          <textarea id="script-code" placeholder="// Wklej tutaj swój skrypt lub CSS..." style="width:100%;height:100%;background:var(--bg-3);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px;color:var(--text-1);font-family:'Courier New',monospace;font-size:12px;resize:none;outline:none"></textarea>
         </div>
         <div style="padding:6px 12px;display:flex;gap:6px;border-top:1px solid var(--border)">
-          <button id="script-save-btn" class="settings-btn" style="flex:1;background:var(--accent);color:#fff;border:none">Save</button>
-          <button id="script-cancel-btn" class="settings-btn" style="flex:1;border:1px solid var(--border);background:transparent;color:var(--text-2)">Cancel</button>
-          <button id="script-delete-btn" class="settings-btn danger-btn" style="border:1px solid var(--border);background:transparent;color:var(--red)">Delete</button>
+          <button id="script-save-btn" class="settings-btn" style="flex:1;background:var(--accent);color:#fff;border:none">Zapisz</button>
+          <button id="script-cancel-btn" class="settings-btn" style="flex:1;border:1px solid var(--border);background:transparent;color:var(--text-2)">Anuluj</button>
+          <button id="script-delete-btn" class="settings-btn danger-btn" style="border:1px solid var(--border);background:transparent;color:var(--red)">Usuń</button>
         </div>
       </div>
     </div>
@@ -866,17 +893,17 @@
     <!-- READER MODE OVERLAY -->
     <div id="reader-overlay" class="hidden">
       <div id="reader-toolbar">
-        <button id="reader-close">← Exit Reader</button>
+        <button id="reader-close">← Wyjdź z czytnika</button>
         <div id="reader-controls">
           <button id="reader-font-dec">A-</button>
           <button id="reader-font-inc">A+</button>
           <select id="reader-font-family">
-            <option value="Georgia,serif">Serif</option>
-            <option value="system-ui,sans-serif">Sans</option>
-            <option value="'Courier New',monospace">Mono</option>
+            <option value="Georgia,serif">Szeryfowa</option>
+            <option value="system-ui,sans-serif">Bezszeryfowa</option>
+            <option value="'Courier New',monospace">Monospace</option>
           </select>
           <button id="reader-theme-toggle">🌙</button>
-          <button id="reader-tts" title="Read aloud">🔊</button>
+          <button id="reader-tts" title="Czytaj na głos">🔊</button>
         </div>
       </div>
       <div id="reader-content"></div>
@@ -887,43 +914,43 @@
       <div id="shortcuts-backdrop"></div>
       <div id="shortcuts-modal">
         <div id="shortcuts-header">
-          <span>Keyboard Shortcuts</span>
+          <span>Skróty klawiaturowe</span>
           <button id="shortcuts-close">✕</button>
         </div>
         <div id="shortcuts-grid">
-          <div class="sc-group"><div class="sc-group-title">Navigation</div>
-            <div class="sc-row"><kbd>Ctrl+T</kbd><span>New tab</span></div>
-            <div class="sc-row"><kbd>Ctrl+Shift+T</kbd><span>Reopen closed tab</span></div>
-            <div class="sc-row"><kbd>Ctrl+W</kbd><span>Close tab</span></div>
-            <div class="sc-row"><kbd>Ctrl+R / F5</kbd><span>Reload</span></div>
-            <div class="sc-row"><kbd>Ctrl+L</kbd><span>Focus URL bar</span></div>
-            <div class="sc-row"><kbd>Alt+←/→</kbd><span>Back / Forward</span></div>
-            <div class="sc-row"><kbd>Ctrl+1–9</kbd><span>Switch to tab N</span></div>
+          <div class="sc-group"><div class="sc-group-title">Nawigacja</div>
+            <div class="sc-row"><kbd>Ctrl+T</kbd><span>Nowa karta</span></div>
+            <div class="sc-row"><kbd>Ctrl+Shift+T</kbd><span>Przywróć zamkniętą kartę</span></div>
+            <div class="sc-row"><kbd>Ctrl+W</kbd><span>Zamknij kartę</span></div>
+            <div class="sc-row"><kbd>Ctrl+R / F5</kbd><span>Odśwież</span></div>
+            <div class="sc-row"><kbd>Ctrl+L</kbd><span>Przejdź do paska adresu</span></div>
+            <div class="sc-row"><kbd>Alt+←/→</kbd><span>Wstecz / Dalej</span></div>
+            <div class="sc-row"><kbd>Ctrl+1–9</kbd><span>Przełącz na kartę N</span></div>
           </div>
-          <div class="sc-group"><div class="sc-group-title">Panels</div>
-            <div class="sc-row"><kbd>Ctrl+H</kbd><span>History</span></div>
-            <div class="sc-row"><kbd>Ctrl+B</kbd><span>Bookmarks</span></div>
-            <div class="sc-row"><kbd>Ctrl+J</kbd><span>Downloads</span></div>
+          <div class="sc-group"><div class="sc-group-title">Panele</div>
+            <div class="sc-row"><kbd>Ctrl+H</kbd><span>Historia</span></div>
+            <div class="sc-row"><kbd>Ctrl+B</kbd><span>Zakładki</span></div>
+            <div class="sc-row"><kbd>Ctrl+J</kbd><span>Pobieranie</span></div>
             <div class="sc-row"><kbd>Ctrl+I</kbd><span>Wave AI</span></div>
-            <div class="sc-row"><kbd>Ctrl+M</kbd><span>Notes / Mute All</span></div>
-            <div class="sc-row"><kbd>Ctrl+Shift+T</kbd><span>Reopen tab</span></div>
+            <div class="sc-row"><kbd>Ctrl+M</kbd><span>Notatki / Wycisz wszystko</span></div>
+            <div class="sc-row"><kbd>Ctrl+Shift+T</kbd><span>Przywróć kartę</span></div>
             <div class="sc-row"><kbd>Ctrl+Shift+P</kbd><span>WavePass</span></div>
           </div>
-          <div class="sc-group"><div class="sc-group-title">Page</div>
-            <div class="sc-row"><kbd>Ctrl+F</kbd><span>Find in page</span></div>
-            <div class="sc-row"><kbd>Ctrl++/-</kbd><span>Zoom in/out</span></div>
-            <div class="sc-row"><kbd>Ctrl+0</kbd><span>Reset zoom</span></div>
-            <div class="sc-row"><kbd>Ctrl+P</kbd><span>Print</span></div>
-            <div class="sc-row"><kbd>Ctrl+Shift+R</kbd><span>Reader mode</span></div>
-            <div class="sc-row"><kbd>Ctrl+Shift+S</kbd><span>Screenshot</span></div>
-            <div class="sc-row"><kbd>Ctrl+Shift+N</kbd><span>Incognito tab</span></div>
-            <div class="sc-row"><kbd>Ctrl+Shift+E</kbd><span>Sessions</span></div>
-            <div class="sc-row"><kbd>Ctrl+Shift+X</kbd><span>Extensions</span></div>
+          <div class="sc-group"><div class="sc-group-title">Strona</div>
+            <div class="sc-row"><kbd>Ctrl+F</kbd><span>Szukaj na stronie</span></div>
+            <div class="sc-row"><kbd>Ctrl++/-</kbd><span>Powiększ / pomniejsz</span></div>
+            <div class="sc-row"><kbd>Ctrl+0</kbd><span>Resetuj powiększenie</span></div>
+            <div class="sc-row"><kbd>Ctrl+P</kbd><span>Drukuj</span></div>
+            <div class="sc-row"><kbd>Ctrl+Shift+R</kbd><span>Tryb czytnika</span></div>
+            <div class="sc-row"><kbd>Ctrl+Shift+S</kbd><span>Zrzut ekranu</span></div>
+            <div class="sc-row"><kbd>Ctrl+Shift+N</kbd><span>Karta incognito</span></div>
+            <div class="sc-row"><kbd>Ctrl+Shift+E</kbd><span>Sesje</span></div>
+            <div class="sc-row"><kbd>Ctrl+Shift+X</kbd><span>Rozszerzenia</span></div>
           </div>
-          <div class="sc-group"><div class="sc-group-title">Other</div>
-            <div class="sc-row"><kbd>?</kbd><span>This help</span></div>
-            <div class="sc-row"><kbd>Ctrl+D</kbd><span>Bookmark page</span></div>
-            <div class="sc-row"><kbd>Ctrl+U</kbd><span>View source</span></div>
+          <div class="sc-group"><div class="sc-group-title">Inne</div>
+            <div class="sc-row"><kbd>?</kbd><span>Ta pomoc</span></div>
+            <div class="sc-row"><kbd>Ctrl+D</kbd><span>Dodaj stronę do zakładek</span></div>
+            <div class="sc-row"><kbd>Ctrl+U</kbd><span>Pokaż kod źródłowy</span></div>
           </div>
         </div>
       </div>
@@ -934,12 +961,12 @@
       <div id="wp-save-prompt-content">
         <div id="wp-save-prompt-icon">🔑</div>
         <div id="wp-save-prompt-info">
-          <div id="wp-save-prompt-title">Save password?</div>
+          <div id="wp-save-prompt-title">Zapisać hasło?</div>
           <div id="wp-save-prompt-url"></div>
         </div>
         <div id="wp-save-prompt-actions">
-          <button id="wp-save-prompt-save">Save</button>
-          <button id="wp-save-prompt-ignore">Never</button>
+          <button id="wp-save-prompt-save">Zapisz</button>
+          <button id="wp-save-prompt-ignore">Nigdy</button>
           <button id="wp-save-prompt-close">✕</button>
         </div>
       </div>
@@ -962,7 +989,7 @@
     <div class="cmd-modal">
       <div class="cmd-search-wrap">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" class="cmd-icon"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M16.5 16.5l4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-        <input id="cmd-input" class="cmd-input" type="text" placeholder="Type a command..." spellcheck="false" />
+        <input id="cmd-input" class="cmd-input" type="text" placeholder="Wpisz polecenie..." spellcheck="false" />
         <span class="cmd-hint">ESC</span>
       </div>
       <div id="cmd-results" class="cmd-results"></div>
@@ -1010,13 +1037,13 @@
               <defs><linearGradient id="obG" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#ff1a35"/><stop offset="100%" style="stop-color:#ff4444"/></linearGradient></defs>
             </svg>
           </div>
-          <h2>Welcome to WAVEWEB</h2>
-          <p class="ob-sub">Your AI-powered browser — fast, modern, and private.</p>
+          <h2>Witaj w WAVEWEB</h2>
+          <p class="ob-sub">Twoja przeglądarka z AI — szybka, nowoczesna i prywatna.</p>
           <div class="ob-features">
-            <div class="ob-feature"><span class="ob-f-icon">🤖</span><span>Local AI — no setup, no API key</span></div>
-            <div class="ob-feature"><span class="ob-f-icon">🛡</span><span>Built-in ad & tracker blocking</span></div>
-            <div class="ob-feature"><span class="ob-f-icon">📑</span><span>Tab management with gestures</span></div>
-            <div class="ob-feature"><span class="ob-f-icon">🎨</span><span>Customizable dark theme</span></div>
+            <div class="ob-feature"><span class="ob-f-icon">🤖</span><span>Lokalne AI — bez konfiguracji, bez klucza API</span></div>
+            <div class="ob-feature"><span class="ob-f-icon">🛡</span><span>Wbudowane blokowanie reklam i trackerów</span></div>
+            <div class="ob-feature"><span class="ob-f-icon">📑</span><span>Zarządzanie kartami gestami</span></div>
+            <div class="ob-feature"><span class="ob-f-icon">🎨</span><span>Konfigurowalny ciemny motyw</span></div>
           </div>
         </div>
         <!-- Step 1: AI Setup -->
@@ -1025,47 +1052,47 @@
           <h2>Wave AI</h2>
           <p class="ob-sub">AI assistant działa wprost w przeglądarce — zero instalacji, zero kluczy API. Model (~2.3GB) pobiera się raz.</p>
           <div class="ob-input-group">
-            <button id="ob-start-ai" class="settings-btn" style="flex:1;background:var(--accent);color:#fff;border:none">⚡ Load AI Now</button>
-            <button id="ob-skip-ai" class="settings-btn" style="background:transparent;border:1px solid var(--border);color:var(--text-2)">Skip</button>
+            <button id="ob-start-ai" class="settings-btn" style="flex:1;background:var(--accent);color:#fff;border:none">⚡ Wczytaj AI teraz</button>
+            <button id="ob-skip-ai" class="settings-btn" style="background:transparent;border:1px solid var(--border);color:var(--text-2)">Pomiń</button>
           </div>
           <p style="font-size:11px;color:var(--text-3);margin-top:6px">Powered by Transformers.js — działa lokalnie, offline po pierwszym pobraniu.</p>
         </div>
         <!-- Step 2: Theme -->
         <div class="onboarding-step hidden" data-step="2">
           <div class="ob-icon">🎨</div>
-          <h2>Choose Your Accent</h2>
-          <p class="ob-sub">Pick a color that matches your style.</p>
+          <h2>Wybierz swój kolor akcentu</h2>
+          <p class="ob-sub">Wybierz kolor, który pasuje do Twojego stylu.</p>
           <div id="ob-accent-picker">
-            <button class="accent-opt" data-color="6c63ff" style="background:#ff1a35" title="Purple"></button>
-            <button class="accent-opt" data-color="0078d4" style="background:#0078d4" title="Blue"></button>
-            <button class="accent-opt" data-color="00d4a0" style="background:#00d4a0" title="Teal"></button>
-            <button class="accent-opt active" data-color="ff1a35" style="background:#ff1a35" title="Red"></button>
-            <button class="accent-opt" data-color="ff8844" style="background:#ff8844" title="Orange"></button>
-            <button class="accent-opt" data-color="ffd060" style="background:#ffd060" title="Yellow"></button>
+            <button class="accent-opt" data-color="6c63ff" style="background:#ff1a35" title="Fioletowy"></button>
+            <button class="accent-opt" data-color="0078d4" style="background:#0078d4" title="Niebieski"></button>
+            <button class="accent-opt" data-color="00d4a0" style="background:#00d4a0" title="Morski"></button>
+            <button class="accent-opt active" data-color="ff1a35" style="background:#ff1a35" title="Czerwony"></button>
+            <button class="accent-opt" data-color="ff8844" style="background:#ff8844" title="Pomarańczowy"></button>
+            <button class="accent-opt" data-color="ffd060" style="background:#ffd060" title="Żółty"></button>
           </div>
         </div>
         <!-- Step 3: Ready -->
         <div class="onboarding-step hidden" data-step="3">
           <div class="ob-icon">🚀</div>
-          <h2>You're All Set!</h2>
-          <p class="ob-sub">WAVEWEB is ready to go. Start browsing, or check out the keyboard shortcuts with <kbd style="background:var(--bg-4);padding:2px 8px;border-radius:4px">?</kbd></p>
+          <h2>Gotowe!</h2>
+          <p class="ob-sub">WAVEWEB jest gotowy do pracy. Zacznij przeglądać lub sprawdź skróty klawiaturowe klawiszem <kbd style="background:var(--bg-4);padding:2px 8px;border-radius:4px">?</kbd></p>
           <div class="ob-summary">
-            <div><span>Ctrl+T</span> New tab</div>
-            <div><span>Ctrl+W</span> Close tab</div>
-            <div><span>Ctrl+L</span> Focus URL bar</div>
-            <div><span>Ctrl+I</span> Open AI sidebar</div>
+            <div><span>Ctrl+T</span> Nowa karta</div>
+            <div><span>Ctrl+W</span> Zamknij kartę</div>
+            <div><span>Ctrl+L</span> Przejdź do paska adresu</div>
+            <div><span>Ctrl+I</span> Otwórz panel AI</div>
           </div>
         </div>
       </div>
       <div id="onboarding-footer">
-        <button id="ob-prev" class="settings-btn" style="background:transparent;border:1px solid var(--border);color:var(--text-2);visibility:hidden">Back</button>
+        <button id="ob-prev" class="settings-btn" style="background:transparent;border:1px solid var(--border);color:var(--text-2);visibility:hidden">Wstecz</button>
         <div id="ob-dots">
           <span class="ob-dot active" data-step="0"></span>
           <span class="ob-dot" data-step="1"></span>
           <span class="ob-dot" data-step="2"></span>
           <span class="ob-dot" data-step="3"></span>
         </div>
-        <button id="ob-next" class="settings-btn">Next</button>
+        <button id="ob-next" class="settings-btn">Dalej</button>
       </div>
     </div>
   </div>
@@ -1073,7 +1100,7 @@
   <!-- ===== TAB SEARCH ===== -->
   <div id="tab-search-overlay" class="hidden">
     <div id="tab-search-modal">
-      <input id="tab-search-input" type="text" placeholder="Search open tabs..." autocomplete="off" spellcheck="false" />
+      <input id="tab-search-input" type="text" placeholder="Szukaj otwartych kart..." autocomplete="off" spellcheck="false" />
       <div id="tab-search-results"></div>
     </div>
   </div>
@@ -1107,12 +1134,12 @@
       <div class="splash-logo" aria-label="WAVEWEB">
         <span style="--i:0">W</span><span style="--i:1">A</span><span style="--i:2">V</span><span style="--i:3">E</span><span style="--i:4">W</span><span style="--i:5">E</span><span style="--i:6">B</span>
       </div>
-      <div class="splash-tagline">Your AI-powered browser</div>
+      <div class="splash-tagline">Twoja przeglądarka z AI</div>
       <div class="splash-bar"><div class="splash-bar-fill"></div></div>
       <div class="splash-status">
-        <span style="--p:0">Initializing engine&hellip;</span>
-        <span style="--p:1">Loading AI core&hellip;</span>
-        <span style="--p:2">Almost ready&hellip;</span>
+        <span style="--p:0">Inicjalizacja silnika&hellip;</span>
+        <span style="--p:1">Ładowanie rdzenia AI&hellip;</span>
+        <span style="--p:2">Prawie gotowe&hellip;</span>
       </div>
     </div>
     <div class="splash-footer"><b>WAVEWEB</b> &nbsp;&middot;&nbsp; Powered by ASTROWORLD</div>

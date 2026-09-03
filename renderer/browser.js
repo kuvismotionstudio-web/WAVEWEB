@@ -79,8 +79,8 @@ const SEARCH_ENGINES = {
 const SAFETY_CATEGORIES = {
   adult: {
     icon: '🔞',
-    title: 'Adult Content Detected',
-    reason: 'This site contains explicit adult content that may not be suitable for all audiences.',
+    title: 'Wykryto treści dla dorosłych',
+    reason: 'Ta strona zawiera treści dla dorosłych, które mogą nie być odpowiednie dla wszystkich odbiorców.',
     domains: [
       'pornhub.com', 'xvideos.com', 'xnxx.com', 'xhamster.com', 'redtube.com',
       'youporn.com', 'brazzers.com', 'bangbros.com', 'realitykings.com', 'mofos.com',
@@ -96,8 +96,8 @@ const SAFETY_CATEGORIES = {
   },
   gambling: {
     icon: '🎰',
-    title: 'Gambling Site Detected',
-    reason: 'This site appears to be an online gambling platform. Gambling can be addictive and may cause financial harm.',
+    title: 'Wykryto witrynę hazardową',
+    reason: 'Ta strona wydaje się być platformą hazardową online. Hazard może być uzależniający i powodować szkody finansowe.',
     domains: [
       'bet365.com', 'paddypower.com', 'williamhill.com', 'ladbrokes.com', 'coral.co.uk',
       'betfair.com', 'skybet.com', 'bwin.com', 'unibet.com', 'betway.com',
@@ -113,8 +113,8 @@ const SAFETY_CATEGORIES = {
   },
   phishing: {
     icon: '🎣',
-    title: 'Phishing / Scam Site Detected',
-    reason: 'This site has been identified as a potential phishing or scam page. Entering personal information here may compromise your security.',
+    title: 'Wykryto witrynę phishingową / oszustwo',
+    reason: 'Ta strona została zidentyfikowana jako potencjalne oszustwo phishingowe. Podawanie danych osobowych może zagrażać Twojemu bezpieczeństwu.',
     domains: [
       'paypa1.com', 'g00gle.com', 'amaz0n.com', 'appld.com', 'micr0soft.com',
       'faceb00k.com', 'tw1tter.com', '1nstagram.com', 'linkedln.com',
@@ -127,8 +127,8 @@ const SAFETY_CATEGORIES = {
   },
   malware: {
     icon: '🦠',
-    title: 'Malware / Unsafe Site Detected',
-    reason: 'This site is known to distribute malware, unwanted software, or other security threats.',
+    title: 'Wykryto złośliwą / niebezpieczną witrynę',
+    reason: 'Ta strona jest znana z rozpowszechniania złośliwego oprogramowania lub innych zagrożeń bezpieczeństwa.',
     domains: [
       'cracksnow.com', 'keygenguru.com', 'warezworld.com', 'piratebaymirror.com',
       'megaupload-link.com', 'rapidshare-hack.com', 'free-torrents.com',
@@ -137,8 +137,8 @@ const SAFETY_CATEGORIES = {
   },
   drugs: {
     icon: '💊',
-    title: 'Illegal Substances Site Detected',
-    reason: 'This site appears to be related to the sale or distribution of illegal substances.',
+    title: 'Wykryto witrynę z nielegalnymi substancjami',
+    reason: 'Ta strona wydaje się być związana ze sprzedażą lub dystrybucją nielegalnych substancji.',
     domains: [
       'silkroad.com', 'silkroad6berutulxyl.onion', 'dreammarket.com',
       'wallstreetmarket.com', 'dark0de.com', 'versus-market.com',
@@ -318,13 +318,13 @@ async function initSettings() {
     _webviewPreloadPath = (info && info.webviewPreload) || null;
     const infoEl = $('system-info-content');
     const rows = [
-      ['Version', '1.0.0'],
-      ['Electron', (info && info.electronVersion) || 'unknown'],
-      ['Chromium', (info && info.chromiumVersion) || 'unknown'],
-      ['Node', (info && info.nodeVersion) || 'unknown'],
-      ['Platform', (info && info.platform) || 'unknown'],
-      ['RAM', (info && info.memory) || 'unknown'],
-      ['Downloads', (info && info.downloadsPath) || 'unknown'],
+      ['Wersja', '1.0.0'],
+      ['Electron', (info && info.electronVersion) || 'nieznane'],
+      ['Chromium', (info && info.chromiumVersion) || 'nieznane'],
+      ['Node', (info && info.nodeVersion) || 'nieznane'],
+      ['Platforma', (info && info.platform) || 'nieznane'],
+      ['RAM', (info && info.memory) || 'nieznane'],
+      ['Katalog pobierania', (info && info.downloadsPath) || 'nieznane'],
     ];
     if (infoEl) {
       infoEl.innerHTML = rows.map(([k, v]) =>
@@ -369,7 +369,7 @@ function updateDownloadPathLabel(path) {
     label.textContent = short;
     label.title = path;
   } else {
-    label.textContent = 'Default downloads folder';
+    label.textContent = 'Domyślny folder pobierania';
     label.title = '';
   }
 }
@@ -618,9 +618,9 @@ function renderTopSites() {
       return `<div class="top-site" data-url="${esc(s.url)}" data-index="${i}">
         ${icon}
         <span class="top-site-title">${esc(s.title)}</span>
-        <button class="top-site-remove" data-index="${i}" title="Remove">✕</button>
+        <button class="top-site-remove" data-index="${i}" title="Usuń">✕</button>
       </div>`;
-    }).join('') + `<div class="top-site top-site-add" id="top-site-add-btn" title="Add site">
+    }).join('') + `<div class="top-site top-site-add" id="top-site-add-btn" title="Dodaj stronę">
       <div class="ql-icon">+</div>
       <span class="top-site-title">Add</span>
     </div>`;
@@ -833,7 +833,7 @@ function createTab(url = null) {
   const tab = {
     id,
     url: url || '',
-    title: 'New Tab',
+    title: 'Nowa karta',
     favicon: null,
     webview: null,
     loading: false,
@@ -853,7 +853,7 @@ function createTab(url = null) {
   tabEl.innerHTML = `
     <img class="tab-favicon" src="${defaultFavicon()}" />
     <span class="tab-title">New Tab</span>
-    <button class="tab-close" title="Close (Ctrl+W)">✕</button>
+    <button class="tab-close" title="Zamknij (Ctrl+W)">✕</button>
   `;
 
   tabEl.addEventListener('click', e => {
@@ -1027,12 +1027,20 @@ function attachWebview(tab, url) {
 
   // Context menu
   wv.addEventListener('context-menu', e => {
+    const p = e.params || {};
     window.electronAPI.showContextMenu({
-      x: e.params?.x, y: e.params?.y,
-      linkURL: e.params?.linkURL || '',
-      selectionText: e.params?.selectionText || '',
-      mediaType: e.params?.mediaType || '',
-      srcURL: e.params?.srcURL || '',
+      x: p.x, y: p.y,
+      pageURL: tab?.url || '',
+      linkURL: p.linkURL || '',
+      linkText: p.linkText || '',
+      selectionText: p.selectionText || '',
+      mediaType: p.mediaType || '',
+      srcURL: p.srcURL || '',
+      canGoBack: tab?.webview?.canGoBack() ? true : false,
+      canGoForward: tab?.webview?.canGoForward() ? true : false,
+      hasVideo: !!p.hasVideoContents,
+      misspelledWord: p.misspelledWord || '',
+      dictionarySuggestions: p.dictionarySuggestions || [],
     });
   });
 
@@ -1094,7 +1102,7 @@ function closeTab(id) {
 
   // Save to recently closed (if not incognito and has URL)
   if (tab.url && !tab.incognito) {
-    closedTabs.unshift({ url: tab.url, title: tab.title || 'New Tab' });
+    closedTabs.unshift({ url: tab.url, title: tab.title || 'Nowa karta' });
     if (closedTabs.length > 30) closedTabs.length = 30;
     localStorage.setItem('ww_closed_tabs', JSON.stringify(closedTabs));
   }
@@ -1124,15 +1132,15 @@ function reopenClosedTab() {
     localStorage.setItem('ww_closed_tabs', JSON.stringify(closedTabs));
     createTab(entry.url);
   } else {
-    showToast('No recently closed tabs', 1500);
+    showToast('Brak ostatnio zamkniętych kart', 1500);
   }
 }
 
 function setTabTitle(id, title) {
   const tab = tabs.find(t => t.id === id);
-  if (tab) tab.title = title || 'Untitled';
+  if (tab) tab.title = title || 'Bez tytułu';
   const el = document.querySelector(`[data-tab-id="${id}"] .tab-title`);
-  if (el) el.textContent = title || 'Untitled';
+  if (el) el.textContent = title || 'Bez tytułu';
 }
 
 function setTabFavicon(id, url) {
@@ -1217,15 +1225,15 @@ function setSecurityIcon(url) {
 
   if (detectPhishing(url)) {
     securityIcon.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 3L2 21h20L12 3z" stroke="#ff4444" stroke-width="2" stroke-linejoin="round"/><line x1="12" y1="10" x2="12" y2="14" stroke="#ff4444" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17" r="0.8" fill="#ff4444"/></svg>`;
-    securityIcon.title = '⚠ Potential phishing site detected';
+    securityIcon.title = '⚠ Wykryto potencjalną witrynę phishingową';
     wrap?.classList.add('phishing');
   } else if (url.startsWith('https://')) {
     securityIcon.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="10" rx="2" stroke="#00d4a0" stroke-width="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="#00d4a0" stroke-width="2" stroke-linecap="round"/></svg>`;
-    securityIcon.title = 'Secure connection (HTTPS)';
+    securityIcon.title = 'Bezpieczne połączenie (HTTPS)';
     wrap?.classList.remove('phishing');
   } else {
     securityIcon.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="10" rx="2" stroke="#ff8844" stroke-width="2"/><path d="M8 11V7a4 4 0 0 1 8 0" stroke="#ff8844" stroke-width="2" stroke-linecap="round"/></svg>`;
-    securityIcon.title = 'Not secure';
+    securityIcon.title = 'Niezabezpieczone połączenie';
     wrap?.classList.remove('phishing');
   }
 }
@@ -1353,8 +1361,8 @@ btnHome.addEventListener('click', () => {
     if (tab) {
       if (tab.webview) { tab.webview.remove(); tab.webview = null; }
       tab.url = '';
-      tab.title = 'New Tab';
-      setTabTitle(tab.id, 'New Tab');
+      tab.title = 'Nowa karta';
+      setTabTitle(tab.id, 'Nowa karta');
       setTabFavicon(tab.id, defaultFavicon());
       newtabPage.classList.add('active');
       hideSafetyScreen();
@@ -1372,8 +1380,8 @@ function goHome() {
     if (tab) {
       if (tab.webview) { tab.webview.remove(); tab.webview = null; }
       tab.url = '';
-      tab.title = 'New Tab';
-      setTabTitle(tab.id, 'New Tab');
+      tab.title = 'Nowa karta';
+      setTabTitle(tab.id, 'Nowa karta');
       setTabFavicon(tab.id, defaultFavicon());
       newtabPage.classList.add('active');
       hideSafetyScreen();
@@ -1402,10 +1410,10 @@ async function checkBookmarkState(url) {
   const bookmarks = await window.electronAPI.bookmarksGet();
   if (bookmarks.find(b => b.url === url)) {
     btnBookmarkPage.classList.add('bookmarked');
-    btnBookmarkPage.title = 'Remove bookmark';
+    btnBookmarkPage.title = 'Usuń z zakładek';
   } else {
     btnBookmarkPage.classList.remove('bookmarked');
-    btnBookmarkPage.title = 'Bookmark this page';
+    btnBookmarkPage.title = 'Zapisz stronę w zakładkach';
   }
 }
 
@@ -1416,13 +1424,13 @@ btnBookmarkPage.addEventListener('click', async () => {
   if (bookmarks.find(b => b.url === tab.url)) {
     window.electronAPI.bookmarksRemove(tab.url);
     btnBookmarkPage.classList.remove('bookmarked');
-    btnBookmarkPage.title = 'Bookmark this page';
-    showToast('Bookmark removed');
+    btnBookmarkPage.title = 'Zapisz stronę w zakładkach';
+    showToast('Usunięto z zakładek');
   } else {
     window.electronAPI.bookmarksAdd({ url: tab.url, title: tab.title, favicon: tab.favicon });
     btnBookmarkPage.classList.add('bookmarked');
-    btnBookmarkPage.title = 'Remove bookmark';
-    showToast('Bookmark saved ⭐');
+    btnBookmarkPage.title = 'Usuń z zakładek';
+    showToast('Zapisano w zakładkach ⭐');
   }
   if (activePanel === 'bookmarks') loadBookmarksPanel();
   loadBookmarksBar();
@@ -1471,7 +1479,7 @@ $('btn-translate')?.addEventListener('click', e => {
   if (!popup.classList.contains('hidden')) { hideTranslatePopup(); return; }
   const tab = tabs.find(t => t.id === activeTabId);
   if (!tab?.url || tab.url.startsWith('about:') || tab.url.startsWith('chrome')) {
-    showToast('Cannot translate this page');
+    showToast('Nie można przetłumaczyć tej strony');
     return;
   }
   renderTranslateLangs();
@@ -1520,8 +1528,8 @@ function saveReadingList(list) {
 function toggleReadingList(url, title, favicon) {
   let list = getReadingList();
   const idx = list.findIndex(item => item.url === url);
-  if (idx >= 0) { list.splice(idx, 1); showToast('Removed from reading list'); }
-  else { list.unshift({ url, title: title || url, favicon: favicon || '', date: Date.now() }); showToast('Saved to reading list 📖'); }
+  if (idx >= 0) { list.splice(idx, 1); showToast('Usunięto z listy do przeczytania'); }
+  else { list.unshift({ url, title: title || url, favicon: favicon || '', date: Date.now() }); showToast('Zapisano na listę do przeczytania 📖'); }
   saveReadingList(list);
   renderReadingList();
 }
@@ -1530,7 +1538,7 @@ function renderReadingList() {
   if (!container) return;
   const list = getReadingList();
   if (!list.length) { container.innerHTML = ''; return; }
-  container.innerHTML = `<div style="padding:6px 14px;font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:0.07em">Reading List</div>` +
+  container.innerHTML = `<div style="padding:6px 14px;font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:0.07em">Lista do przeczytania</div>` +
     list.map(item => `
     <div class="panel-item" data-url="${esc(item.url)}">
       <div class="panel-item-icon">${item.favicon ? `<img src="${esc(item.favicon)}" width="16" height="16" onerror="this.style.display='none'" />` : '📖'}</div>
@@ -1539,7 +1547,7 @@ function renderReadingList() {
         <div class="panel-item-sub">${esc(item.url)}</div>
       </div>
       <div class="panel-item-actions">
-        <button class="panel-item-btn danger" data-action="del-rl" data-url="${esc(item.url)}" title="Remove">✕</button>
+        <button class="panel-item-btn danger" data-action="del-rl" data-url="${esc(item.url)}" title="Usuń">✕</button>
       </div>
     </div>
   `).join('');
@@ -1570,11 +1578,11 @@ $('history-search').addEventListener('input', async function () {
 });
 $('bm-export-btn').addEventListener('click', async () => {
   const ok = await window.electronAPI.bookmarksExport();
-  showToast(ok ? 'Bookmarks exported' : 'Export cancelled');
+  showToast(ok ? 'Zakładki wyeksportowane' : 'Eksport anulowany');
 });
 $('bm-import-btn').addEventListener('click', async () => {
   const count = await window.electronAPI.bookmarksImport();
-  showToast(count > 0 ? `Imported ${count} bookmarks` : 'No new bookmarks found');
+  showToast(count > 0 ? `Zaimportowano ${count} zakładek` : 'Nie znaleziono nowych zakładek');
   loadBookmarksPanel();
   loadBookmarksBar();
 });
@@ -1591,7 +1599,7 @@ function renderFilteredBookmarks(bookmarks, q) {
   const filtered = q ? bookmarks.filter(b => b.title?.toLowerCase().includes(q.toLowerCase()) || b.url?.toLowerCase().includes(q.toLowerCase())) : bookmarks;
 
   if (!filtered.length) {
-    list.innerHTML = `<div class="panel-empty"><div class="panel-empty-icon">⭐</div><span>No bookmarks yet.<br>Click the star in the address bar to save pages.</span></div>`;
+    list.innerHTML = `<div class="panel-empty"><div class="panel-empty-icon">⭐</div><span>Brak zakładek.<br>Kliknij gwiazdkę na pasku adresu, aby zapisywać strony.</span></div>`;
     return;
   }
   list.innerHTML = filtered.map(b => `
@@ -1604,7 +1612,7 @@ function renderFilteredBookmarks(bookmarks, q) {
         <div class="panel-item-sub">${esc(b.url)}</div>
       </div>
       <div class="panel-item-actions">
-        <button class="panel-item-btn danger" data-action="del-bm" data-url="${esc(b.url)}" title="Remove">🗑</button>
+        <button class="panel-item-btn danger" data-action="del-bm" data-url="${esc(b.url)}" title="Usuń">🗑</button>
       </div>
     </div>
   `).join('');
@@ -1634,7 +1642,7 @@ function loadBookmarksBar() {
 
   window.electronAPI.bookmarksGet().then(bookmarks => {
     if (!bookmarks.length) {
-      listEl.innerHTML = `<span class="bb-drop-hint">Drag URLs here to bookmark</span>`;
+      listEl.innerHTML = `<span class="bb-drop-hint">Przeciągnij adresy URL tutaj, aby dodać do zakładek</span>`;
       return;
     }
     listEl.innerHTML = bookmarks.slice(0, 30).map(b => `
@@ -1644,7 +1652,7 @@ function loadBookmarksBar() {
           : `<span class="bb-favicon-fallback">⭐</span>`
         }
         <span class="bb-label">${esc(b.title || b.url).replace(/(.{30})..+/, '$1…')}</span>
-        <button class="bb-remove" data-url="${esc(b.url)}" title="Remove">✕</button>
+        <button class="bb-remove" data-url="${esc(b.url)}" title="Usuń">✕</button>
       </div>
     `).join('');
 
@@ -1682,7 +1690,7 @@ bookmarksBar.addEventListener('drop', e => {
   if (url && /^https?:\/\//i.test(url)) {
     window.electronAPI.bookmarksAdd({ url, title: url, favicon: '' });
     loadBookmarksBar();
-    showToast('⭐ Bookmark added');
+    showToast('⭐ Dodano do zakładek');
   }
 });
 
@@ -1720,7 +1728,7 @@ function updateAdblockStats() {
           <span class="ab-domain-count">${count}</span>
         </div>
       `).join('')
-      : `<div style="padding:12px;text-align:center;color:var(--text-3);font-size:11px">No data yet — browse the web to see blocked domains</div>`;
+      : `<div style="padding:12px;text-align:center;color:var(--text-3);font-size:11px">Brak danych — przeglądaj internet, aby zobaczyć zablokowane domeny</div>`;
   });
 }
 
@@ -1738,7 +1746,7 @@ $('ab-reset-stats')?.addEventListener('click', () => {
   adsBlockedCount = 0;
   localStorage.setItem('ww_ads_blocked', '0');
   updateAdblockStats();
-  showToast('Stats reset');
+  showToast('Zresetowano statystyki');
 });
 
 // Whitelist
@@ -1746,11 +1754,11 @@ function loadWhitelist() {
   window.electronAPI.adblockWhitelistGet().then(list => {
     const el = $('ab-whitelist');
     if (!list.length) {
-      el.innerHTML = '<div style="padding:6px;font-size:10px;color:var(--text-3)">No sites whitelisted</div>';
+      el.innerHTML = '<div style="padding:6px;font-size:10px;color:var(--text-3)">Brak stron na białej liście</div>';
       return;
     }
     el.innerHTML = list.map(d => `
-      <div class="ab-list-item"><span>${esc(d)}</span><button data-domain="${esc(d)}" title="Remove">✕</button></div>
+      <div class="ab-list-item"><span>${esc(d)}</span><button data-domain="${esc(d)}" title="Usuń">✕</button></div>
     `).join('');
     el.querySelectorAll('button').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -1767,7 +1775,7 @@ $('ab-whitelist-add')?.addEventListener('click', () => {
     window.electronAPI.adblockWhitelistAdd(val);
     $('ab-whitelist-input').value = '';
     loadWhitelist();
-    showToast(`Whitelisted: ${val}`);
+    showToast(`Dodano do białej listy: ${val}`);
   }
 });
 $('ab-whitelist-input')?.addEventListener('keydown', e => {
@@ -1779,11 +1787,11 @@ function loadCustomFilters() {
   window.electronAPI.adblockCustomFilters().then(list => {
     const el = $('ab-custom-filters');
     if (!list.length) {
-      el.innerHTML = '<div style="padding:6px;font-size:10px;color:var(--text-3)">No custom filters</div>';
+      el.innerHTML = '<div style="padding:6px;font-size:10px;color:var(--text-3)">Brak własnych filtrów</div>';
       return;
     }
     el.innerHTML = list.map(f => `
-      <div class="ab-list-item"><span>${esc(f)}</span><button data-filter="${esc(f)}" title="Remove">✕</button></div>
+      <div class="ab-list-item"><span>${esc(f)}</span><button data-filter="${esc(f)}" title="Usuń">✕</button></div>
     `).join('');
     el.querySelectorAll('button').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -1800,7 +1808,7 @@ $('ab-filter-add')?.addEventListener('click', () => {
     window.electronAPI.adblockCustomFilterAdd(val);
     $('ab-filter-input').value = '';
     loadCustomFilters();
-    showToast('Filter added');
+    showToast('Dodano filtr');
   }
 });
 $('ab-filter-input')?.addEventListener('keydown', e => {
@@ -1809,17 +1817,17 @@ $('ab-filter-input')?.addEventListener('keydown', e => {
 
 // Filter subscriptions (EasyList/uBlock lists)
 const SUBSCRIPTION_PRESETS = [
-  { name: 'EasyList', url: 'https://easylist.to/easylist/easylist.txt', desc: 'Ads (EN)' },
-  { name: 'EasyPrivacy', url: 'https://easylist.to/easylist/easyprivacy.txt', desc: 'Trackers' },
-  { name: 'uBlock filters – Ads', url: 'https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters.min.txt', desc: 'uBO ads' },
-  { name: 'uBlock filters – Badware', url: 'https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/badware.txt', desc: 'Malware/phishing' },
+  { name: 'EasyList', url: 'https://easylist.to/easylist/easylist.txt', desc: 'Reklamy (EN)' },
+  { name: 'EasyPrivacy', url: 'https://easylist.to/easylist/easyprivacy.txt', desc: 'Trackery' },
+  { name: 'uBlock filters – Ads', url: 'https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters.min.txt', desc: 'Reklamy uBO' },
+  { name: 'uBlock filters – Badware', url: 'https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/badware.txt', desc: 'Złośliwe oprogramowanie/phishing' },
   { name: 'Polskie Filtry', url: 'https://raw.githubusercontent.com/MajkiIT/polish-ads-filter/master/polish-adblock-filters/adblock.txt', desc: 'Polskie reklamy' },
 ];
 
 function populateSubPresets() {
   const sel = $('ab-sub-preset');
   if (!sel) return;
-  sel.innerHTML = '<option value="">— Choose a list —</option>' +
+  sel.innerHTML = '<option value="">— Wybierz listę —</option>' +
     SUBSCRIPTION_PRESETS.map(p => `<option value="${esc(p.url)}">${esc(p.name)} · ${esc(p.desc)}</option>`).join('');
 }
 populateSubPresets();
@@ -1830,15 +1838,15 @@ function renderSubscriptions(subs) {
   const el = $('ab-subscriptions');
   if (!el) return;
   if (!subs || !subs.length) {
-    el.innerHTML = '<div style="padding:6px;font-size:10px;color:var(--text-3)">No filter lists added</div>';
+    el.innerHTML = '<div style="padding:6px;font-size:10px;color:var(--text-3)">Brak dodanych list filtrów</div>';
     return;
   }
   el.innerHTML = subs.map(s => {
     const st = subStatuses[s.id];
-    const statusTxt = st?.status === 'updating' ? 'Updating…'
-      : st?.status === 'error' ? `⚠ ${esc(st.error || 'Error')}`
-      : s.lastUpdate ? `${s.rules.toLocaleString()} rules · ${timeAgo(new Date(s.lastUpdate).toISOString())}`
-      : s.updating ? 'Updating…' : `${s.rules.toLocaleString()} rules · Not downloaded`;
+    const statusTxt = st?.status === 'updating' ? 'Aktualizowanie…'
+      : st?.status === 'error' ? `⚠ ${esc(st.error || 'Błąd')}`
+      : s.lastUpdate ? `${s.rules.toLocaleString()} reguł · ${timeAgo(new Date(s.lastUpdate).toISOString())}`
+      : s.updating ? 'Aktualizowanie…' : `${s.rules.toLocaleString()} reguł · Nie pobrano`;
     return `
       <div class="ab-sub-item ${st?.status === 'error' ? 'error' : ''}" data-id="${s.id}">
         <div class="ab-sub-main">
@@ -1846,12 +1854,12 @@ function renderSubscriptions(subs) {
           <div class="ab-sub-meta" data-meta="${s.id}">${statusTxt}</div>
         </div>
         <div class="ab-sub-actions">
-          <button class="panel-item-btn" data-act="update" data-id="${s.id}" title="Update now">↻</button>
-          <label class="toggle mini" title="Enable">
+          <button class="panel-item-btn" data-act="update" data-id="${s.id}" title="Zaktualizuj teraz">↻</button>
+          <label class="toggle mini" title="Włącz">
             <input type="checkbox" data-act="toggle" data-id="${s.id}" ${s.enabled ? 'checked' : ''}/>
             <span class="toggle-slider"></span>
           </label>
-          <button class="panel-item-btn danger" data-act="remove" data-id="${s.id}" title="Remove">✕</button>
+          <button class="panel-item-btn danger" data-act="remove" data-id="${s.id}" title="Usuń">✕</button>
         </div>
       </div>`;
   }).join('');
@@ -1866,7 +1874,7 @@ function renderSubscriptions(subs) {
         await window.electronAPI.adblockSubscriptionUpdate(id);
       } else if (btn.dataset.act === 'remove') {
         window.electronAPI.adblockSubscriptionRemove(id);
-        showToast('Filter list removed');
+        showToast('Usunięto listę filtrów');
       }
     });
   });
@@ -1881,7 +1889,7 @@ function updateSubItemMeta(id) {
   const metaEl = document.querySelector(`[data-meta="${id}"]`);
   if (!metaEl) return;
   const st = subStatuses[id];
-  if (st?.status === 'updating') metaEl.textContent = 'Updating…';
+  if (st?.status === 'updating') metaEl.textContent = 'Aktualizowanie…';
 }
 
 async function loadSubscriptions() {
@@ -1891,10 +1899,10 @@ async function loadSubscriptions() {
 
 $('ab-sub-add-preset')?.addEventListener('click', async () => {
   const url = $('ab-sub-preset').value;
-  if (!url) { showToast('Choose a list first'); return; }
+  if (!url) { showToast('Najpierw wybierz listę'); return; }
   const preset = SUBSCRIPTION_PRESETS.find(p => p.url === url);
   const res = await window.electronAPI.adblockSubscriptionAdd({ name: preset?.name, url });
-  showToast(res.ok ? `Added: ${preset?.name}` : res.error || 'Failed');
+  showToast(res.ok ? `Dodano: ${preset?.name}` : res.error || 'Nie udało się');
 });
 
 $('ab-sub-add-custom')?.addEventListener('click', async () => {
@@ -1902,16 +1910,16 @@ $('ab-sub-add-custom')?.addEventListener('click', async () => {
   if (!url) return;
   const res = await window.electronAPI.adblockSubscriptionAdd({ name: '', url });
   if (res.ok) $('ab-sub-custom-url').value = '';
-  showToast(res.ok ? 'Filter list added' : res.error || 'Failed');
+  showToast(res.ok ? 'Dodano listę filtrów' : res.error || 'Nie udało się');
 });
 $('ab-sub-custom-url')?.addEventListener('keydown', e => {
   if (e.key === 'Enter') $('ab-sub-add-custom')?.click();
 });
 
 $('ab-sub-update-all')?.addEventListener('click', async () => {
-  showToast('Updating all filter lists…');
+  showToast('Aktualizowanie wszystkich list filtrów…');
   await window.electronAPI.adblockSubscriptionsUpdateAll();
-  showToast('✓ Filter lists updated');
+  showToast('✓ Zaktualizowano listy filtrów');
 });
 
 window.electronAPI.on('adblock-sub-status', (data) => {
@@ -1962,52 +1970,180 @@ async function loadHistoryPanel() {
   renderFilteredHistory(history, '');
 }
 
+function histGroupLabel(dateStr) {
+  const d = new Date(dateStr);
+  const now = new Date();
+  const diff = Date.now() - d.getTime();
+  if (d.toDateString() === now.toDateString()) return 'Dziś';
+  const yesterday = new Date(now); yesterday.setDate(now.getDate() - 1);
+  if (d.toDateString() === yesterday.toDateString()) return 'Wczoraj';
+  if (diff < 7 * 86400000) return d.toLocaleDateString(undefined, { weekday: 'long' });
+  return d.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
+}
+
+function histTimeLabel(dateStr) {
+  const d = new Date(dateStr);
+  const now = new Date();
+  const diff = Date.now() - d.getTime();
+  if (diff < 3600000) {
+    const mins = Math.floor(diff / 60000);
+    return mins < 1 ? 'just now' : mins + 'm ago';
+  }
+  if (d.toDateString() === now.toDateString()) {
+    return d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+  }
+  const yesterday = new Date(now); yesterday.setDate(now.getDate() - 1);
+  if (d.toDateString() === yesterday.toDateString()) {
+    return 'Yesterday ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+  }
+  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' +
+    d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+}
+
+function hlText(text, q) {
+  if (!q) return esc(text);
+  const safe = esc(text);
+  const re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+  return safe.replace(re, '<b class="hist-hl">$1</b>');
+}
+
 function renderFilteredHistory(history, q) {
   const list = $('history-list');
-  const filtered = q ? history.filter(h => h.title?.toLowerCase().includes(q.toLowerCase()) || h.url?.toLowerCase().includes(q.toLowerCase())) : history;
+  const filtered = q
+    ? history.filter(h => h.title?.toLowerCase().includes(q.toLowerCase()) || h.url?.toLowerCase().includes(q.toLowerCase()))
+    : history;
+
+  const todayCount = history.filter(h => new Date(h.date).toDateString() === new Date().toDateString()).length;
+  const statsEl = $('history-stats');
+  if (statsEl) statsEl.textContent = history.length + ' łącznie' + (todayCount ? ' · ' + todayCount + ' dziś' : '');
 
   if (!filtered.length) {
-    list.innerHTML = `<div class="panel-empty"><div class="panel-empty-icon">🕐</div><span>No history yet.</span></div>`;
+    const msg = q ? `Brak wyników dla „${esc(q)}"` : 'Brak historii przeglądania.';
+    list.innerHTML = `<div class="panel-empty"><div class="panel-empty-icon">🕐</div><span>${msg}</span></div>`;
     return;
   }
 
-  // Group by date
   const groups = {};
+  const groupOrder = [];
   filtered.forEach(h => {
-    const day = new Date(h.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-    if (!groups[day]) groups[day] = [];
-    groups[day].push(h);
+    const label = histGroupLabel(h.date);
+    if (!groups[label]) { groups[label] = []; groupOrder.push(label); }
+    groups[label].push(h);
   });
 
-  list.innerHTML = Object.entries(groups).map(([day, items]) => `
-    <div class="panel-group-label">${esc(day)}</div>
-    ${items.map(h => `
-      <div class="panel-item" data-url="${esc(h.url)}">
-        <div class="panel-item-icon">
-          ${h.favicon ? `<img src="${esc(h.favicon)}" width="18" height="18" onerror="this.style.display='none'" />` : '🌐'}
-        </div>
-        <div class="panel-item-info">
-          <div class="panel-item-title">${esc(h.title || h.url)}</div>
-          <div class="panel-item-sub">${timeAgo(h.date)} · ${esc(h.url)}</div>
-        </div>
-      </div>
-    `).join('')}
-  `).join('');
+  list.innerHTML = groupOrder.map(day => {
+    const items = groups[day];
+    return `
+      <div class="panel-group-label"><span>${esc(day)}</span><span class="hist-group-count">${items.length}</span></div>
+      ${items.map(h => {
+        const title = hlText(h.title || h.url, q);
+        const urlText = hlText(h.url || '', q);
+        const time = histTimeLabel(h.date);
+        const initial = (h.title || h.url || '?')[0]?.toUpperCase() || '?';
+        return `<div class="panel-item hist-item" data-url="${esc(h.url)}" data-date="${esc(h.date)}">
+          <div class="panel-item-icon hist-icon">
+            ${h.favicon ? `<img src="${esc(h.favicon)}" width="18" height="18" onerror="this.style.display='none';this.parentElement.classList.add('hist-icon-text')" />` : ''}
+            <span class="hist-icon-letter" ${h.favicon ? 'style="display:none"' : ''}>${initial}</span>
+          </div>
+          <div class="panel-item-info">
+            <div class="panel-item-title">${title}</div>
+            <div class="panel-item-sub">${urlText}</div>
+          </div>
+          <span class="hist-time">${time}</span>
+          <div class="panel-item-actions">
+            <button class="panel-item-btn" data-action="open-new" title="Otwórz w nowej karcie">🚀</button>
+            <button class="panel-item-btn" data-action="copy" title="Kopiuj adres URL">🔗</button>
+            <button class="panel-item-btn danger" data-action="delete" title="Usuń">🗑</button>
+          </div>
+        </div>`;
+      }).join('')}
+    `;
+  }).join('');
 
-  list.querySelectorAll('.panel-item').forEach(el => {
-    el.addEventListener('click', () => {
+  list.querySelectorAll('.hist-item').forEach(el => {
+    el.addEventListener('click', (e) => {
+      if (e.target.closest('.panel-item-btn')) return;
       navigate(el.dataset.url);
       closeAllPanels();
+    });
+    el.querySelectorAll('.panel-item-btn').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const url = el.dataset.url;
+        const action = btn.dataset.action;
+        if (action === 'open-new') {
+          createTab(url);
+          closeAllPanels();
+          showToast('Otwarto w nowej karcie');
+        } else if (action === 'copy') {
+          await navigator.clipboard.writeText(url);
+          showToast('Skopiowano adres URL');
+        } else if (action === 'delete') {
+          await window.electronAPI.historyDelete(url);
+          el.style.opacity = '0';
+          el.style.transform = 'translateX(30px)';
+          setTimeout(() => el.remove(), 200);
+          showToast('Usunięto wpis');
+        }
+      });
+    });
+  });
+  list.querySelectorAll('.hist-icon-text img[onerror]').forEach(img => {
+    img.addEventListener('error', () => {
+      img.style.display = 'none';
+      const letter = img.nextElementSibling;
+      if (letter) letter.style.display = '';
     });
   });
 }
 
+$('history-search').addEventListener('input', async function () {
+  const all = await window.electronAPI.historyGet();
+  renderFilteredHistory(all, this.value);
+});
+
 $('history-clear-btn').addEventListener('click', async () => {
-  if (confirm('Clear all browsing history?')) {
-    window.electronAPI.historyClear();
-    loadHistoryPanel();
-    showToast('History cleared');
-  }
+  const existing = $('hist-clear-modal');
+  if (existing) existing.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'hist-clear-modal';
+  overlay.className = 'as-overlay';
+  overlay.innerHTML = `
+    <div class="as-card hist-clear-card" role="dialog" aria-modal="true">
+      <div class="as-card-glow"></div>
+      <div class="as-icon">🗑</div>
+      <h3 class="as-title">Wyczyść historię</h3>
+      <p class="as-sub">Wybierz, co usunąć z historii przeglądania</p>
+      <div class="hist-clear-opts">
+        <button class="as-btn as-btn-ghost" data-range="3600000">Ostatnia godzina</button>
+        <button class="as-btn as-btn-ghost" data-range="86400000">Ostatnie 24 godziny</button>
+        <button class="as-btn as-btn-ghost" data-range="604800000">Ostatnie 7 dni</button>
+        <button class="as-btn as-btn-ghost" data-range="2592000000">Ostatnie 30 dni</button>
+        <button class="as-btn as-btn-danger" data-range="all">Wyczyść wszystko</button>
+      </div>
+      <div class="as-actions">
+        <button class="as-btn as-btn-ghost" id="hist-clear-cancel">Anuluj</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  function close() { overlay.remove(); }
+  overlay.querySelector('#hist-clear-cancel').addEventListener('click', close);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+  overlay.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+  overlay.querySelectorAll('[data-range]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const range = btn.dataset.range;
+      if (range === 'all') {
+        await window.electronAPI.historyClear();
+      } else {
+        await window.electronAPI.historyClearRange(parseInt(range, 10));
+      }
+      close();
+      loadHistoryPanel();
+      showToast('Wyczyszczono historię');
+    });
+  });
 });
 
 // ===== DOWNLOADS =====
@@ -2163,7 +2299,7 @@ function cancelDownload(id) {
   removeActiveDownloadUI(id);
   updateDlBadge();
   _refreshDlSummary();
-  showToast('Download cancelled');
+  showToast('Anulowano pobieranie');
 }
 
 function syncDownloadButtons(id) {
@@ -2179,7 +2315,7 @@ function syncDownloadButtons(id) {
     btn.innerHTML = dl.paused
       ? '<svg viewBox="0 0 24 24" width="14" fill="currentColor"><path d="M6 4l14 8-14 8z"/></svg>'
       : '<svg viewBox="0 0 24 24" width="14" fill="currentColor"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>';
-    btn.title = dl.paused ? 'Resume' : 'Pause';
+    btn.title = dl.paused ? 'Wznów' : 'Wstrzymaj';
     btn.classList.toggle('is-paused', !!dl.paused);
     btn.disabled = dl.paused ? !dl.canResume : !dl.canPause;
     btn.setAttribute('data-label', dl.paused ? 'resume' : 'pause');
@@ -2187,7 +2323,7 @@ function syncDownloadButtons(id) {
   if (fill) fill.classList.toggle('paused', !!dl.paused);
   if (dot) dot.classList.toggle('paused', !!dl.paused);
   if (item) item.classList.toggle('is-paused', !!dl.paused);
-  if (speedEl && dl.paused) speedEl.textContent = 'Paused';
+  if (speedEl && dl.paused) speedEl.textContent = 'Wstrzymano';
   if (etaEl) etaEl.textContent = dl.paused ? '' : formatETA(((dl.totalBytes || 0) - (dl.receivedBytes || 0)) / (dl.speed || 0));
 }
 
@@ -2239,8 +2375,8 @@ async function loadDownloadsHistory() {
 
   if (!filtered.length) {
     const emptyText = (history.length === 0)
-      ? (hasActive ? '' : 'No downloads yet.')
-      : 'Nothing here.';
+      ? (hasActive ? '' : 'Brak pobierania.')
+      : 'Nic tutaj nie ma.';
     list.innerHTML = `<div class="panel-empty"><div class="panel-empty-icon">📥</div><span>${emptyText}</span></div>`;
     return;
   }
@@ -2259,9 +2395,9 @@ async function loadDownloadsHistory() {
         <div class="dl-meta">${formatBytes(dl.size)} · ${timeAgo(dl.date)}</div>
       </div>
       <div class="dl-actions">
-        <button class="dl-act-btn" data-action="open" data-path="${esc(dl.savePath)}" title="Open file"><svg viewBox="0 0 24 24" width="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg></button>
-        <button class="dl-act-btn" data-action="folder" data-path="${esc(dl.savePath)}" title="Show in folder"><svg viewBox="0 0 24 24" width="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></button>
-        <button class="dl-act-btn danger" data-action="delete" data-id="${esc(dl.id)}" title="Remove from list"><svg viewBox="0 0 24 24" width="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></button>
+        <button class="dl-act-btn" data-action="open" data-path="${esc(dl.savePath)}" title="Otwórz plik"><svg viewBox="0 0 24 24" width="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg></button>
+        <button class="dl-act-btn" data-action="folder" data-path="${esc(dl.savePath)}" title="Pokaż w folderze"><svg viewBox="0 0 24 24" width="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></button>
+        <button class="dl-act-btn danger" data-action="delete" data-id="${esc(dl.id)}" title="Usuń z listy"><svg viewBox="0 0 24 24" width="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></button>
       </div>
     </div>`;
   }).join('');
@@ -2299,10 +2435,10 @@ document.querySelectorAll('.dl-tab').forEach(tab => {
 });
 
 $('dl-clear-btn').addEventListener('click', () => {
-  if (confirm('Clear all download history?')) {
+  if (confirm('Wyczyścić całą historię pobierania?')) {
     window.electronAPI.downloadsClear();
     loadDownloadsHistory();
-    showToast('Download history cleared');
+    showToast('Wyczyszczono historię pobierania');
   }
 });
 
@@ -2322,7 +2458,7 @@ function showDownloadToast(id) {
     </div>
     <div class="dl-toast-bar"><div class="dl-toast-fill" id="tf-${id}" style="width:0%"></div></div>
     <div class="dl-toast-meta">
-      <span id="ts-${id}">Downloading...</span>
+      <span id="ts-${id}">Pobieranie...</span>
       <span id="tp-${id}">0%</span>
     </div>
   `;
@@ -2354,10 +2490,10 @@ function finishToast(id, filename, savePath) {
     t.innerHTML = `
       <div class="dl-toast-header">
         <span>✅</span>
-        <span class="dl-toast-title">${esc(filename)} — Done</span>
+        <span class="dl-toast-title">${esc(filename)} — zakończono</span>
         <button class="dl-toast-close">✕</button>
       </div>
-      <div class="dl-toast-meta"><span style="color:var(--green);opacity:1">Download complete</span><button class="dl-toast-open" data-path="${esc(savePath)}">Open</button></div>
+      <div class="dl-toast-meta"><span style="color:var(--green);opacity:1">Pobieranie zakończone</span><button class="dl-toast-open" data-path="${esc(savePath)}">Otwórz</button></div>
     `;
     t.querySelector('.dl-toast-close').addEventListener('click', () => closeToast(t));
     t.querySelector('.dl-toast-open')?.addEventListener('click', () => window.electronAPI.openFile(savePath));
@@ -2368,13 +2504,13 @@ function finishToast(id, filename, savePath) {
   toast.innerHTML = `
     <div class="dl-toast-header">
       <span>✅</span>
-      <span class="dl-toast-title">${esc(filename)} — Done</span>
+      <span class="dl-toast-title">${esc(filename)} — zakończono</span>
       <button class="dl-toast-close">✕</button>
     </div>
     <div class="dl-toast-bar"><div class="dl-toast-fill" style="width:100%"></div></div>
     <div class="dl-toast-meta">
-      <span style="color:var(--green);opacity:1">Complete</span>
-      <button class="dl-toast-open" data-path="${esc(savePath)}">Open</button>
+      <span style="color:var(--green);opacity:1">Zakończono</span>
+      <button class="dl-toast-open" data-path="${esc(savePath)}">Otwórz</button>
     </div>
   `;
   toast.querySelector('.dl-toast-close').addEventListener('click', () => closeToast(toast));
@@ -2385,7 +2521,7 @@ function finishToast(id, filename, savePath) {
 function failToast(id) {
   const toast = $(`toast-${id}`);
   if (toast) {
-    toast.innerHTML = `<div class="dl-toast-header"><span>❌</span><span class="dl-toast-title">Download failed</span><button class="dl-toast-close">✕</button></div>`;
+    toast.innerHTML = `<div class="dl-toast-header"><span>❌</span><span class="dl-toast-title">Nie udało się pobrać</span><button class="dl-toast-close">✕</button></div>`;
     toast.querySelector('.dl-toast-close').addEventListener('click', () => closeToast(toast));
     setTimeout(() => closeToast(toast), 4000);
   }
@@ -2409,13 +2545,13 @@ async function loadPasswordsPanel() {
     $('wp-vault').classList.add('hidden');
     $('wp-unlock-error').textContent = '';
     $('wp-lock-icon').textContent = '🔑';
-    $('wp-lock-title').textContent = 'Welcome to WavePass';
-    $('wp-lock-sub').textContent = 'Choose a master PIN (4-6 digits) to secure your passwords';
-    $('wp-unlock-input').placeholder = 'Create PIN';
+    $('wp-lock-title').textContent = 'Witaj w WavePass';
+    $('wp-lock-sub').textContent = 'Wybierz główny PIN (4-6 cyfr), aby zabezpieczyć swoje hasła';
+    $('wp-unlock-input').placeholder = 'Utwórz PIN';
     $('wp-unlock-input').value = '';
     $('wp-unlock-input').classList.remove('hidden');
     $('wp-unlock-input').focus();
-    $('wp-unlock-btn').textContent = 'Set PIN';
+    $('wp-unlock-btn').textContent = 'Ustaw PIN';
     $('wp-unlock-btn').classList.remove('hidden');
     $('wp-setup-btn').classList.add('hidden');
     return;
@@ -2432,13 +2568,13 @@ async function loadPasswordsPanel() {
     $('wp-vault').classList.add('hidden');
     $('wp-unlock-error').textContent = '';
     $('wp-lock-icon').textContent = '🔐';
-    $('wp-lock-title').textContent = 'Vault Locked';
-    $('wp-lock-sub').textContent = 'Enter your master PIN to unlock';
-    $('wp-unlock-input').placeholder = 'Enter PIN';
+    $('wp-lock-title').textContent = 'Sejf zablokowany';
+    $('wp-lock-sub').textContent = 'Wpisz główny PIN, aby odblokować';
+    $('wp-unlock-input').placeholder = 'Wpisz PIN';
     $('wp-unlock-input').value = '';
     $('wp-unlock-input').classList.remove('hidden');
     $('wp-unlock-input').focus();
-    $('wp-unlock-btn').textContent = 'Unlock';
+    $('wp-unlock-btn').textContent = 'Odblokuj';
     $('wp-unlock-btn').classList.remove('hidden');
     $('wp-setup-btn').classList.add('hidden');
   }
@@ -2471,7 +2607,7 @@ function passwordStrength(pwd) {
   if (/[a-z]/.test(pwd) && /[A-Z]/.test(pwd)) score++;
   if (/\d/.test(pwd)) score++;
   if (/[^A-Za-z0-9]/.test(pwd)) score++;
-  return { label: ['Very weak', 'Weak', 'Okay', 'Good', 'Strong', 'Very strong'][score], score };
+  return { label: ['Bardzo słabe', 'Słabe', 'Średnie', 'Dobre', 'Silne', 'Bardzo silne'][score], score };
 }
 
 function updateGeneratedPassword() {
@@ -2498,7 +2634,7 @@ $('wp-gen-symbols')?.addEventListener('change', updateGeneratedPassword);
 
 $('wp-gen-copy')?.addEventListener('click', () => {
   const pwd = $('wp-gen-pwd').textContent;
-  if (pwd) copySensitive(pwd, 'Password');
+  if (pwd) copySensitive(pwd, 'Hasło');
 });
 
 $('wp-gen-close')?.addEventListener('click', () => {
@@ -2510,7 +2646,7 @@ function renderPasswordsList() {
   const q = ($('wp-search')?.value || '').toLowerCase();
   const items = q ? _wpFiltered : _wpData;
   if (!items.length) {
-    const msg = q ? `No passwords matching "${q}"` : 'No saved passwords yet.<br>Log in to a site and WavePass will offer to save.';
+    const msg = q ? `Brak haseł pasujących do „${q}"` : 'Brak zapisanych haseł.<br>Zaloguj się na stronie, a WavePass zaproponuje zapisanie.';
     list.innerHTML = `<div class="panel-empty"><div class="panel-empty-icon">🔑</div><span>${msg}</span></div>`;
     return;
   }
@@ -2529,11 +2665,11 @@ function renderPasswordsList() {
         ${pwRow}
       </div>
       <div class="wp-item-actions">
-        <button class="wp-item-btn" data-action="reveal" title="${revealed ? 'Hide password' : 'Show password'}">${revealed ? '🙈' : '👁'}</button>
-        <button class="wp-item-btn" data-action="copy-user" title="Copy username">👤</button>
-        <button class="wp-item-btn" data-action="copy-pass" title="Copy password">🔑</button>
-        <button class="wp-item-btn" data-action="edit" title="Edit entry">✏️</button>
-        <button class="wp-item-btn danger" data-action="delete" title="Delete">🗑</button>
+        <button class="wp-item-btn" data-action="reveal" title="${revealed ? 'Ukryj hasło' : 'Pokaż hasło'}">${revealed ? '🙈' : '👁'}</button>
+        <button class="wp-item-btn" data-action="copy-user" title="Kopiuj nazwę użytkownika">👤</button>
+        <button class="wp-item-btn" data-action="copy-pass" title="Kopiuj hasło">🔑</button>
+        <button class="wp-item-btn" data-action="edit" title="Edytuj wpis">✏️</button>
+        <button class="wp-item-btn danger" data-action="delete" title="Usuń">🗑</button>
       </div>
     </div>`;
   }).join('');
@@ -2546,21 +2682,21 @@ function renderPasswordsList() {
       const action = btn.dataset.action;
       if (action === 'copy-user') {
         await navigator.clipboard.writeText(entry.username);
-        showToast('Username copied');
+        showToast('Skopiowano nazwę użytkownika');
       } else if (action === 'copy-pass') {
-        copySensitive(entry.password, 'Password');
+        copySensitive(entry.password, 'Hasło');
       } else if (action === 'reveal') {
         _wpRevealed[entry.id] = !_wpRevealed[entry.id];
         renderPasswordsList();
       } else if (action === 'edit') {
         openPasswordEditor(entry);
       } else if (action === 'delete') {
-        if (!confirm('Delete this password?')) return;
+        if (!confirm('Usunąć to hasło?')) return;
         await window.electronAPI.passwordsDelete(entry.id);
         _wpData = _wpData.filter(p => p.id !== entry.id);
         filterPasswordsList();
         renderPasswordsList();
-        showToast('Password deleted');
+        showToast('Usunięto hasło');
       }
     });
   });
@@ -2575,53 +2711,53 @@ function renderPasswordsList() {
 
 // ===== COMMAND PALETTE (Ctrl+K) =====
 const CMD_COMMANDS = [
-  { name: 'New Tab', desc: 'Open a new tab', icon: '➕', shortcut: 'Ctrl+T', action: () => createTab(), cat: 'Tabs' },
-  { name: 'Close Tab', desc: 'Close current tab', icon: '❌', shortcut: 'Ctrl+W', action: () => closeTab(activeTabId), cat: 'Tabs' },
-  { name: 'Reopen Closed Tab', desc: 'Restore last closed tab', icon: '♻️', shortcut: 'Ctrl+Shift+T', action: () => reopenClosedTab(), cat: 'Tabs' },
-  { name: 'Next Tab', desc: 'Switch to next tab', icon: '➡️', shortcut: 'Ctrl+Tab', action: () => { const i = tabs.findIndex(t => t.id === activeTabId); if (tabs[i + 1]) switchTab(tabs[i + 1].id); else if (tabs[0]) switchTab(tabs[0].id); }, cat: 'Tabs' },
-  { name: 'Previous Tab', desc: 'Switch to previous tab', icon: '⬅️', shortcut: 'Ctrl+Shift+Tab', action: () => { const i = tabs.findIndex(t => t.id === activeTabId); if (tabs[i - 1]) switchTab(tabs[i - 1].id); else if (tabs[tabs.length - 1]) switchTab(tabs[tabs.length - 1].id); }, cat: 'Tabs' },
-  { name: 'Pin Tab', desc: 'Pin/unpin current tab', icon: '📌', action: () => { const t = tabs.find(t => t.id === activeTabId); if (t) pinTab(t.id); }, cat: 'Tabs' },
+  { name: 'Nowa karta', desc: 'Otwórz nową kartę', icon: '➕', shortcut: 'Ctrl+T', action: () => createTab(), cat: 'Karty' },
+  { name: 'Zamknij kartę', desc: 'Zamknij bieżącą kartę', icon: '❌', shortcut: 'Ctrl+W', action: () => closeTab(activeTabId), cat: 'Karty' },
+  { name: 'Przywróć zamkniętą kartę', desc: 'Przywróć ostatnio zamkniętą kartę', icon: '♻️', shortcut: 'Ctrl+Shift+T', action: () => reopenClosedTab(), cat: 'Karty' },
+  { name: 'Następna karta', desc: 'Przełącz na następną kartę', icon: '➡️', shortcut: 'Ctrl+Tab', action: () => { const i = tabs.findIndex(t => t.id === activeTabId); if (tabs[i + 1]) switchTab(tabs[i + 1].id); else if (tabs[0]) switchTab(tabs[0].id); }, cat: 'Karty' },
+  { name: 'Poprzednia karta', desc: 'Przełącz na poprzednią kartę', icon: '⬅️', shortcut: 'Ctrl+Shift+Tab', action: () => { const i = tabs.findIndex(t => t.id === activeTabId); if (tabs[i - 1]) switchTab(tabs[i - 1].id); else if (tabs[tabs.length - 1]) switchTab(tabs[tabs.length - 1].id); }, cat: 'Karty' },
+  { name: 'Przypnij kartę', desc: 'Przypnij / odepnij bieżącą kartę', icon: '📌', action: () => { const t = tabs.find(t => t.id === activeTabId); if (t) pinTab(t.id); }, cat: 'Karty' },
 
-  { name: 'Go Back', desc: 'Navigate back', icon: '◀️', shortcut: 'Alt+←', action: () => btnBack.click(), cat: 'Navigation' },
-  { name: 'Go Forward', desc: 'Navigate forward', icon: '▶️', shortcut: 'Alt+→', action: () => btnForward.click(), cat: 'Navigation' },
-  { name: 'Reload Page', desc: 'Refresh current page', icon: '🔄', shortcut: 'Ctrl+R', action: () => btnReload.click(), cat: 'Navigation' },
-  { name: 'Home', desc: 'Go to home page', icon: '🏠', action: () => goHome(), cat: 'Navigation' },
-  { name: 'Focus URL Bar', desc: 'Edit the current URL', icon: '🔗', shortcut: 'Ctrl+L', action: () => { urlBar.focus(); urlBar.select(); }, cat: 'Navigation' },
+  { name: 'Wstecz', desc: 'Nawiguj do tyłu', icon: '◀️', shortcut: 'Alt+←', action: () => btnBack.click(), cat: 'Nawigacja' },
+  { name: 'Dalej', desc: 'Nawiguj do przodu', icon: '▶️', shortcut: 'Alt+→', action: () => btnForward.click(), cat: 'Nawigacja' },
+  { name: 'Odśwież stronę', desc: 'Odśwież bieżącą stronę', icon: '🔄', shortcut: 'Ctrl+R', action: () => btnReload.click(), cat: 'Nawigacja' },
+  { name: 'Strona główna', desc: 'Przejdź do strony głównej', icon: '🏠', action: () => goHome(), cat: 'Nawigacja' },
+  { name: 'Pasek adresu', desc: 'Edytuj bieżący adres URL', icon: '🔗', shortcut: 'Ctrl+L', action: () => { urlBar.focus(); urlBar.select(); }, cat: 'Nawigacja' },
 
-  { name: 'Zoom In', desc: 'Increase zoom level', icon: '🔍', shortcut: 'Ctrl++', action: () => setZoom(0.1), cat: 'View' },
-  { name: 'Zoom Out', desc: 'Decrease zoom level', icon: '🔎', shortcut: 'Ctrl+-', action: () => setZoom(-0.1), cat: 'View' },
-  { name: 'Reset Zoom', desc: 'Reset to 100%', icon: '1️⃣', shortcut: 'Ctrl+0', action: () => { const t = tabs.find(t => t.id === activeTabId); if (t?.webview) { t.zoom = 1; t.webview.setZoomFactor(1); } }, cat: 'View' },
-  { name: 'Toggle Fullscreen', desc: 'Enter/exit fullscreen', icon: '⛶', shortcut: 'F11', action: () => toggleFullscreen(), cat: 'View' },
-  { name: 'Toggle Vertical Tabs', desc: 'Switch tab layout', icon: '📐', action: () => toggleVerticalTabs(), cat: 'View' },
-  { name: 'Toggle Bookmarks Bar', desc: 'Show/hide bookmarks bar', icon: '🔖', action: () => toggleBookmarksBar(), cat: 'View' },
-  { name: 'Find in Page', desc: 'Search text on page', icon: '🔎', shortcut: 'Ctrl+F', action: () => openFindBar(), cat: 'View' },
-  { name: 'View Page Source', desc: 'See HTML source', icon: '📄', action: () => { const t = tabs.find(t => t.id === activeTabId); if (t?.url) createTab('view-source:' + t.url); }, cat: 'View' },
-  { name: 'Screenshot', desc: 'Capture visible page', icon: '📸', shortcut: 'Ctrl+Shift+S', action: () => takeScreenshot(), cat: 'View' },
-  { name: 'Screenshot – Selected Area', desc: 'Drag to select a region', icon: '🖼️', action: () => startRegionScreenshot(), cat: 'View' },
-  { name: 'Screenshot – Full Page', desc: 'Capture entire scrollable page', icon: '📄', action: () => takeFullPageScreenshot(), cat: 'View' },
-  { name: 'Picture in Picture', desc: 'Floating video player', icon: '📺', action: () => togglePiP(), cat: 'View' },
+  { name: 'Powiększ', desc: 'Zwiększ poziom powiększenia', icon: '🔍', shortcut: 'Ctrl++', action: () => setZoom(0.1), cat: 'Widok' },
+  { name: 'Pomniejsz', desc: 'Zmniejsz poziom powiększenia', icon: '🔎', shortcut: 'Ctrl+-', action: () => setZoom(-0.1), cat: 'Widok' },
+  { name: 'Resetuj powiększenie', desc: 'Przywróć 100%', icon: '1️⃣', shortcut: 'Ctrl+0', action: () => { const t = tabs.find(t => t.id === activeTabId); if (t?.webview) { t.zoom = 1; t.webview.setZoomFactor(1); } }, cat: 'Widok' },
+  { name: 'Pełny ekran', desc: 'Wejdź / wyjdź z pełnego ekranu', icon: '⛶', shortcut: 'F11', action: () => toggleFullscreen(), cat: 'Widok' },
+  { name: 'Pionowe karty', desc: 'Przełącz układ kart', icon: '📐', action: () => toggleVerticalTabs(), cat: 'Widok' },
+  { name: 'Pasek zakładek', desc: 'Pokaż / ukryj pasek zakładek', icon: '🔖', action: () => toggleBookmarksBar(), cat: 'Widok' },
+  { name: 'Szukaj na stronie', desc: 'Wyszukaj tekst na stronie', icon: '🔎', shortcut: 'Ctrl+F', action: () => openFindBar(), cat: 'Widok' },
+  { name: 'Pokaż kod źródłowy', desc: 'Zobacz kod HTML', icon: '📄', action: () => { const t = tabs.find(t => t.id === activeTabId); if (t?.url) createTab('view-source:' + t.url); }, cat: 'Widok' },
+  { name: 'Zrzut ekranu', desc: 'Przechwyć widoczną stronę', icon: '📸', shortcut: 'Ctrl+Shift+S', action: () => takeScreenshot(), cat: 'Widok' },
+  { name: 'Zrzut ekranu – obszar', desc: 'Przeciągnij, aby zaznaczyć obszar', icon: '🖼️', action: () => startRegionScreenshot(), cat: 'Widok' },
+  { name: 'Zrzut ekranu – cała strona', desc: 'Przechwyć całą przewijaną stronę', icon: '📄', action: () => takeFullPageScreenshot(), cat: 'Widok' },
+  { name: 'Obraz w obrazie', desc: 'Pływający odtwarzacz wideo', icon: '📺', action: () => togglePiP(), cat: 'Widok' },
 
-  { name: 'Open Downloads', desc: 'Download manager', icon: '⬇️', shortcut: 'Ctrl+J', action: () => openPanel('downloads'), cat: 'Panels' },
-  { name: 'Open History', desc: 'Browsing history', icon: '📜', shortcut: 'Ctrl+H', action: () => openPanel('history'), cat: 'Panels' },
-  { name: 'Open Bookmarks', desc: 'Bookmark manager', icon: '🔖', shortcut: 'Ctrl+B', action: () => openPanel('bookmarks'), cat: 'Panels' },
-  { name: 'Open Passwords', desc: 'Password manager', icon: '🔑', shortcut: 'Ctrl+Shift+P', action: () => openPanel('passwords'), cat: 'Panels' },
-  { name: 'Open Notes', desc: 'Quick notes', icon: '📝', action: () => openPanel('notes'), cat: 'Panels' },
-  { name: 'Open Settings', desc: 'Browser settings', icon: '⚙️', action: () => openPanel('settings'), cat: 'Panels' },
-  { name: 'Open AI Assistant', desc: 'Chat with AI', icon: '🤖', shortcut: 'Ctrl+I', action: () => openPanel('ai-sidebar'), cat: 'Panels' },
-  { name: 'Open User Scripts', desc: 'Manage scripts', icon: '📜', action: () => openPanel('scripts'), cat: 'Panels' },
-  { name: 'Open Clipboard', desc: 'Clipboard history', icon: '📋', action: () => { openPanel('clipboard'); renderClipboardPanel(); }, cat: 'Panels' },
-  { name: 'Open Sessions', desc: 'Session manager', icon: '📑', action: () => openPanel('sessions'), cat: 'Panels' },
-  { name: 'Open Extensions', desc: 'Extension manager', icon: '🧩', action: () => openPanel('extensions'), cat: 'Panels' },
-  { name: 'Open Performance', desc: 'System monitor', icon: '📊', action: () => { openPanel('perf'); renderPerfPanel(); }, cat: 'Panels' },
-  { name: 'Open Ad Blocker', desc: 'Ad blocker settings', icon: '🛡', action: () => openPanel('adblock'), cat: 'Panels' },
+  { name: 'Otwórz pobieranie', desc: 'Menedżer pobierania', icon: '⬇️', shortcut: 'Ctrl+J', action: () => openPanel('downloads'), cat: 'Panele' },
+  { name: 'Otwórz historię', desc: 'Historia przeglądania', icon: '📜', shortcut: 'Ctrl+H', action: () => openPanel('history'), cat: 'Panele' },
+  { name: 'Otwórz zakładki', desc: 'Menedżer zakładek', icon: '🔖', shortcut: 'Ctrl+B', action: () => openPanel('bookmarks'), cat: 'Panele' },
+  { name: 'Otwórz hasła', desc: 'Menedżer haseł', icon: '🔑', shortcut: 'Ctrl+Shift+P', action: () => openPanel('passwords'), cat: 'Panele' },
+  { name: 'Otwórz notatki', desc: 'Szybkie notatki', icon: '📝', action: () => openPanel('notes'), cat: 'Panele' },
+  { name: 'Otwórz ustawienia', desc: 'Ustawienia przeglądarki', icon: '⚙️', action: () => openPanel('settings'), cat: 'Panele' },
+  { name: 'Otwórz asystenta AI', desc: 'Czat z AI', icon: '🤖', shortcut: 'Ctrl+I', action: () => openPanel('ai-sidebar'), cat: 'Panele' },
+  { name: 'Otwórz skrypty', desc: 'Zarządzaj skryptami', icon: '📜', action: () => openPanel('scripts'), cat: 'Panele' },
+  { name: 'Otwórz schowek', desc: 'Historia schowka', icon: '📋', action: () => { openPanel('clipboard'); renderClipboardPanel(); }, cat: 'Panele' },
+  { name: 'Otwórz sesje', desc: 'Menedżer sesji', icon: '📑', action: () => openPanel('sessions'), cat: 'Panele' },
+  { name: 'Otwórz rozszerzenia', desc: 'Menedżer rozszerzeń', icon: '🧩', action: () => openPanel('extensions'), cat: 'Panele' },
+  { name: 'Otwórz wydajność', desc: 'Monitor systemu', icon: '📊', action: () => { openPanel('perf'); renderPerfPanel(); }, cat: 'Panele' },
+  { name: 'Otwórz bloker reklam', desc: 'Ustawienia blokera reklam', icon: '🛡', action: () => openPanel('adblock'), cat: 'Panele' },
 
-  { name: 'Toggle Dark Mode', desc: 'Invert page colors', icon: '🌙', action: () => { settings.darkMode = !settings.darkMode; applyDarkMode(); saveSettings(); }, cat: 'Features' },
-  { name: 'Reader Mode', desc: 'Clean reading view', icon: '📖', action: () => toggleReaderMode(), cat: 'Features' },
-  { name: 'Translate Page', desc: 'Translate this page', icon: '🌐', action: () => { const lang = prompt('Translate to (language code):', 'pl'); if (lang) translatePage(lang); }, cat: 'Features' },
-  { name: 'Clear Browsing Data', desc: 'Clear cache, cookies, history', icon: '🗑', action: () => clearBrowsingData(), cat: 'Features' },
-  { name: 'New Incognito Window', desc: 'Private browsing', icon: '🕵', action: () => createTab(null, true), cat: 'Features' },
-  { name: 'DevTools', desc: 'Open developer tools', icon: '🔧', shortcut: 'F12', action: () => toggleDevTools(), cat: 'Features' },
-  { name: 'Mute All Tabs', desc: 'Mute/unmute all tabs', icon: '🔇', shortcut: 'Ctrl+M', action: () => { const anyMuted = tabs.some(t => t.muted); muteAllTabs(!anyMuted); }, cat: 'Features' },
+  { name: 'Przełącz tryb ciemny', desc: 'Odwróć kolory stron', icon: '🌙', action: () => { settings.darkMode = !settings.darkMode; applyDarkMode(); saveSettings(); }, cat: 'Funkcje' },
+  { name: 'Tryb czytnika', desc: 'Czysty widok do czytania', icon: '📖', action: () => toggleReaderMode(), cat: 'Funkcje' },
+  { name: 'Przetłumacz stronę', desc: 'Przetłumacz tę stronę', icon: '🌐', action: () => { const lang = prompt('Tłumacz na (kod języka):', 'pl'); if (lang) translatePage(lang); }, cat: 'Funkcje' },
+  { name: 'Wyczyść dane przeglądania', desc: 'Wyczyść pamięć podręczną, cookies, historię', icon: '🗑', action: () => clearBrowsingData(), cat: 'Funkcje' },
+  { name: 'Nowa karta incognito', desc: 'Prywatne przeglądanie', icon: '🕵', action: () => createTab(null, true), cat: 'Funkcje' },
+  { name: 'DevTools', desc: 'Otwórz narzędzia deweloperskie', icon: '🔧', shortcut: 'F12', action: () => toggleDevTools(), cat: 'Funkcje' },
+  { name: 'Wycisz wszystkie karty', desc: 'Wycisz / odcisz wszystkie karty', icon: '🔇', shortcut: 'Ctrl+M', action: () => { const anyMuted = tabs.some(t => t.muted); muteAllTabs(!anyMuted); }, cat: 'Funkcje' },
 ];
 
 let _cmdIdx = 0;
@@ -2713,7 +2849,7 @@ function renderQuickSwitcher() {
     <div class="qs-item${i === _qsIdx ? ' active' : ''}" data-idx="${i}">
       <img class="qs-favicon" src="${t.favicon || defaultFavicon()}" onerror="this.src='${defaultFavicon()}'" />
       <div class="qs-info">
-        <div class="qs-title">${esc(t.title || 'New Tab')}</div>
+        <div class="qs-title">${esc(t.title || 'Nowa karta')}</div>
         <div class="qs-url">${esc(t.url || 'about:blank')}</div>
       </div>
     </div>
@@ -2750,8 +2886,8 @@ function showGroupMenu(tabId, x, y) {
   menu.style.left = x + 'px';
   menu.style.top = y + 'px';
   menu.innerHTML = `
-    <div class="group-menu-item" data-action="none">No Group</div>
-    <div class="group-menu-item" data-action="new">+ New Group</div>
+    <div class="group-menu-item" data-action="none">Brak grupy</div>
+    <div class="group-menu-item" data-action="new">+ Nowa grupa</div>
     <div style="display:flex;gap:4px;padding:6px 10px;flex-wrap:wrap;">
       ${GROUP_COLORS.map(c => `<div class="group-color-dot" style="background:${c}" data-color="${c}"></div>`).join('')}
     </div>
@@ -2761,12 +2897,12 @@ function showGroupMenu(tabId, x, y) {
 
   menu.querySelector('[data-action="none"]').addEventListener('click', () => { tab.group = ''; closeGroupMenu(); updateTabGroups(); });
   menu.querySelector('[data-action="new"]').addEventListener('click', () => {
-    const name = prompt('Group name:', 'Group');
+    const name = prompt('Nazwa grupy:', 'Grupa');
     if (name) { tab.group = name; tab.groupColor = GROUP_COLORS[Math.floor(Math.random() * GROUP_COLORS.length)]; closeGroupMenu(); updateTabGroups(); }
   });
   menu.querySelectorAll('.group-color-dot').forEach(dot => {
     dot.addEventListener('click', () => {
-      if (!tab.group) { tab.group = 'Group'; }
+      if (!tab.group) { tab.group = 'Grupa'; }
       tab.groupColor = dot.dataset.color;
       closeGroupMenu();
       updateTabGroups();
@@ -2856,11 +2992,11 @@ function applyWeatherCity() {
   if (city) {
     settings.weatherCity = city;
     window.electronAPI.settingsSet(settings);
-    showToast('Weather location set to ' + city);
+    showToast('Ustawiono lokalizację pogody: ' + city);
   } else {
     delete settings.weatherCity;
     window.electronAPI.settingsSet(settings);
-    showToast('Weather back to auto-location');
+    showToast('Pogoda — powrót do automatycznej lokalizacji');
     $('weather-city-label').textContent = '🌍';
   }
   box.classList.add('hidden');
@@ -2937,7 +3073,7 @@ async function showSavePasswordPrompt(webview, url, username, password) {
 
   const el = $('wp-save-prompt');
   $('wp-save-prompt-url').textContent = getHost(url) || url;
-  $('wp-save-prompt-title').textContent = sameUser ? 'Update password?' : 'Save password?';
+  $('wp-save-prompt-title').textContent = sameUser ? 'Zaktualizować hasło?' : 'Zapisać hasło?';
   el.classList.remove('hidden');
 
   const cleanup = () => { el.classList.add('hidden'); };
@@ -2946,7 +3082,7 @@ async function showSavePasswordPrompt(webview, url, username, password) {
     _wpData = await window.electronAPI.passwordsGetAll();
     filterPasswordsList();
     if (activePanel === 'passwords') renderPasswordsList();
-    showToast(sameUser ? 'Password updated' : 'Password saved');
+    showToast(sameUser ? 'Zaktualizowano hasło' : 'Zapisano hasło');
     cleanup();
   };
   $('wp-save-prompt-ignore').onclick = () => {
@@ -2990,7 +3126,7 @@ async function autofillPasswords(webview, url) {
       <div style="display:flex;flex-direction:column;gap:8px;width:100%;">
         <div style="display:flex;align-items:center;gap:8px;">
           <div style="width:28px;height:28px;border-radius:8px;background:var(--bg-4);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;">🔑</div>
-          <span style="font-weight:500;color:var(--text-1);font-size:13px;">${creds.length} accounts found</span>
+          <span style="font-weight:500;color:var(--text-1);font-size:13px;">Znaleziono ${creds.length} kont</span>
         </div>
         ${creds.map((c, i) => `
           <button class="wp-pick-btn" data-idx="${i}" style="
@@ -3023,7 +3159,7 @@ $('wp-unlock-input').addEventListener('keydown', wpPinEnter);
 
 $('wp-unlock-btn').addEventListener('click', async () => {
   const pin = $('wp-unlock-input').value;
-  if (!pin || !/^\d{4,6}$/.test(pin)) { $('wp-unlock-error').textContent = 'PIN must be 4-6 digits'; wpShake(); return; }
+  if (!pin || !/^\d{4,6}$/.test(pin)) { $('wp-unlock-error').textContent = 'PIN musi mieć 4-6 cyfr'; wpShake(); return; }
 
   const hasPin = await window.electronAPI.passwordsHasPin();
   if (!hasPin) {
@@ -3037,7 +3173,7 @@ $('wp-unlock-btn').addEventListener('click', async () => {
         confirmEl.type = 'password';
         confirmEl.id = 'wp-unlock-confirm';
         confirmEl.className = 'wp-pin-input';
-        confirmEl.placeholder = 'Confirm PIN';
+        confirmEl.placeholder = 'Potwierdź PIN';
         confirmEl.maxLength = 6;
         confirmEl.autocomplete = 'off';
         confirmEl.style.marginTop = '8px';
@@ -3045,11 +3181,11 @@ $('wp-unlock-btn').addEventListener('click', async () => {
         $('wp-unlock-input').parentNode.insertBefore(confirmEl, $('wp-unlock-error'));
         confirmEl.focus();
       }
-      $('wp-unlock-error').textContent = 'Re-enter PIN to confirm';
-      $('wp-unlock-btn').textContent = 'Confirm';
+      $('wp-unlock-error').textContent = 'Wpisz PIN ponownie, aby potwierdzić';
+      $('wp-unlock-btn').textContent = 'Potwierdź';
       return;
     }
-    if (pin !== confirm) { $('wp-unlock-error').textContent = 'PINs do not match'; $('wp-unlock-confirm').value = ''; wpShake(); return; }
+    if (pin !== confirm) { $('wp-unlock-error').textContent = 'Piny nie są identyczne'; $('wp-unlock-confirm').value = ''; wpShake(); return; }
     await window.electronAPI.passwordsSetPin(pin);
     _wpUnlocked = true;
     _wpData = [];
@@ -3058,14 +3194,14 @@ $('wp-unlock-btn').addEventListener('click', async () => {
     $('wp-lock-btn').classList.remove('hidden');
     $('wp-unlock-confirm')?.remove();
     renderPasswordsList();
-    showToast('WavePass is ready');
+    showToast('WavePass gotowy');
     return;
   }
 
   // Unlock mode
   const ok = await window.electronAPI.passwordsCheckPin(pin);
   if (!ok) {
-    $('wp-unlock-error').textContent = 'Wrong PIN';
+    $('wp-unlock-error').textContent = 'Błędny PIN';
     $('wp-unlock-input').value = '';
     wpShake();
     return;
@@ -3092,13 +3228,13 @@ function showVaultLocked() {
   const err = $('wp-unlock-error');
   if (err) err.textContent = '';
   $('wp-unlock-input').value = '';
-  $('wp-unlock-input').placeholder = 'Enter PIN';
+  $('wp-unlock-input').placeholder = 'Wpisz PIN';
   $('wp-unlock-input').classList.remove('hidden');
-  $('wp-unlock-btn').textContent = 'Unlock';
+  $('wp-unlock-btn').textContent = 'Odblokuj';
   $('wp-unlock-btn').classList.remove('hidden');
   $('wp-lock-icon').textContent = '🔐';
-  $('wp-lock-title').textContent = 'Vault Locked';
-  $('wp-lock-sub').textContent = 'Enter your master PIN to unlock';
+  $('wp-lock-title').textContent = 'Sejf zablokowany';
+  $('wp-lock-sub').textContent = 'Wpisz główny PIN, aby odblokować';
   $('wp-unlock-confirm')?.remove();
 }
 
@@ -3112,7 +3248,7 @@ function wpShake() {
 
 function copySensitive(text, label) {
   navigator.clipboard.writeText(text);
-  showToast(`${label} copied · clears in 30s`);
+  showToast(`${label} skopiowano · czyści się po 30 s`);
   setTimeout(() => { navigator.clipboard.writeText(''); }, 30000);
 }
 
@@ -3131,23 +3267,23 @@ function openPasswordEditor(entry) {
     <div class="as-card wp-editor" role="dialog" aria-modal="true">
       <div class="as-card-glow"></div>
       <div class="as-icon">🔑</div>
-      <h3 class="as-title">${entry ? 'Edit entry' : 'Add entry'}</h3>
-      <p class="as-sub">${entry ? esc(getHost(entry.url) || 'Saved credentials') : 'Store credentials for a website'}</p>
+      <h3 class="as-title">${entry ? 'Edytuj wpis' : 'Dodaj wpis'}</h3>
+      <p class="as-sub">${entry ? esc(getHost(entry.url) || 'Zapisane dane logowania') : 'Zapisz dane logowania do strony internetowej'}</p>
       <div class="as-field">
         <label class="as-label" for="wp-ed-url">URL</label>
         <div class="as-input-wrap"><input id="wp-ed-url" type="text" value="${esc(url)}" placeholder="https://example.com" autocomplete="off" spellcheck="false" /></div>
       </div>
       <div class="as-field">
-        <label class="as-label" for="wp-ed-user">Username</label>
+        <label class="as-label" for="wp-ed-user">Nazwa użytkownika</label>
         <div class="as-input-wrap"><input id="wp-ed-user" type="text" value="${esc(username)}" placeholder="you@example.com" autocomplete="off" spellcheck="false" /></div>
       </div>
       <div class="as-field">
-        <label class="as-label" for="wp-ed-pass">Password</label>
+        <label class="as-label" for="wp-ed-pass">Hasło</label>
         <div class="as-input-wrap"><input id="wp-ed-pass" type="password" value="${esc(password)}" placeholder="••••••" autocomplete="off" /><button class="wp-ed-eye" id="wp-ed-eye" tabindex="-1">👁</button></div>
       </div>
       <div class="as-actions">
-        <button class="as-btn as-btn-ghost" id="wp-ed-cancel">Cancel</button>
-        <button class="as-btn as-btn-primary" id="wp-ed-save">Save</button>
+        <button class="as-btn as-btn-ghost" id="wp-ed-cancel">Anuluj</button>
+        <button class="as-btn as-btn-primary" id="wp-ed-save">Zapisz</button>
       </div>
     </div>
   `;
@@ -3178,7 +3314,7 @@ function openPasswordEditor(entry) {
     filterPasswordsList();
     renderPasswordsList();
     close();
-    showToast(entry ? 'Entry updated' : 'Entry saved');
+    showToast(entry ? 'Zaktualizowano wpis' : 'Zapisano wpis');
   });
 
   urlInput.addEventListener('keydown', (e) => {
@@ -3218,7 +3354,7 @@ $('wp-auto-lock')?.addEventListener('change', () => {
 window.electronAPI.on('passwords-locked', () => {
   if (!_wpUnlocked) return;
   showVaultLocked();
-  showToast('WavePass locked automatically');
+  showToast('WavePass zablokowany automatycznie');
 });
 
 $('wp-add-btn')?.addEventListener('click', () => openPasswordEditor(null));
@@ -3266,7 +3402,7 @@ function watchLoginForm(webview, url) {
 $('setting-ai-model')?.addEventListener('change', function () {
   // Changing model requires reloading the pipeline
   aiPipeline = null;
-  showToast('Model will load on next AI message');
+  showToast('Model załaduje się przy następnej wiadomości AI');
 });
 
 $('clear-all-data-btn').addEventListener('click', async () => {
@@ -3276,10 +3412,10 @@ $('clear-all-data-btn').addEventListener('click', async () => {
     cookies: $('cd-cookies').checked,
     downloads: $('cd-downloads').checked,
   };
-  if (!Object.values(types).some(Boolean)) return showToast('Select at least one data type');
-  if (!confirm('Clear selected browsing data? This cannot be undone.')) return;
+  if (!Object.values(types).some(Boolean)) return showToast('Wybierz co najmniej jeden typ danych');
+  if (!confirm('Wyczyścić wybrane dane przeglądania? Tej operacji nie można cofnąć.')) return;
   await window.electronAPI.clearBrowsingData(types);
-  showToast('Selected data cleared');
+  showToast('Wyczyszczono wybrane dane');
 });
 
 // ===== AI SIDEBAR =====
@@ -3311,13 +3447,13 @@ async function loadAIModel() {
     _aiLoadPromise = null;
     _aiLoadMsg = null;
     document.querySelector('.ai-bubble:last-child')?.remove();
-    addAIMessage('bot', '✅ AI model ready! Ask me anything.');
+    addAIMessage('bot', '✅ Model AI gotowy! O co chcesz zapytać?');
     return true;
   }).catch(err => {
     _aiLoadPromise = null;
     _aiLoadMsg = null;
     document.querySelector('.ai-bubble:last-child')?.remove();
-    addAIMessage('bot', '❌ Failed to load AI model: ' + err.message);
+    addAIMessage('bot', '❌ Nie udało się wczytać modelu AI: ' + err.message);
     return false;
   });
   return _aiLoadPromise;
@@ -3380,7 +3516,7 @@ ${text}<|eot_id|>
     const output = await window.electronAPI.aiGenerate(prompt);
     loadMsg.remove();
     const full = Array.isArray(output) ? output[0]?.generated_text || '' : '';
-    const reply = full.trim() || '⚠️ No response.';
+    const reply = full.trim() || '⚠️ Brak odpowiedzi.';
     addAIMessage('bot', reply);
   } catch (err) {
     loadMsg.remove();
@@ -3398,27 +3534,27 @@ $('ai-load-model').addEventListener('click', async () => {
 
 $('ai-summarize').addEventListener('click', () => {
   const tab = tabs.find(t => t.id === activeTabId);
-  if (tab?.url && !tab.url.startsWith('about')) sendAIMessage(`Summarize the content of this page: ${tab.url}`);
-  else addAIMessage('bot', 'Open a web page first, then I can summarize it.');
+  if (tab?.url && !tab.url.startsWith('about')) sendAIMessage(`Podsumuj zawartość tej strony: ${tab.url}`);
+  else addAIMessage('bot', 'Najpierw otwórz stronę internetową, wtedy mogę ją podsumować.');
 });
 
 $('ai-translate').addEventListener('click', () => {
   const tab = tabs.find(t => t.id === activeTabId);
-  if (tab?.url) sendAIMessage(`The page I'm on is: ${tab.url} — can you help me translate or understand its content?`);
-  else addAIMessage('bot', 'Open a web page first.');
+  if (tab?.url) sendAIMessage(`Strona, na której jestem, to: ${tab.url} — czy możesz pomóc mi przetłumaczyć lub zrozumieć jej treść?`);
+  else addAIMessage('bot', 'Najpierw otwórz stronę internetową.');
 });
 
 $('ai-explain').addEventListener('click', () => {
   const tab = tabs.find(t => t.id === activeTabId);
-  if (tab?.url) sendAIMessage(`Explain what the website at ${tab.url} is about and what I can do there.`);
-  else addAIMessage('bot', 'Open a web page first.');
+  if (tab?.url) sendAIMessage(`Wyjaśnij, o czym jest witryna ${tab.url} i co mogę na niej zrobić.`);
+  else addAIMessage('bot', 'Najpierw otwórz stronę internetową.');
 });
 
 $('ai-clear-chat').addEventListener('click', () => {
   aiMessages.innerHTML = `
     <div class="ai-msg ai-msg-bot">
       <div class="ai-avatar">W</div>
-      <div class="ai-bubble">Chat cleared. How can I help you?</div>
+      <div class="ai-bubble">Czat wyczyszczony. W czym mogę pomóc?</div>
     </div>
   `;
 });
@@ -3442,7 +3578,7 @@ function findInPage(forward = true) {
   if (!tab?.webview || !findInput.value) return;
   tab.webview.findInPage(findInput.value, { forward, matchCase: false });
   tab.webview.addEventListener('found-in-page', e => {
-    findCount.textContent = e.result?.matches ? `${e.result.activeMatchOrdinal}/${e.result.matches}` : 'No results';
+    findCount.textContent = e.result?.matches ? `${e.result.activeMatchOrdinal}/${e.result.matches}` : 'Brak wyników';
   }, { once: true });
 }
 
@@ -3525,12 +3661,12 @@ function renderTabSearch(q) {
   const ql = q.toLowerCase();
   const results = ql ? tabs.filter(t => (t.title || '').toLowerCase().includes(ql) || (t.url || '').toLowerCase().includes(ql)) : tabs;
   if (!results.length) {
-    list.innerHTML = '<div class="ts-empty">No matching tabs</div>';
+    list.innerHTML = '<div class="ts-empty">Brak pasujących kart</div>';
     return;
   }
   _tsActive = -1;
   list.innerHTML = results.map(t => {
-    const title = t.title || 'New Tab';
+    const title = t.title || 'Nowa karta';
     const url = t.url || 'about:blank';
     const fav = t.favicon && (t.favicon.startsWith('http://') || t.favicon.startsWith('https://') || t.favicon.startsWith('data:')) ? esc(t.favicon) : '';
     return `<div class="ts-item" data-id="${t.id}"><img src="${fav || fallbackFavicon}" onerror="this.src='${fallbackFavicon}'; this.onerror=null" /><span class="ts-title">${esc(title)}</span><span class="ts-url">${esc(url)}</span></div>`;
@@ -3621,12 +3757,12 @@ const _UPD_PILL_DOT = {
 function _updPillHTML() {
   const state = _updateState || 'available';
   const label = state === 'downloaded'
-    ? `Update v${_updateData.version} ready — click to restart`
+    ? `Aktualizacja v${_updateData.version} gotowa — kliknij, aby zrestartować`
     : state === 'error'
-      ? 'Update failed — click for details'
+      ? 'Aktualizacja nie powiodła się — kliknij, aby zobaczyć szczegóły'
       : state === 'available'
-        ? `Updating to v${_updateData.version} — ${_updateData.percent || 0}%`
-        : `Checking for updates…`;
+        ? `Aktualizacja do v${_updateData.version} — ${_updateData.percent || 0}%`
+        : `Sprawdzanie aktualizacji…`;
   return `
     <div style="display:flex;align-items:center;gap:10px;">
       <span class="upd-dot" style="background:${_UPD_PILL_DOT[state] || 'var(--accent)'};box-shadow:0 0 10px ${_UPD_PILL_DOT[state] || 'var(--accent)'};"></span>
@@ -3731,10 +3867,10 @@ function minimizeUpdateModal() {
     if (prevState === 'checking' || prevState === 'error') return;
     showUpdateModal({
       state: prevState,
-      title: prevState === 'downloaded' ? 'Update ready' : `Update v${esc(prevData.version)} available`,
+      title: prevState === 'downloaded' ? 'Aktualizacja gotowa' : `Dostępna aktualizacja v${esc(prevData.version)}`,
       sub: prevState === 'downloaded'
-        ? `v${esc(prevData.version)} downloaded — restart to install`
-        : 'Downloading and installing automatically',
+        ? `v${esc(prevData.version)} pobrano — zrestartuj, aby zainstalować`
+        : 'Pobieranie i instalacja automatyczna',
       body: updProgressHTML(prevData.percent),
       buttons: updFooterButtons(prevState),
     });
@@ -3746,7 +3882,7 @@ function updProgressHTML(pct) {
   const v = pct || 0;
   return `
     <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
-      <span style="font-size:12px;color:var(--text-3);">Downloading update…</span>
+      <span style="font-size:12px;color:var(--text-3);">Pobieranie aktualizacji…</span>
       <span style="font-size:12px;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums;"><span id="update-pct">${v}</span>%</span>
     </div>
     <div style="display:flex;align-items:center;gap:10px;">
@@ -3762,12 +3898,12 @@ function updProgressHTML(pct) {
 function updFooterButtons(state) {
   if (state === 'downloaded') {
     return [
-      { id: 'update-restart-btn', label: 'Restart now', kind: 'primary', onClick: () => window.electronAPI.updateInstall() },
-      { id: 'update-later-btn', label: 'Later', kind: 'secondary', onClick: closeUpdateModal },
+      { id: 'update-restart-btn', label: 'Uruchom ponownie teraz', kind: 'primary', onClick: () => window.electronAPI.updateInstall() },
+      { id: 'update-later-btn', label: 'Później', kind: 'secondary', onClick: closeUpdateModal },
     ];
   }
   return [
-    { id: 'update-min-btn', label: 'Background', kind: 'secondary', onClick: minimizeUpdateModal },
+    { id: 'update-min-btn', label: 'W tle', kind: 'secondary', onClick: minimizeUpdateModal },
   ];
 }
 
@@ -3794,8 +3930,8 @@ function initUpdater() {
   window.electronAPI.on('update-checking', () => {
     showUpdateModal({
       state: 'checking',
-      title: 'Checking for updates…',
-      sub: 'Looking for a newer version',
+      title: 'Sprawdzanie aktualizacji…',
+      sub: 'Szukanie nowszej wersji',
       body: '<div style="display:flex;justify-content:center;padding:6px 0 2px;"><div class="upd-spinner"></div></div>',
       buttons: [],
       minimize: false,
@@ -3808,8 +3944,8 @@ function initUpdater() {
     _updateData.version = ver;
     showUpdateModal({
       state: 'available',
-      title: `Update v${esc(ver)} available`,
-      sub: 'Downloading and installing automatically',
+      title: `Dostępna aktualizacja v${esc(ver)}`,
+      sub: 'Pobieranie i instalacja automatyczna',
       body: updProgressHTML(0),
       buttons: updFooterButtons('available'),
       data: { version: ver },
@@ -3836,9 +3972,9 @@ function initUpdater() {
         closeUpdateModal();
         showUpdateModal({
           state: 'downloaded',
-          title: 'Update ready',
-          sub: `v${esc(ver)} downloaded — restart to install`,
-          body: '<div style="display:flex;align-items:center;gap:10px;"><div class="upd-dot" style="background:#00d4a0;box-shadow:0 0 10px #00d4a0;"></div><span style="font-size:12.5px;color:var(--text-2);">The new version will be applied after restart. You can keep browsing.</span></div>',
+          title: 'Aktualizacja gotowa',
+          sub: `v${esc(ver)} pobrano — zrestartuj, aby zainstalować`,
+          body: '<div style="display:flex;align-items:center;gap:10px;"><div class="upd-dot" style="background:#00d4a0;box-shadow:0 0 10px #00d4a0;"></div><span style="font-size:12.5px;color:var(--text-2);">Nowa wersja zostanie zastosowana po restarcie. Możesz dalej przeglądać.</span></div>',
           buttons: updFooterButtons('downloaded'),
         });
       });
@@ -3846,9 +3982,9 @@ function initUpdater() {
     }
     showUpdateModal({
       state: 'downloaded',
-      title: 'Update ready',
-      sub: `v${esc(ver)} downloaded — restart to install`,
-      body: '<div style="display:flex;align-items:center;gap:10px;"><div class="upd-dot" style="background:#00d4a0;box-shadow:0 0 10px #00d4a0;"></div><span style="font-size:12.5px;color:var(--text-2);">The new version will be applied after restart. You can keep browsing.</span></div>',
+      title: 'Aktualizacja gotowa',
+      sub: `v${esc(ver)} pobrano — zrestartuj, aby zainstalować`,
+      body: '<div style="display:flex;align-items:center;gap:10px;"><div class="upd-dot" style="background:#00d4a0;box-shadow:0 0 10px #00d4a0;"></div><span style="font-size:12.5px;color:var(--text-2);">Nowa wersja zostanie zastosowana po restarcie. Możesz dalej przeglądać.</span></div>',
       buttons: updFooterButtons('downloaded'),
     });
   });
@@ -3862,17 +3998,17 @@ function initUpdater() {
     }
     showUpdateModal({
       state: 'error',
-      title: 'Update failed',
-      sub: 'Something went wrong while downloading',
+      title: 'Aktualizacja nie powiodła się',
+      sub: 'Coś poszło nie tak podczas pobierania',
       body: `<div style="display:flex;gap:10px;align-items:flex-start;">
         <div style="width:32px;height:32px;border-radius:9px;background:rgba(255,90,95,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
           ${_UPD_ICONS.error}
         </div>
-        <span style="font-size:12.5px;color:var(--text-2);line-height:1.5;">${esc(msg) || 'Check your connection and try again.'}</span>
+        <span style="font-size:12.5px;color:var(--text-2);line-height:1.5;">${esc(msg) || 'Sprawdź połączenie i spróbuj ponownie.'}</span>
       </div>`,
       buttons: [
-        { id: 'update-retry-btn', label: 'Retry', kind: 'primary', onClick: () => { closeUpdateModal(); window.electronAPI.updateCheck(); } },
-        { id: 'update-close-btn', label: 'Close', kind: 'secondary', onClick: closeUpdateModal },
+        { id: 'update-retry-btn', label: 'Ponów', kind: 'primary', onClick: () => { closeUpdateModal(); window.electronAPI.updateCheck(); } },
+        { id: 'update-close-btn', label: 'Zamknij', kind: 'secondary', onClick: closeUpdateModal },
       ],
     });
   });
@@ -3884,96 +4020,184 @@ function esc(str) {
 }
 
 // ===== GENERIC CONTEXT MENU =====
-function createContextMenu(items, x, y) {
+let _ctxActiveEl = null;
+
+function createContextMenu(items, x, y, opts = {}) {
   document.querySelectorAll('.ctx-menu, .ctx-submenu').forEach(el => el.remove());
 
   const menu = document.createElement('div');
   menu.className = 'ctx-menu';
   menu.style.left = x + 'px';
   menu.style.top = y + 'px';
+  menu.setAttribute('role', 'menu');
+
+  const allButtons = [];
+
+  // Optional smart header
+  if (opts.header) {
+    const head = document.createElement('div');
+    head.className = 'ctx-header';
+    const headIcon = document.createElement('span');
+    headIcon.className = 'ctx-header-icon';
+    headIcon.textContent = opts.header.icon || 'ℹ';
+    const headBody = document.createElement('span');
+    headBody.className = 'ctx-header-body';
+    const headTitle = document.createElement('span');
+    headTitle.className = 'ctx-header-title';
+    headTitle.textContent = opts.header.title || '';
+    const headSub = document.createElement('span');
+    headSub.className = 'ctx-header-sub';
+    headSub.textContent = opts.header.sub || '';
+    headBody.appendChild(headTitle);
+    headBody.appendChild(headSub);
+    head.appendChild(headIcon);
+    head.appendChild(headBody);
+    menu.appendChild(head);
+  }
+
+  const _ctxStack = [menu];
+
+  function makeItem(item, container) {
+    if (item.header) { makeHeader(container, item); return null; }
+
+    if (item.separator) {
+      const sep = document.createElement('div');
+      sep.className = 'ctx-separator';
+      container.appendChild(sep);
+      return null;
+    }
+
+    const btn = document.createElement('button');
+    btn.className = 'ctx-item' + (item.disabled ? ' disabled' : '');
+    btn.setAttribute('role', 'menuitem');
+    btn.tabIndex = item.disabled ? -1 : 0;
+
+    if (item.icon) {
+      const icon = document.createElement('span');
+      icon.className = 'ctx-icon';
+      icon.textContent = item.icon;
+      btn.appendChild(icon);
+    }
+
+    const mid = document.createElement('span');
+    mid.className = 'ctx-mid';
+
+    const label = document.createElement('span');
+    label.className = 'ctx-label';
+    label.textContent = item.label;
+    mid.appendChild(label);
+
+    if (item.subtitle) {
+      const sub = document.createElement('span');
+      sub.className = 'ctx-subtitle';
+      sub.textContent = item.subtitle;
+      mid.appendChild(sub);
+    }
+    btn.appendChild(mid);
+
+    if (item.dot) {
+      const dotEl = document.createElement('span');
+      dotEl.style.cssText = 'width:10px;height:10px;border-radius:50%;background:' + item.dot + ';flex-shrink:0;margin-right:6px;';
+      if (item.active) {
+        dotEl.style.boxShadow = '0 0 8px ' + item.dot;
+        dotEl.style.outline = '2px solid rgba(255,255,255,0.15)';
+        dotEl.style.outlineOffset = '1px';
+      }
+      btn.insertBefore(dotEl, mid);
+    }
+    if (item.active && !item.dot) {
+      const check = document.createElement('span');
+      check.className = 'ctx-icon';
+      check.textContent = '✓';
+      btn.insertBefore(check, mid);
+    }
+
+    if (item.shortcut) {
+      const k = document.createElement('span');
+      k.className = 'ctx-keycap';
+      k.textContent = item.shortcut;
+      btn.appendChild(k);
+    }
+
+    if (item.submenu) {
+      const arrow = document.createElement('span');
+      arrow.className = 'ctx-sub-arrow';
+      arrow.textContent = '›';
+      btn.appendChild(arrow);
+
+      let subEl = null;
+      let subTimeout = null;
+      function showSub() {
+        if (subTimeout) clearTimeout(subTimeout);
+        if (subEl) { subEl.style.display = ''; return; }
+        const r = btn.getBoundingClientRect();
+        subEl = document.createElement('div');
+        subEl.className = 'ctx-submenu';
+        subEl.setAttribute('role', 'menu');
+        _ctxStack.push(subEl);
+        buildItems(subEl, item.submenu);
+        document.body.appendChild(subEl);
+        requestAnimationFrame(() => {
+          const rr = subEl.getBoundingClientRect();
+          subEl.style.left = Math.min((r.right + 4), window.innerWidth - rr.width - 8) + 'px';
+          subEl.style.top = Math.min(r.top, window.innerHeight - rr.height - 8) + 'px';
+          if (subEl.getBoundingClientRect().bottom > window.innerHeight) {
+            subEl.style.top = (window.innerHeight - subEl.getBoundingClientRect().height - 8) + 'px';
+          }
+        });
+      }
+      function hideSub() {
+        if (subTimeout) clearTimeout(subTimeout);
+        subTimeout = setTimeout(() => { if (subEl) { subEl.remove(); subEl = null; _ctxStack.pop(); } }, 150);
+      }
+      btn.addEventListener('mouseenter', () => { if (subTimeout) clearTimeout(subTimeout); showSub(); });
+      btn.addEventListener('mouseleave', hideSub);
+      btn.addEventListener('focus', showSub);
+    }
+
+    const run = () => {
+      if (item.disabled) return;
+      if (typeof item.action === 'function') {
+        item.action();
+      } else if (typeof item.action === 'string') {
+        window.electronAPI.contextMenuAction(item.action, item.arg);
+      }
+      if (!item.submenu) closeMenu(true);
+    };
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      setActive(btn);
+      run();
+    });
+    btn.addEventListener('mouseenter', () => setActive(btn));
+
+    allButtons.push(btn);
+    container.appendChild(btn);
+    return btn;
+  }
+
+  function makeHeader(container, item) {
+    const h = document.createElement('div');
+    h.className = 'ctx-header-item';
+    h.textContent = item.label;
+    container.appendChild(h);
+  }
 
   function buildItems(container, list) {
-    list.forEach(item => {
-      if (item.separator) {
-        const sep = document.createElement('div');
-        sep.className = 'ctx-separator';
-        container.appendChild(sep);
-        return;
-      }
-      const btn = document.createElement('button');
-      btn.className = 'ctx-item';
-
-      if (item.icon) {
-        const icon = document.createElement('span');
-        icon.className = 'ctx-icon';
-        icon.textContent = item.icon;
-        btn.appendChild(icon);
-      }
-
-      const label = document.createElement('span');
-      label.className = 'ctx-label';
-      label.textContent = item.label;
-      btn.appendChild(label);
-
-      if (item.dot) {
-        const dotEl = document.createElement('span');
-        dotEl.style.cssText = 'width:10px;height:10px;border-radius:50%;background:' + item.dot + ';flex-shrink:0;margin-right:6px;';
-        if (item.active) {
-          dotEl.style.boxShadow = '0 0 8px ' + item.dot;
-          dotEl.style.outline = '2px solid rgba(255,255,255,0.15)';
-          dotEl.style.outlineOffset = '1px';
-        }
-        btn.insertBefore(dotEl, label);
-      }
-      if (item.active && !item.dot) {
-        const check = document.createElement('span');
-        check.className = 'ctx-icon';
-        check.textContent = '✓';
-        btn.insertBefore(check, label);
-      }
-
-      if (item.submenu) {
-        const arrow = document.createElement('span');
-        arrow.className = 'ctx-sub-arrow';
-        arrow.textContent = '›';
-        btn.appendChild(arrow);
-
-        let subEl = null;
-        let subTimeout = null;
-        function showSub() {
-          if (subTimeout) clearTimeout(subTimeout);
-          if (subEl) { subEl.style.display = ''; return; }
-          const rect = container.closest('.ctx-menu, .ctx-submenu') || container;
-          const r = rect.getBoundingClientRect();
-          subEl = document.createElement('div');
-          subEl.className = 'ctx-submenu';
-          subEl.style.left = (r.right + 4) + 'px';
-          subEl.style.top = Math.min(r.top, window.innerHeight - list.length * 36 - 20) + 'px';
-          buildItems(subEl, item.submenu);
-          document.body.appendChild(subEl);
-        }
-        function hideSub() {
-          if (subTimeout) clearTimeout(subTimeout);
-          subTimeout = setTimeout(() => { if (subEl) { subEl.remove(); subEl = null; } }, 150);
-        }
-        btn.addEventListener('mouseenter', () => { if (subTimeout) clearTimeout(subTimeout); showSub(); });
-        btn.addEventListener('mouseleave', hideSub);
-      }
-
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (typeof item.action === 'function') {
-          item.action();
-        } else if (typeof item.action === 'string') {
-          window.electronAPI.contextMenuAction(item.action, item.arg);
-        }
-        if (!item.submenu) { menu.remove(); document.querySelectorAll('.ctx-submenu').forEach(s => s.remove()); }
-      });
-      container.appendChild(btn);
-    });
+    _ctxStack.push(container);
+    list.forEach(item => makeItem(item, container));
+    _ctxStack.pop();
   }
 
   buildItems(menu, items);
+
+  function setActive(btn) {
+    allButtons.forEach(b => b.classList.remove('active-kb'));
+    _ctxActiveEl = btn && !btn.disabled ? btn : null;
+    if (_ctxActiveEl) { _ctxActiveEl.classList.add('active-kb'); }
+  }
+  const firstEnabled = allButtons.find(b => !b.disabled);
+  setActive(firstEnabled);
 
   document.body.appendChild(menu);
   requestAnimationFrame(() => {
@@ -3984,10 +4208,16 @@ function createContextMenu(items, x, y) {
     if (r.top < 0) menu.style.top = '8px';
   });
 
+  function closeMenu(instant) {
+    menu.classList.add('closing');
+    const t = instant ? 0 : 120;
+    window.removeEventListener('keydown', onKey);
+    setTimeout(() => { menu.remove(); document.querySelectorAll('.ctx-submenu').forEach(s => s.remove()); _ctxActiveEl = null; }, t);
+  }
+
   const close = (e) => {
     if (e && e.button === 2) return;
-    menu.classList.add('closing');
-    setTimeout(() => { menu.remove(); document.querySelectorAll('.ctx-submenu').forEach(s => s.remove()); }, 120);
+    closeMenu();
     document.removeEventListener('click', close);
     document.removeEventListener('contextmenu', close);
     window.removeEventListener('blur', close);
@@ -3995,9 +4225,41 @@ function createContextMenu(items, x, y) {
   setTimeout(() => {
     document.addEventListener('click', close);
     document.addEventListener('contextmenu', close);
-    window.addEventListener('blur', close);
+    window.removeEventListener('blur', close);
   }, 0);
+
+  function onKey(e) {
+    const enabled = allButtons.filter(b => !b.disabled);
+    if (enabled.length === 0) return;
+    let idx = enabled.indexOf(_ctxActiveEl);
+    switch (e.key) {
+      case 'ArrowDown':
+      case 'Tab':
+        e.preventDefault();
+        idx = (idx + 1) % enabled.length;
+        setActive(enabled[idx]);
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        idx = (idx - 1 + enabled.length) % enabled.length;
+        setActive(enabled[idx]);
+        break;
+      case 'Enter':
+      case ' ':
+        e.preventDefault();
+        if (_ctxActiveEl) _ctxActiveEl.click();
+        break;
+      case 'Escape':
+        e.preventDefault();
+        closeMenu(true);
+        break;
+      default: break;
+    }
+  }
+  window.addEventListener('keydown', onKey);
+  menu.addEventListener('keydown', onKey);
 }
+
 
 // ===== TAB CONTEXT MENU =====
 function showTabContextMenu(tabId, x, y) {
@@ -4012,31 +4274,31 @@ function showTabContextMenu(tabId, x, y) {
   }));
 
   createContextMenu([
-    { icon: '➕', label: 'New Tab', action: () => createTab() },
-    { icon: '🔄', label: 'Reload', action: () => tab?.webview?.reload() },
-    { icon: '📋', label: 'Duplicate Tab', action: () => { if (tab?.url) createTab(tab.url); } },
-    { icon: '🔇', label: 'Mute Tab', action: () => muteTab(tabId) },
-    { icon: '📋', label: 'Copy URL', action: () => { if (tab?.url) { navigator.clipboard.writeText(tab.url); showToast('URL copied'); } } },
-    { icon: '🔍', label: 'Inspect', action: () => { const t = tabs.find(t2 => t2.id === tabId); if (t?.webview) t.webview.openDevTools(); } },
+    { icon: '➕', label: 'Nowa karta', action: () => createTab() },
+    { icon: '🔄', label: 'Odśwież', action: () => tab?.webview?.reload() },
+    { icon: '📋', label: 'Zduplikuj kartę', action: () => { if (tab?.url) createTab(tab.url); } },
+    { icon: '🔇', label: 'Wycisz kartę', action: () => muteTab(tabId) },
+    { icon: '📋', label: 'Kopiuj adres URL', action: () => { if (tab?.url) { navigator.clipboard.writeText(tab.url); showToast('Skopiowano adres URL'); } } },
+    { icon: '🔍', label: 'Inspekcja', action: () => { const t = tabs.find(t2 => t2.id === tabId); if (t?.webview) t.webview.openDevTools(); } },
     { separator: true },
-    { icon: '📌', label: isPinned ? 'Unpin Tab' : 'Pin Tab', action: () => pinTab(tabId) },
-    { icon: '🏷', label: 'Set Group Name', action: () => {
-      const name = prompt('Group name:', tab?.group || '');
+    { icon: '📌', label: isPinned ? 'Odepnij kartę' : 'Przypnij kartę', action: () => pinTab(tabId) },
+    { icon: '🏷', label: 'Ustaw nazwę grupy', action: () => {
+      const name = prompt('Nazwa grupy:', tab?.group || '');
       if (name !== null) {
         tab.group = name;
         updateTabGroups();
       }
     }},
-    { icon: '🎨', label: 'Group Color', submenu: groupItems },
+    { icon: '🎨', label: 'Kolor grupy', submenu: groupItems },
     { separator: true },
-    { icon: '✕', label: 'Close Tab', action: () => closeTab(tabId) },
-    { label: 'Close Tabs to Right', action: () => { const idx = tabs.findIndex(t => t.id === tabId); if (idx >= 0) tabs.filter((t,i) => i > idx).forEach(t => closeTab(t.id)); } },
-    { label: 'Close Other Tabs', action: () => { tabs.filter(t => t.id !== tabId).forEach(t => closeTab(t.id)); } },
+    { icon: '✕', label: 'Zamknij kartę', action: () => closeTab(tabId) },
+    { label: 'Zamknij karty po prawej', action: () => { const idx = tabs.findIndex(t => t.id === tabId); if (idx >= 0) tabs.filter((t,i) => i > idx).forEach(t => closeTab(t.id)); } },
+    { label: 'Zamknij pozostałe karty', action: () => { tabs.filter(t => t.id !== tabId).forEach(t => closeTab(t.id)); } },
     { separator: true },
-    { label: 'Copy All Tab URLs', action: () => {
+    { label: 'Kopiuj adresy URL wszystkich kart', action: () => {
       const urls = tabs.filter(t => t.url).map(t => t.url).join('\n');
       navigator.clipboard.writeText(urls);
-      showToast(`${tabs.filter(t => t.url).length} URLs copied`);
+      showToast(`Skopiowano adresy URL ${tabs.filter(t => t.url).length} kart`);
     } },
   ], x, y);
 }
@@ -4079,7 +4341,7 @@ function muteAllTabs(muted = true) {
       }
     }
   });
-  showToast(muted ? 'All tabs muted' : 'All tabs unmuted', 1200);
+  showToast(muted ? 'Wyciszono wszystkie karty' : 'Odciszono wszystkie karty', 1200);
 }
 
 function pinTab(tabId) {
@@ -4195,6 +4457,57 @@ window.electronAPI.on('save-to-reading-list', (data) => {
   if (activePanel === 'bookmarks') renderReadingList();
 });
 window.electronAPI.on('open-link-newtab', (url) => createTab(url));
+window.electronAPI.on('open-link', (url) => {
+  const tab = tabs.find(t => t.id === activeTabId);
+  if (tab?.webview && url) tab.webview.loadURL(url);
+  else if (url) createTab(url);
+});
+window.electronAPI.on('open-link-incognito', (url) => createIncognitoTab(url));
+window.electronAPI.on('open-link-background', (url) => {
+  const activeBefore = activeTabId;
+  const id = createTab(url);
+  if (id && activeBefore !== undefined) switchTab(activeBefore);
+});
+window.electronAPI.on('select-all', () => {
+  const tab = tabs.find(t => t.id === activeTabId);
+  tab?.webview?.executeJavaScript('window.getSelection().selectAllChildren(document.body); document.execCommand("selectAll");').catch(() => {});
+});
+window.electronAPI.on('open-find', () => openFindBar());
+window.electronAPI.on('bookmark-url', async (data) => {
+  const url = data?.url;
+  if (!url) return;
+  const bookmarks = await window.electronAPI.bookmarksGet();
+  if (!bookmarks.find(b => b.url === url)) {
+    window.electronAPI.bookmarksAdd({ url, title: data?.title || url });
+    showToast('Zapisano w zakładkach ⭐');
+  } else {
+    showToast('Ta strona jest już w zakładkach');
+  }
+  if (activePanel === 'bookmarks') loadBookmarksPanel();
+  loadBookmarksBar();
+});
+window.electronAPI.on('bookmark-page', async (url) => {
+  const tab = tabs.find(t => t.id === activeTabId);
+  const target = url || tab?.url;
+  if (!target) return;
+  const bookmarks = await window.electronAPI.bookmarksGet();
+  if (!bookmarks.find(b => b.url === target)) {
+    window.electronAPI.bookmarksAdd({ url: target, title: tab?.title || target });
+    showToast('Zapisano w zakładkach ⭐');
+  } else {
+    showToast('Ta strona jest już w zakładkach');
+  }
+  if (activePanel === 'bookmarks') loadBookmarksPanel();
+  loadBookmarksBar();
+});
+window.electronAPI.on('replace-text', (arg) => {
+  const tab = tabs.find(t => t.id === activeTabId);
+  if (!tab?.webview) return;
+  const target = JSON.stringify(String(arg?.target || ''));
+  const replacement = JSON.stringify(String(arg?.replacement || ''));
+  tab.webview.executeJavaScript(`(() => { const el = document.activeElement || document.body; const doc = el.ownerDocument || document; const s = window.getSelection(); if (s.toString().trim()) { document.execCommand('insertText', false, ${replacement}); return true; } if (el.value !== undefined) { el.value = el.value.replace(${target}, ${replacement}); } else { el.textContent = (el.textContent||'').replace(${target}, ${replacement}); } return true; })()`).catch(() => {});
+});
+window.electronAPI.on('context-toast', (msg) => showToast(msg));
 window.electronAPI.on('search-selection', (text) => {
   const url = (SEARCH_ENGINES[settings.searchEngine] || SEARCH_ENGINES.google) + encodeURIComponent(text);
   createTab(url);
@@ -4215,20 +4528,24 @@ window.electronAPI.on('inspect-element', () => {
   tab?.webview?.openDevTools();
 });
 window.electronAPI.on('show-context-menu-renderer', (data) => {
-  createContextMenu(data.items, data.x, data.y);
+  const tab = tabs.find(t => t.id === activeTabId);
+  const host = tab?.url ? (function(){ try { return new URL(tab.url).hostname.replace(/^www\./, ''); } catch(_) { return ''; } })() : '';
+  createContextMenu(data.items, data.x, data.y, host && host !== 'newtab' ? {
+    header: { icon: '🌐', title: host, sub: tab.url.replace(/#.*/, '') },
+  } : {});
 });
 
 // ===== BOOKMARKS BAR TOGGLE =====
 function toggleBookmarksBar() {
   settings.showBookmarksBar = !settings.showBookmarksBar;
   loadBookmarksBar();
-  showToast(settings.showBookmarksBar ? 'Bookmarks bar shown' : 'Bookmarks bar hidden');
+  showToast(settings.showBookmarksBar ? 'Pasek zakładek widoczny' : 'Pasek zakładek ukryty');
 }
 
 // ===== PICTURE-IN-PICTURE TOGGLE =====
 function togglePiP() {
   const tab = tabs.find(t => t.id === activeTabId);
-  if (!tab?.webview) { showToast('No page for PiP'); return; }
+  if (!tab?.webview) { showToast('Brak strony dla trybu obraz w obrazie'); return; }
   tab.webview.executeJavaScript(`
     (function() {
       const video = document.querySelector('video');
@@ -4237,13 +4554,13 @@ function togglePiP() {
         else video.requestPictureInPicture();
       }
     })()
-  `).catch(() => showToast('PiP not available'));
+  `).catch(() => showToast('Tryb obraz w obrazie niedostępny'));
 }
 
 // ===== CLEAR BROWSING DATA =====
 function clearBrowsingData() {
   window.electronAPI.clearBrowsingData(['cache', 'cookies', 'history', 'indexedDB', 'localStorage']);
-  showToast('Browsing data cleared');
+  showToast('Wyczyszczono dane przeglądania');
 }
 
 // ===== KEYBOARD SHORTCUTS =====
@@ -4299,7 +4616,7 @@ document.addEventListener('keydown', e => {
     case '-': e.preventDefault(); setZoom(-0.1); break;
     case '0': e.preventDefault(); {
       const tab = tabs.find(t => t.id === activeTabId);
-      if (tab?.webview) { tab.zoom = 1; tab.webview.setZoomFactor(1); showToast('Zoom reset to 100%'); }
+      if (tab?.webview) { tab.zoom = 1; tab.webview.setZoomFactor(1); showToast('Zresetowano powiększenie do 100%'); }
       break;
     }
     case 'm': e.preventDefault(); {
@@ -4443,12 +4760,12 @@ function renderNotesList() {
   $('notes-editor-view').classList.add('hidden');
 
   if (!notes.length) {
-    list.innerHTML = `<div class="panel-empty"><div class="panel-empty-icon">📝</div><span>No notes yet.<br>Click "+ New" to create one.</span></div>`;
+    list.innerHTML = `<div class="panel-empty"><div class="panel-empty-icon">📝</div><span>Brak notatek.<br>Kliknij „+ Nowa”, aby utworzyć.</span></div>`;
     return;
   }
   list.innerHTML = notes.map(n => `
     <div class="note-item" data-id="${n.id}">
-      <div class="note-item-title">${esc(n.title || 'Untitled')}</div>
+      <div class="note-item-title">${esc(n.title || 'Bez tytułu')}</div>
       <div class="note-item-preview">${esc(n.body.slice(0, 80))}</div>
       <div class="note-item-meta">${timeAgo(n.updated)}</div>
     </div>
@@ -4501,7 +4818,7 @@ $('notes-delete-btn').addEventListener('click', () => {
     if (!activeNoteId) return;
     const note = notes.find(n => n.id === activeNoteId);
     if (!note) return;
-    note.title = $('notes-title-input').value || 'Untitled';
+    note.title = $('notes-title-input').value || 'Bez tytułu';
     note.body = $('notes-textarea').value;
     note.updated = new Date().toISOString();
     clearTimeout(_noteSaveTimer);
@@ -4526,7 +4843,7 @@ function renderSessionsList() {
   const list = $('sessions-list');
   window.electronAPI.sessionsList().then(sessions => {
     if (!sessions.length) {
-      list.innerHTML = `<div class="panel-empty"><div class="panel-empty-icon">📦</div><span>No saved sessions.<br>Click "+ Save Current" to save your open tabs.</span></div>`;
+      list.innerHTML = `<div class="panel-empty"><div class="panel-empty-icon">📦</div><span>Brak zapisanych sesji.<br>Kliknij „+ Zapisz bieżącą”, aby zapisać otwarte karty.</span></div>`;
       return;
     }
     list.innerHTML = sessions.map(s => `
@@ -4537,8 +4854,8 @@ function renderSessionsList() {
           <div class="session-item-sub">${s.tabs?.length || 0} tabs · ${timeAgo(s.date)}</div>
         </div>
         <div class="session-item-actions">
-          <button class="session-item-btn" data-action="restore" title="Restore">▶</button>
-          <button class="session-item-btn danger" data-action="delete" title="Delete">🗑</button>
+          <button class="session-item-btn" data-action="restore" title="Przywróć">▶</button>
+          <button class="session-item-btn danger" data-action="delete" title="Usuń">🗑</button>
         </div>
       </div>
     `).join('');
@@ -4548,10 +4865,10 @@ function renderSessionsList() {
         const action = e.target.closest('[data-action]')?.dataset.action;
         if (action === 'restore') { restoreSession(el.dataset.id); return; }
         if (action === 'delete') {
-          if (confirm('Delete this session?')) {
+          if (confirm('Usunąć tę sesję?')) {
             window.electronAPI.sessionDelete(el.dataset.id);
             renderSessionsList();
-            showToast('Session deleted');
+            showToast('Usunięto sesję');
           }
           return;
         }
@@ -4567,23 +4884,23 @@ function saveCurrentSession(name) {
     title: t.title || t.url,
     favicon: t.favicon || '',
   }));
-  if (!tabData.length) { showToast('No tabs with URLs to save'); return; }
+  if (!tabData.length) { showToast('Brak kart z adresami URL do zapisania'); return; }
   const session = {
     id: uid(),
-    name: name || `Session ${new Date().toLocaleDateString()}`,
+    name: name || `Sesja ${new Date().toLocaleDateString()}`,
     tabs: tabData,
     date: new Date().toISOString(),
   };
   window.electronAPI.sessionSave(session);
-  showToast('✅ Session saved');
+  showToast('✅ Zapisano sesję');
   renderSessionsList();
 }
 
 function restoreSession(id) {
   window.electronAPI.sessionGet(id).then(session => {
-    if (!session?.tabs?.length) { showToast('Session is empty'); return; }
+    if (!session?.tabs?.length) { showToast('Sesja jest pusta'); return; }
     session.tabs.forEach(t => createTab(t.url));
-    showToast(`📑 Restored ${session.tabs.length} tabs`);
+    showToast(`📑 Przywrócono ${session.tabs.length} kart`);
     closeAllPanels();
   });
 }
@@ -4615,7 +4932,7 @@ async function checkLastSession() {
       if (restoreBtn) {
         restoreBtn.addEventListener('click', () => {
           last.tabs.forEach(t => createTab(t.url));
-          showToast(`📑 Restored ${last.tabs.length} tabs from last session`);
+          showToast(`📑 Przywrócono ${last.tabs.length} kart z ostatniej sesji`);
           bar.style.display = 'none';
         });
       }
@@ -4625,7 +4942,7 @@ async function checkLastSession() {
 
 // Session save dialog
 $('session-save-btn')?.addEventListener('click', () => {
-  const name = prompt('Name this session:', `Session ${new Date().toLocaleDateString()}`);
+  const name = prompt('Nazwij tę sesję:', `Sesja ${new Date().toLocaleDateString()}`);
   if (name !== null) saveCurrentSession(name);
 });
 
@@ -4640,7 +4957,7 @@ function renderExtensionsList() {
   const list = $('extensions-list');
   window.electronAPI.extensionsList().then(exts => {
     if (!exts.length) {
-      list.innerHTML = `<div class="panel-empty"><div class="panel-empty-icon">🧩</div><span>No extensions installed.<br>Add folders to <code style="font-size:11px;background:var(--bg-4);padding:1px 5px;border-radius:2px">userData/extensions/</code></span></div>`;
+      list.innerHTML = `<div class="panel-empty"><div class="panel-empty-icon">🧩</div><span>Brak zainstalowanych rozszerzeń.<br>Dodaj foldery do <code style="font-size:11px;background:var(--bg-4);padding:1px 5px;border-radius:2px">userData/extensions/</code></span></div>`;
       return;
     }
     list.innerHTML = exts.map(ext => `
@@ -4651,7 +4968,7 @@ function renderExtensionsList() {
             ${ext.hasBackground ? '<span class="ext-badge">bg</span>' : ''}
             ${ext.contentScripts?.length ? '<span class="ext-badge">cs</span>' : ''}
           </div>
-          <div class="ext-desc">${esc(ext.description) || 'No description'}</div>
+          <div class="ext-desc">${esc(ext.description) || 'Brak opisu'}</div>
         </div>
         <label class="toggle">
           <input type="checkbox" class="ext-toggle" ${ext.enabled ? 'checked' : ''} />
@@ -4664,7 +4981,7 @@ function renderExtensionsList() {
       cb.addEventListener('change', function () {
         const id = exts[i].id;
         window.electronAPI.extensionToggle(id, this.checked);
-        showToast(this.checked ? 'Extension enabled' : 'Extension disabled');
+        showToast(this.checked ? 'Rozszerzenie włączone' : 'Rozszerzenie wyłączone');
       });
     });
   });
@@ -4674,7 +4991,7 @@ function renderExtensionsList() {
 $('ext-reload-btn')?.addEventListener('click', () => {
   window.electronAPI.extensionReloadAll();
   setTimeout(renderExtensionsList, 300);
-  showToast('Extensions reloaded');
+  showToast('Przeładowano rozszerzenia');
 });
 
 // Reload on event
@@ -4687,7 +5004,7 @@ const btnExtensions = (() => {
   const btn = document.createElement('button');
   btn.className = 'nav-btn';
   btn.id = 'btn-extensions';
-  btn.title = 'Extensions';
+  btn.title = 'Rozszerzenia';
   btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M10 4h4v3h-4zM17 10h3v4h-3zM4 10h3v4H4z" stroke="currentColor" stroke-width="1.8"/><path d="M10 17h4v3h-4z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/></svg>`;
   btn.addEventListener('click', () => { openPanel('extensions'); renderExtensionsList(); });
   $('nav-right')?.appendChild(btn);
@@ -4824,7 +5141,7 @@ async function toggleReaderMode() {
     readerActive = true;
     $('btn-reader').classList.add('active');
   } catch (e) {
-    showToast('Reader mode not available for this page');
+    showToast('Tryb czytnika niedostępny dla tej strony');
   }
 }
 
@@ -4923,8 +5240,8 @@ async function showPageStats() {
       headings: document.querySelectorAll('h1,h2,h3').length,
       paragraphs: document.querySelectorAll('p').length,
     })`);
-    showToast(`📊 ${stats.images} img · ${stats.scripts} scripts · ${stats.videos} vid · ${stats.links} links · ${stats.iframes} iframes · ${stats.headings} headings · ${(stats.totalSize/1024).toFixed(0)}KB HTML`);
-  } catch (_) { showToast('Failed to get page stats'); }
+    showToast(`📊 ${stats.images} obrazów · ${stats.scripts} skryptów · ${stats.videos} filmów · ${stats.links} linków · ${stats.iframes} ramek · ${stats.headings} nagłówków · ${(stats.totalSize/1024).toFixed(0)}KB HTML`);
+  } catch (_) { showToast('Nie udało się pobrać statystyk strony'); }
 }
 
 // ===== READING TIME ESTIMATOR =====
@@ -4943,11 +5260,11 @@ async function showReadingTime() {
     `);
     if (wordCount > 50) {
       const mins = Math.max(1, Math.round(wordCount / 200));
-      showToast(`📖 ~${mins} min read · ${wordCount} words`, 3000);
+      showToast(`📖 ok. ${mins} min czytania · ${wordCount} słów`, 3000);
     } else {
-      showToast('Not an article page', 1500);
+      showToast('To nie jest strona artykułu', 1500);
     }
-  } catch (_) { showToast('Could not estimate reading time'); }
+  } catch (_) { showToast('Nie udało się oszacować czasu czytania'); }
 }
 
 // ===== SCREENSHOT =====
@@ -5022,14 +5339,14 @@ function closeScreenshotMenu() {
 // --- Mode 1: visible area ---
 async function takeScreenshot() {
   const wv = getActiveWebview();
-  if (!wv) { showToast('No page to screenshot'); return; }
+  if (!wv) { showToast('Brak strony do zrzutu ekranu'); return; }
   try {
     const img = await wv.capturePage();
     flashEffect();
     const ok = await copyPngToClipboard(img.toPNG());
-    showToast(ok ? '📸 Screenshot copied to clipboard!' : '📸 Screenshot saved!');
+    showToast(ok ? '📸 Zrzut ekranu skopiowany do schowka!' : '📸 Zapisano zrzut ekranu!');
   } catch (e) {
-    showToast('Screenshot failed: ' + e.message);
+    showToast('Zrzut ekranu nie powiódł się: ' + e.message);
   }
 }
 
@@ -5037,7 +5354,7 @@ async function takeScreenshot() {
 function startRegionScreenshot() {
   if ($('ss-region-overlay')) return;
   const wv = getActiveWebview();
-  if (!wv) { showToast('No page to screenshot'); return; }
+  if (!wv) { showToast('Brak strony do zrzutu ekranu'); return; }
 
   const overlay = document.createElement('div');
   overlay.id = 'ss-region-overlay';
@@ -5107,7 +5424,7 @@ async function cropAndCopyRegion(rect) {
     const x1 = Math.min(rect.right, wvRect.right);
     const y1 = Math.min(rect.bottom, wvRect.bottom);
     const w = x1 - x0, h = y1 - y0;
-    if (w <= 0 || h <= 0) { showToast('Selection is outside the page'); return; }
+    if (w <= 0 || h <= 0) { showToast('Zaznaczenie jest poza stroną'); return; }
 
     const img = await wv.capturePage();
     const cropped = img.crop({
@@ -5118,17 +5435,17 @@ async function cropAndCopyRegion(rect) {
     });
     flashEffect();
     const ok = await copyPngToClipboard(cropped.toPNG());
-    showToast(ok ? '📸 Region copied to clipboard!' : '📸 Region saved!');
+    showToast(ok ? '📸 Obszar skopiowany do schowka!' : '📸 Zapisano obszar!');
   } catch (e) {
-    showToast('Region capture failed: ' + e.message);
+    showToast('Nie udało się przechwycić obszaru: ' + e.message);
   }
 }
 
 // --- Mode 3: full page (scroll capture & stitch) ---
 async function takeFullPageScreenshot() {
   const wv = getActiveWebview();
-  if (!wv) { showToast('No page to screenshot'); return; }
-  showToast('📄 Capturing full page…', 4000);
+  if (!wv) { showToast('Brak strony do zrzutu ekranu'); return; }
+  showToast('📄 Przechwytywanie całej strony…', 4000);
   let originalY = 0;
   try {
     const m = await wv.executeJavaScript(`(() => {
@@ -5175,11 +5492,11 @@ async function takeFullPageScreenshot() {
       dataUrl,
       filename: `waveweb-fullpage-${Date.now()}.png`,
     });
-    if (savedPath) showToast('📸 Full-page screenshot saved to Downloads!');
-    else showToast('Could not save full-page screenshot');
+    if (savedPath) showToast('📸 Zapisano zrzut całej strony w Pobieranie!');
+    else showToast('Nie udało się zapisać zrzutu całej strony');
   } catch (e) {
     try { await wv.executeJavaScript(`window.scrollTo(0, ${originalY}); true`); } catch (_) {}
-    showToast('Full-page capture failed: ' + e.message);
+    showToast('Nie udało się przechwycić całej strony: ' + e.message);
   }
 }
 
@@ -5198,12 +5515,12 @@ $('btn-pip').addEventListener('click', async () => {
             video.requestPictureInPicture();
           }
         } else {
-          alert('No video found on this page.');
+          alert('Na tej stronie nie znaleziono wideo.');
         }
       })()
     `);
   } catch(e) {
-    showToast('PiP not available on this page');
+    showToast('Tryb obraz w obrazie niedostępny na tej stronie');
   }
 });
 
@@ -5220,7 +5537,7 @@ function createIncognitoTab(url = null) {
 
   incognitoCount++;
   $('status-incognito').classList.remove('hidden');
-  showToast('🕵 Incognito tab — no history saved');
+  showToast('🕵 Karta incognito — historia nie jest zapisywana');
   return id;
 }
 
@@ -5250,10 +5567,10 @@ document.addEventListener('mousemove', e => {
   const dist = Math.sqrt(dx * dx + dy * dy);
   if (dist > 30) {
     const angle = Math.atan2(dy, dx) * 180 / Math.PI;
-    if (Math.abs(angle) < 30) showGesture('→ Forward');
-    else if (Math.abs(angle) > 150) showGesture('← Back');
-    else if (angle < -60 && angle > -120) showGesture('↑ New Tab');
-    else if (angle > 60 && angle < 120) showGesture('↓ Close Tab');
+    if (Math.abs(angle) < 30) showGesture('→ Naprzód');
+    else if (Math.abs(angle) > 150) showGesture('← Wstecz');
+    else if (angle < -60 && angle > -120) showGesture('↑ Nowa karta');
+    else if (angle > 60 && angle < 120) showGesture('↓ Zamknij kartę');
   }
 });
 
@@ -5502,18 +5819,18 @@ function closeOnboarding() {
         <div style="display:flex;align-items:center;gap:10px;width:100%;">
           <div style="width:32px;height:32px;border-radius:8px;background:var(--bg-4);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;">📑</div>
           <div style="display:flex;flex-direction:column;flex:1;">
-            <span style="font-weight:500;color:var(--text-1);font-size:13px;">Restore ${last.tabs.length} tabs from last session?</span>
+            <span style="font-weight:500;color:var(--text-1);font-size:13px;">Przywrócić ${last.tabs.length} kart z ostatniej sesji?</span>
           </div>
           <button id="session-restore-toast-btn" style="
             background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:var(--r-sm);
             padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;
-          ">Restore</button>
+          ">Przywróć</button>
         </div>
       `, 8000);
       t.querySelector('#session-restore-toast-btn')?.addEventListener('click', () => {
         last.tabs.forEach(tab => createTab(tab.url));
         t.remove();
-        showToast('📑 Session restored');
+        showToast('📑 Przywrócono sesję');
       });
     }, 1500);
   }
@@ -5538,7 +5855,7 @@ function closeOnboarding() {
   if (!list) return;
   window.electronAPI.clipboardGetHistory().then(items => {
     if (!items || !items.length) {
-      list.innerHTML = `<div class="panel-empty"><div class="panel-empty-icon">📋</div><span>Clipboard is empty.<br>Copied text will appear here.</span></div>`;
+      list.innerHTML = `<div class="panel-empty"><div class="panel-empty-icon">📋</div><span>Schowek jest pusty.<br>Skopiowany tekst pojawi się tutaj.</span></div>`;
       return;
     }
     list.innerHTML = items.map(item => {
@@ -5548,12 +5865,12 @@ function closeOnboarding() {
         <div class="panel-item-icon" style="font-size:12px;">${item.pinned ? '📌' : '📋'}</div>
         <div class="panel-item-info">
           <div class="panel-item-title" style="white-space:normal;max-height:36px;overflow:hidden;">${esc(preview)}</div>
-          <div class="panel-item-sub">${esc(timeAgo)}${item.pinned ? ' • Pinned' : ''}</div>
+          <div class="panel-item-sub">${esc(timeAgo)}${item.pinned ? ' • Przypięte' : ''}</div>
         </div>
         <div class="panel-item-actions">
-          <button class="panel-item-btn" data-action="copy" title="Copy">📋</button>
-          <button class="panel-item-btn" data-action="pin" title="${item.pinned ? 'Unpin' : 'Pin'}">${item.pinned ? '📌' : '📎'}</button>
-          <button class="panel-item-btn danger" data-action="delete" title="Delete">✕</button>
+          <button class="panel-item-btn" data-action="copy" title="Kopiuj">📋</button>
+          <button class="panel-item-btn" data-action="pin" title="${item.pinned ? 'Odepnij' : 'Przypnij'}">${item.pinned ? '📌' : '📎'}</button>
+          <button class="panel-item-btn danger" data-action="delete" title="Usuń">✕</button>
         </div>
       </div>`;
     }).join('');
@@ -5563,7 +5880,7 @@ function closeOnboarding() {
       el.querySelector('[data-action="copy"]')?.addEventListener('click', async (e) => {
         e.stopPropagation();
         const item = items.find(i => i.id === id);
-        if (item) { await window.electronAPI.clipboardCopy(item.text); showToast('Copied!'); }
+        if (item) { await window.electronAPI.clipboardCopy(item.text); showToast('Skopiowano!'); }
       });
       el.querySelector('[data-action="pin"]')?.addEventListener('click', async (e) => {
         e.stopPropagation();
@@ -5581,7 +5898,7 @@ function closeOnboarding() {
 $('clipboard-clear-btn')?.addEventListener('click', async () => {
   await window.electronAPI.clipboardClear(true);
   renderClipboardPanel();
-  showToast('Clipboard cleared');
+  showToast('Wyczyszczono schowek');
 });
 $('clipboard-search')?.addEventListener('input', () => {
   const q = ($('clipboard-search')?.value || '').toLowerCase();
@@ -5611,9 +5928,47 @@ function formatUptime(sec) {
 }
 
 let _perfInterval = null;
+let _perfPoints = [];
+
+function perfBarClass(pct) {
+  if (pct >= 85) return 'danger';
+  if (pct >= 60) return 'warn';
+  return '';
+}
+
+function perfHealth(cpu, memPct) {
+  if (cpu >= 85 || memPct >= 90) return { text: 'Wysokie obciążenie', cls: 'danger' };
+  if (cpu >= 55 || memPct >= 70) return { text: 'Umiarkowane', cls: 'warn' };
+  return { text: 'Wydajny', cls: 'ok' };
+}
+
+function perfChartBars(container, points, maxVal, unit) {
+  const el = $(container);
+  if (!el) return;
+  if (!points || !points.length) { el.innerHTML = '<span class="perf-chart-empty">collecting…</span>'; return; }
+  const last = Math.max(1, maxVal || 100);
+  let html = '';
+  for (let i = 0; i < points.length; i++) {
+    const v = points[i];
+    const pct = Math.min(100, (v / last) * 100);
+    const hpx = Math.max(3, Math.round((pct / 100) * 56));
+    const cls = perfBarClass(pct);
+    html += `<span class="perf-chart-bar ${cls}" style="height:${hpx}px" title="${unit ? unit + ': ' : ''}${unit === 'MB/GB' ? formatBytes(v) : Math.round(v * 10) / 10}"></span>`;
+  }
+  el.innerHTML = html;
+}
+
 function renderPerfPanel() {
   if (_perfInterval) clearInterval(_perfInterval);
-  const setBar = (id, pct) => { const el = $(id); if (el) el.style.width = Math.min(100, pct || 0) + '%'; };
+
+  const setBar = (id, pct, clsId) => {
+    const el = $(id);
+    if (!el) return;
+    el.style.width = Math.min(100, pct || 0) + '%';
+    el.classList.remove('danger', 'warn');
+    const c = perfBarClass(pct);
+    if (c) el.classList.add(c);
+  };
   const setText = (id, txt) => { const el = $(id); if (el) el.textContent = txt; };
   const paint = (s) => {
     if (!s) return;
@@ -5624,24 +5979,51 @@ function renderPerfPanel() {
     setBar('perf-elec-heap-bar', e.heapTotal ? ((e.heapUsed || 0) / e.heapTotal) * 100 : 0);
     setText('perf-cpu-load', `${e.appCpuPct || 0}%`);
     setBar('perf-cpu-bar', e.appCpuPct);
-    setText('perf-cpu-cores', sys.cpuCores || '—');
+    setText('perf-cpu-cores', (sys.cpuCores || '—') + ' core' + ((sys.cpuCores || 0) === 1 ? '' : 's'));
     setText('perf-rss', formatBytes(e.rss || 0));
     setText('perf-heap-used', formatBytes(e.heapUsed || 0));
     setText('perf-heap-total', formatBytes(e.heapTotal || 0));
     setText('perf-external', formatBytes(e.external || 0));
+    setText('perf-procs', (e.appProcesses || '—') + ' procs');
     setText('perf-total-mem', formatBytes(sys.totalMem || 0));
     setText('perf-free-mem', formatBytes(sys.freeMem || 0));
     setText('perf-cpu-model', sys.cpuModel || '—');
     setText('perf-uptime', formatUptime(sys.uptime || 0));
     setText('perf-platform', (sys.platform || '') + ' ' + (sys.arch || ''));
+    setText('perf-load1', sys.loadAvg1 ?? '—');
+    setText('perf-load5', sys.loadAvg5 ?? '—');
+    setText('perf-load15', sys.loadAvg15 ?? '—');
+
+    // Charts
+    setText('perf-cpu-now', (e.appCpuPct || 0) + '%');
+    setText('perf-mem-now', formatBytes(e.rss || 0));
+    if (_perfPoints.length > 60) _perfPoints.shift();
+    _perfPoints.push({
+      cpu: e.appCpuPct || 0,
+      mem: e.rss || 0,
+      memPct: sys.memPercent || 0,
+    });
+    perfChartBars('perf-cpu-chart', _perfPoints.map(p => p.cpu), 100, 'CPU');
+    const memTotal = e.heapTotal || 0;
+    perfChartBars('perf-mem-chart', _perfPoints.map(p => p.mem), memTotal > 0 ? memTotal : 1024 * 1024 * 1024, 'MB/GB');
+
+    // Health
+    const health = perfHealth(e.appCpuPct || 0, parseFloat(sys.memPercent) || 0);
+    const dot = $('perf-health-dot');
+    const t = $('perf-health-text');
+    if (dot) { dot.className = 'perf-health-dot ' + health.cls; }
+    if (t) t.textContent = health.text;
   };
   const update = async () => {
     try {
-      paint(await window.electronAPI.perfGetStats());
+      const s = await window.electronAPI.perfGetStats();
+      paint(s);
     } catch (err) {
       console.error('[perf] failed:', err);
     }
   };
+  paint({ electron: {}, system: {} });
+  _perfPoints = [];
   update();
   _perfInterval = setInterval(update, 2000);
 }
@@ -5652,19 +6034,19 @@ async function renderScriptsPanel() {
   if (!list) return;
   const scripts = await window.electronAPI.userScriptsGet();
   if (!scripts || !scripts.length) {
-    list.innerHTML = `<div class="panel-empty"><div class="panel-empty-icon">📜</div><span>No user scripts yet.<br>Click "+ New" to create one.</span></div>`;
+    list.innerHTML = `<div class="panel-empty"><div class="panel-empty-icon">📜</div><span>Brak skryptów użytkownika.<br>Kliknij „+ Nowy”, aby utworzyć.</span></div>`;
     return;
   }
   list.innerHTML = scripts.map((s, i) => `
     <div class="panel-item script-item" data-index="${i}">
       <div class="panel-item-icon" style="font-size:12px;">${s.type === 'css' ? '🎨' : '📜'}</div>
       <div class="panel-item-info">
-        <div class="panel-item-title">${esc(s.name || 'Untitled')}</div>
-        <div class="panel-item-sub">${esc(s.pattern || '*')} • ${s.type || 'js'}${s.enabled !== false ? '' : ' • Disabled'}</div>
+        <div class="panel-item-title">${esc(s.name || 'Bez nazwy')}</div>
+        <div class="panel-item-sub">${esc(s.pattern || '*')} • ${s.type || 'js'}${s.enabled !== false ? '' : ' • Wyłączony'}</div>
       </div>
       <div class="panel-item-actions">
-        <button class="panel-item-btn" data-action="edit" title="Edit">✏️</button>
-        <button class="panel-item-btn danger" data-action="delete" title="Delete">✕</button>
+        <button class="panel-item-btn" data-action="edit" title="Edytuj">✏️</button>
+        <button class="panel-item-btn danger" data-action="delete" title="Usuń">✕</button>
       </div>
     </div>
   `).join('');
@@ -5703,7 +6085,7 @@ function editScript(idx, script) {
     await window.electronAPI.userScriptsSave(scripts);
     $('scripts-editor')?.classList.add('hidden');
     renderScriptsPanel();
-    showToast('Script saved');
+    showToast('Zapisano skrypt');
   }, { once: true });
 }
   const tabPreviewEl = document.getElementById('tab-preview');
@@ -5725,7 +6107,7 @@ function editScript(idx, script) {
     tabPreviewEl.style.left = left + 'px';
 
     // Set info
-    tabPreviewTitle.textContent = tab.title || 'Untitled';
+    tabPreviewTitle.textContent = tab.title || 'Bez tytułu';
     tabPreviewUrl.textContent = tab.url || 'about:blank';
 
     // Show loading dots, hide image

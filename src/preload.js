@@ -11,6 +11,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // History
   historyGet: () => ipcRenderer.invoke('history-get'),
   historyAdd: (entry) => ipcRenderer.send('history-add', entry),
+  historyDelete: (url) => ipcRenderer.send('history-delete', url),
+  historyClearRange: (ms) => ipcRenderer.send('history-clear-range', ms),
   historyClear: () => ipcRenderer.send('history-clear'),
 
   // Bookmarks
