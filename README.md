@@ -1,5 +1,9 @@
 # 🌊 WAVEWEB
 
+<p align="center">
+  <img src="assets/waveweb.png" alt="WAVEWEB" width="240">
+</p>
+
 > A modern, lightweight Chromium-based browser built on Electron — with a sleek dark UI, a built-in AI assistant, and a stack of features you won't find in a stock browser.
 
 WAVEWEB is a custom browser designed for everyday work: fast, configurable, and packed with tools — from an ad blocker and article reader to a password manager and split-screen view.
