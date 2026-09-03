@@ -131,3 +131,9 @@ Get an API key at: <https://platform.openai.com/api-keys>
 ## 📄 License
 
 Project maintained under `kuvismotionstudio-web/WAVEWEB`. See [PRIVACY.md](./PRIVACY.md) for details about privacy and data handling.
+
+---
+
+Built with ❤️ by the AstroWorld team
+
+© 2025-2026 AstroWorld. All rights reserved.
